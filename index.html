@@ -237,14 +237,9 @@ try{
     sessionStorage.removeItem('ctrl_google_calendar_token');
   }
 }catch{}
-if(!restoredCalendarToken&&localStorage.getItem('ctrl_google_calendar_connected')==='1'){
-  const restoreGoogleCalendar=()=>{
-    if(!googleAuthReady()){window.setTimeout(restoreGoogleCalendar,250);return}
-    connectGoogleCalendar(true);
-  };
-  if(document.readyState==='complete')restoreGoogleCalendar();
-  else window.addEventListener('load',restoreGoogleCalendar,{once:true});
-}
+// No solicitar autorización de Google automáticamente al abrir la página.
+// La copia local del calendario sigue visible; el usuario puede reconectar
+// manualmente con el botón "Conectar Google" cuando quiera actualizar eventos.
 if('serviceWorker' in navigator && location.protocol!=='file:')window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(registration=>registration.update()).catch(()=>{}));
 </script>
 </body></html>
