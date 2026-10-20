@@ -212,6 +212,6 @@ $('searchBtn').onclick=()=>{$('searchBackdrop').classList.add('open');setTimeout
 document.querySelectorAll('[data-task]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.task);state.tasks=state.tasks||[false,false,false];state.tasks[i]=!state.tasks[i];b.classList.toggle('checked',state.tasks[i]);b.innerHTML=state.tasks[i]?'<svg viewBox="0 0 24 24"><path d="m4 12 5 5L20 5"/></svg>':'';b.nextElementSibling.style.opacity=state.tasks[i]?'.5':'1';b.nextElementSibling.querySelector('strong').style.textDecoration=state.tasks[i]?'line-through':'none';localStorage.setItem(KEY,JSON.stringify(state))});(state.tasks||[]).forEach((done,i)=>{const b=document.querySelector('[data-task="'+i+'"]');if(done&&b){b.classList.add('checked');b.innerHTML='<svg viewBox="0 0 24 24"><path d="m4 12 5 5L20 5"/></svg>';b.nextElementSibling.style.opacity='.5';b.nextElementSibling.querySelector('strong').style.textDecoration='line-through'}});
 renderAll();
 renderCalendar();
-if('serviceWorker' in navigator && location.protocol!=='file:')window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+if('serviceWorker' in navigator && location.protocol!=='file:')window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(registration=>registration.update()).catch(()=>{}));
 </script>
 </body></html>
