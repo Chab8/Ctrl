@@ -1,0 +1,17 @@
+{
+  "name": "Ctrl — Personal Life OS",
+  "short_name": "Ctrl",
+  "description": "Tu centro de control personal",
+  "lang": "es-AR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ebe8e1",
+  "theme_color": "#ebe8e1",
+  "categories": [
+    "productivity",
+    "finance"
+  ],
+  "icons": []
+}
