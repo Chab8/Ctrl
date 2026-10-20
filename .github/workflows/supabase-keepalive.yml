@@ -1,0 +1,38 @@
+name: Keep Supabase Ctrl active
+
+on:
+  schedule:
+    # Run four times a day (UTC); GitHub may delay scheduled runs.
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-ctrl-keepalive
+  cancel-in-progress: false
+
+jobs:
+  database-ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-client
+
+      - name: Send a lightweight query to Ctrl's database
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "::error::Missing repository secret SUPABASE_DB_URL. Add the Supabase Session Pooler connection string in GitHub Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+
+          psql "$SUPABASE_DB_URL" \
+            --no-psqlrc \
+            --set=ON_ERROR_STOP=1 \
+            --command="SELECT 1 AS keepalive;"
