@@ -356,12 +356,12 @@ function parseMercadoPagoCsv(text){
     if(!date||!Number.isFinite(amount)){invalid++;continue}
     if(Math.abs(amount)<0.000001){zero++;continue}
     const method=mpField(row,headers,'PAYMENT_METHOD_TYPE'),business=mpField(row,headers,'BUSINESS_UNIT'),subUnit=mpField(row,headers,'SUB_UNIT');
-    const currency=mpField(row,headers,'TRANSACTION_CURRENCY')||'ARS',payer=mpField(row,headers,'PAYER_NAME'),pos=mpField(row,headers,'POS_NAME'),issuer=mpField(row,headers,'ISSUER_NAME');
+    const currency=mpField(row,headers,'TRANSACTION_CURRENCY')||'ARS',payer=mpField(row,headers,'PAYER_NAME'),pos=mpField(row,headers,'POS_NAME'),issuer=mpField(row,headers,'ISSUER_NAME'),store=mpField(row,headers,'STORE_NAME'),wallet=mpField(row,headers,'POI_WALLET_NAME'),bank=mpField(row,headers,'POI_BANK_NAME');
     const keyParts=sourceId?[sourceId,transactionType,rawDate,method,business,subUnit]:[transactionType,rawDate,method,business,subUnit,amountText,mpField(row,headers,'FEE_AMOUNT')];
     const key=mpImportKey(keyParts);
-    if(!groups.has(key))groups.set(key,{key,sourceId,transactionType,date,method,business,subUnit,currency,payer,pos,issuer,net:0});
+    if(!groups.has(key))groups.set(key,{key,sourceId,transactionType,date,method,business,subUnit,currency,payer,pos,issuer,store,wallet,bank,net:0});
     const g=groups.get(key);g.net+=amount;
-    if(!g.payer&&payer)g.payer=payer;if(!g.pos&&pos)g.pos=pos;if(!g.issuer&&issuer)g.issuer=issuer;
+    if(!g.payer&&payer)g.payer=payer;if(!g.pos&&pos)g.pos=pos;if(!g.issuer&&issuer)g.issuer=issuer;if(!g.store&&store)g.store=store;if(!g.wallet&&wallet)g.wallet=wallet;if(!g.bank&&bank)g.bank=bank;
     if(!g.method&&method)g.method=method;if(!g.business&&business)g.business=business;if(!g.subUnit&&subUnit)g.subUnit=subUnit;if(!g.currency&&currency)g.currency=currency;
   }
   const ownerNames=['chab manuel','manuel chab'];
@@ -369,24 +369,15 @@ function parseMercadoPagoCsv(text){
   const methodLabel=value=>({'available_money':'Saldo de Mercado Pago','credit_card':'Tarjeta','bank_transfer':'Transferencia bancaria','debit_card':'Tarjeta de débito'}[String(value||'').toLowerCase()]||String(value||'').replace(/_/g,' '));
   const transactions=[...groups.values()].map(g=>{
     const type=g.net<0?'expense':'income',payer=String(g.payer||'').trim(),isOwner=ownerNames.includes(payer.toLocaleLowerCase('es-AR')),pos=usefulPos(g.pos);
-    let description='';
-    if(g.transactionType==='REFUND'&&payer&&!isOwner)description='Devolución · '+payer;
-    else if(g.method==='credit_card'&&payer&&!isOwner)description='Pago con tarjeta · '+payer;
-    else if(g.method==='bank_transfer'&&payer&&!isOwner)description=(type==='income'?'Transferencia de ':'Transferencia a ')+payer;
-    else if(payer&&!isOwner)description=(type==='income'?'Transferencia de ':'Movimiento con ')+payer;
-    else if(pos)description=(type==='expense'?'Pago en ':'Movimiento en ')+pos;
-    else if(g.subUnit==='QR')description=type==='expense'?'Pago con QR':'Ingreso por QR';
-    else if(g.subUnit==='Wallet')description=type==='expense'?'Pago con billetera':'Movimiento de billetera';
-    else if(g.method==='bank_transfer')description=type==='income'?'Transferencia recibida':'Transferencia enviada';
-    else if(g.method==='credit_card')description=type==='income'?'Ingreso con tarjeta':'Pago con tarjeta';
-    else if(g.transactionType==='TIP')description='Propina';
-    else if(g.transactionType==='REFUND')description='Devolución';
-    else description=type==='income'?'Ingreso en Mercado Pago':'Pago desde Mercado Pago';
-    const notes=[methodLabel(g.method)||(g.subUnit==='QR'?'QR':g.subUnit==='Wallet'?'Billetera':'Mercado Pago'),g.currency||'ARS'];
-    if(g.business&&g.business!=='Mercado Pago'&&g.business!=='Mercado Libre')notes.push(g.business);
-    if(g.subUnit&&g.subUnit!=='QR'&&g.subUnit!=='Wallet')notes.push(g.subUnit);
+    const localName=usefulPos(g.store)||usefulPos(pos)||usefulPos(g.wallet)||usefulPos(g.bank);
+    const counterparty=type==='income'?(payer&&!isOwner?payer:localName):(payer&&!isOwner?payer:localName);
+    let description;
+    if(g.transactionType==='REFUND'&&counterparty)description='Devolución de '+counterparty;
+    else if(type==='income')description=counterparty?'Transferencia recibida de '+counterparty:'Transferencia recibida';
+    else description=counterparty?'Transferencia enviada a '+counterparty:'Transferencia enviada';
+    const notes=['Mercado Pago',g.currency||'ARS'];
+    if(pos&&usefulPos(pos)&&pos!==counterparty)notes.push('Comercio: '+pos);
     if(g.issuer)notes.push(g.issuer);
-    if(pos&&pos!==description)notes.push('Comercio: '+pos);
     return {id:crypto.randomUUID(),type,amount:Math.round(Math.abs(g.net)*100)/100,description:description.slice(0,100),category:'Otros',date:g.date,account:'Mercado Pago',currency:g.currency||'ARS',notes:[...new Set(notes.filter(Boolean))].join(' · '),createdAt:new Date().toISOString(),mpImportKey:g.key,mpSourceId:g.sourceId||''};
   }).filter(t=>t.amount>0&&t.date);
   return {transactions,invalid,zero,sourceRows:rows.length-1};
