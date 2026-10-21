@@ -371,6 +371,8 @@ function parseMercadoPagoCsv(text){
     const type=g.net<0?'expense':'income',payer=String(g.payer||'').trim(),isOwner=ownerNames.includes(payer.toLocaleLowerCase('es-AR')),pos=usefulPos(g.pos);
     let description='';
     if(g.transactionType==='REFUND'&&payer&&!isOwner)description='Devolución · '+payer;
+    else if(g.method==='credit_card'&&payer&&!isOwner)description='Pago con tarjeta · '+payer;
+    else if(g.method==='bank_transfer'&&payer&&!isOwner)description=(type==='income'?'Transferencia de ':'Transferencia a ')+payer;
     else if(payer&&!isOwner)description=(type==='income'?'Transferencia de ':'Movimiento con ')+payer;
     else if(pos)description=(type==='expense'?'Pago en ':'Movimiento en ')+pos;
     else if(g.subUnit==='QR')description=type==='expense'?'Pago con QR':'Ingreso por QR';
