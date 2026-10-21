@@ -336,60 +336,56 @@ function importDate(value){
 function mpField(row,headers,name){const i=headers.indexOf(name);return i<0?'':String(row[i]??'').trim()}
 function mpImportKey(parts){return 'mercadopago-csv-v1|'+parts.map(v=>encodeURIComponent(String(v??'').trim())).join('|')}
 function parseMercadoPagoCsv(text){
-  const clean=String(text||'').replace(/^\uFEFF/,'').trim();
+  const clean=String(text||'').replace(/^\\uFEFF/,'').trim();
   if(!clean)throw new Error('El archivo está vacío.');
-  const firstLine=clean.split(/\r?\n/,1)[0];
-  const delimiter=detectCsvDelimiter(firstLine);
+  const delimiter=detectCsvDelimiter(clean.split(/\\r?\\n/,1)[0]);
   const rows=parseCsvRows(clean,delimiter);
   if(rows.length<2)throw new Error('El CSV no contiene movimientos para importar.');
-  const headers=rows[0].map(h=>String(h??'').replace(/^\uFEFF/,'').trim().toUpperCase());
+  const headers=rows[0].map(h=>String(h??'').replace(/^\\uFEFF/,'').trim().toUpperCase());
   const required=['SOURCE_ID','TRANSACTION_TYPE','TRANSACTION_DATE'];
   const missing=required.filter(h=>!headers.includes(h));
   if(missing.length)throw new Error('Este archivo no parece ser un reporte de Mercado Pago compatible. Faltan columnas: '+missing.join(', ')+'.');
   if(!headers.includes('REAL_AMOUNT')&&!headers.includes('TRANSACTION_AMOUNT'))throw new Error('El archivo no incluye una columna de importe reconocible.');
   const groups=new Map();let invalid=0,zero=0;
   for(let index=1;index<rows.length;index++){
-    const row=rows[index];
-    const sourceId=mpField(row,headers,'SOURCE_ID');
+    const row=rows[index],sourceId=mpField(row,headers,'SOURCE_ID');
     const transactionType=mpField(row,headers,'TRANSACTION_TYPE').toUpperCase()||'MOVIMIENTO';
     const rawDate=mpField(row,headers,'TRANSACTION_DATE')||mpField(row,headers,'SETTLEMENT_DATE');
-    const date=importDate(rawDate);
-    const amountText=mpField(row,headers,'REAL_AMOUNT')||mpField(row,headers,'TRANSACTION_AMOUNT');
+    const date=importDate(rawDate),amountText=mpField(row,headers,'REAL_AMOUNT')||mpField(row,headers,'TRANSACTION_AMOUNT');
     const amount=importNumber(amountText);
     if(!date||!Number.isFinite(amount)){invalid++;continue}
     if(Math.abs(amount)<0.000001){zero++;continue}
-    const method=mpField(row,headers,'PAYMENT_METHOD_TYPE');
-    const business=mpField(row,headers,'BUSINESS_UNIT');
-    const subUnit=mpField(row,headers,'SUB_UNIT');
-    const settlementDate=mpField(row,headers,'SETTLEMENT_DATE');
+    const method=mpField(row,headers,'PAYMENT_METHOD_TYPE'),business=mpField(row,headers,'BUSINESS_UNIT'),subUnit=mpField(row,headers,'SUB_UNIT');
+    const currency=mpField(row,headers,'TRANSACTION_CURRENCY')||'ARS',payer=mpField(row,headers,'PAYER_NAME'),pos=mpField(row,headers,'POS_NAME'),issuer=mpField(row,headers,'ISSUER_NAME');
     const keyParts=sourceId?[sourceId,transactionType,rawDate,method,business,subUnit]:[transactionType,rawDate,method,business,subUnit,amountText,mpField(row,headers,'FEE_AMOUNT')];
     const key=mpImportKey(keyParts);
-    if(!groups.has(key))groups.set(key,{key,sourceId,transactionType,date,method,business,subUnit,settlementDate,net:0,gross:0,fees:0,taxes:0,components:0});
-    const g=groups.get(key);
-    g.net+=amount;
-    const gross=importNumber(mpField(row,headers,'TRANSACTION_AMOUNT'));if(Number.isFinite(gross))g.gross+=gross;
-    const fee=importNumber(mpField(row,headers,'FEE_AMOUNT'));if(Number.isFinite(fee))g.fees+=fee;
-    const tax=importNumber(mpField(row,headers,'TAXES_AMOUNT'));if(Number.isFinite(tax))g.taxes+=tax;
-    g.components++;
-    if(settlementDate&&!g.settlementDate)g.settlementDate=settlementDate;
+    if(!groups.has(key))groups.set(key,{key,sourceId,transactionType,date,method,business,subUnit,currency,payer,pos,issuer,net:0});
+    const g=groups.get(key);g.net+=amount;
+    if(!g.payer&&payer)g.payer=payer;if(!g.pos&&pos)g.pos=pos;if(!g.issuer&&issuer)g.issuer=issuer;
+    if(!g.method&&method)g.method=method;if(!g.business&&business)g.business=business;if(!g.subUnit&&subUnit)g.subUnit=subUnit;if(!g.currency&&currency)g.currency=currency;
   }
+  const ownerNames=['chab manuel','manuel chab'];
+  const usefulPos=value=>{const v=String(value||'').trim();return !v||/^\\d+$/.test(v)||/^QR(?:_AU| #?\\d+)?$/i.test(v)?'':v};
+  const methodLabel=value=>({'available_money':'Saldo de Mercado Pago','credit_card':'Tarjeta','bank_transfer':'Transferencia bancaria','debit_card':'Tarjeta de débito'}[String(value||'').toLowerCase()]||String(value||'').replace(/_/g,' '));
   const transactions=[...groups.values()].map(g=>{
-    const type=g.net<0?'expense':'income';
-    const description=[g.business||'Mercado Pago',g.subUnit,g.transactionType].filter(Boolean).join(' · ');
-    const details=[
-      'Importado desde reporte de Mercado Pago',
-      g.sourceId?'ID de origen: '+g.sourceId:'',
-      'Tipo de operación: '+g.transactionType,
-      g.method?'Medio: '+g.method:'',
-      g.business?'Unidad: '+g.business:'',
-      g.subUnit?'Subunidad: '+g.subUnit:'',
-      g.components>1?'Filas agrupadas: '+g.components:'',
-      Number.isFinite(g.gross)&&Math.abs(g.gross-g.net)>0.009?'Importe bruto acumulado: '+g.gross.toFixed(2):'',
-      Math.abs(g.fees)>0.0001?'Comisiones informadas: '+g.fees.toFixed(2):'',
-      Math.abs(g.taxes)>0.0001?'Impuestos informados: '+g.taxes.toFixed(2):'',
-      g.settlementDate?'Fecha de liquidación: '+g.settlementDate:''
-    ].filter(Boolean).join(' | ');
-    return {id:crypto.randomUUID(),type,amount:Math.round(Math.abs(g.net)*100)/100,description:description.slice(0,100),category:'Otros',date:g.date,account:'Mercado Pago',currency:'ARS',notes:details,createdAt:new Date().toISOString(),mpImportKey:g.key,mpSourceId:g.sourceId||''};
+    const type=g.net<0?'expense':'income',payer=String(g.payer||'').trim(),isOwner=ownerNames.includes(payer.toLocaleLowerCase('es-AR')),pos=usefulPos(g.pos);
+    let description='';
+    if(g.transactionType==='REFUND'&&payer&&!isOwner)description='Devolución · '+payer;
+    else if(payer&&!isOwner)description=(type==='income'?'Transferencia de ':'Movimiento con ')+payer;
+    else if(pos)description=(type==='expense'?'Pago en ':'Movimiento en ')+pos;
+    else if(g.subUnit==='QR')description=type==='expense'?'Pago con QR':'Ingreso por QR';
+    else if(g.subUnit==='Wallet')description=type==='expense'?'Pago con billetera':'Movimiento de billetera';
+    else if(g.method==='bank_transfer')description=type==='income'?'Transferencia recibida':'Transferencia enviada';
+    else if(g.method==='credit_card')description=type==='income'?'Ingreso con tarjeta':'Pago con tarjeta';
+    else if(g.transactionType==='TIP')description='Propina';
+    else if(g.transactionType==='REFUND')description='Devolución';
+    else description=type==='income'?'Ingreso en Mercado Pago':'Pago desde Mercado Pago';
+    const notes=[methodLabel(g.method)||(g.subUnit==='QR'?'QR':g.subUnit==='Wallet'?'Billetera':'Mercado Pago'),g.currency||'ARS'];
+    if(g.business&&g.business!=='Mercado Pago'&&g.business!=='Mercado Libre')notes.push(g.business);
+    if(g.subUnit&&g.subUnit!=='QR'&&g.subUnit!=='Wallet')notes.push(g.subUnit);
+    if(g.issuer)notes.push(g.issuer);
+    if(pos&&pos!==description)notes.push('Comercio: '+pos);
+    return {id:crypto.randomUUID(),type,amount:Math.round(Math.abs(g.net)*100)/100,description:description.slice(0,100),category:'Otros',date:g.date,account:'Mercado Pago',currency:g.currency||'ARS',notes:[...new Set(notes.filter(Boolean))].join(' · '),createdAt:new Date().toISOString(),mpImportKey:g.key,mpSourceId:g.sourceId||''};
   }).filter(t=>t.amount>0&&t.date);
   return {transactions,invalid,zero,sourceRows:rows.length-1};
 }
