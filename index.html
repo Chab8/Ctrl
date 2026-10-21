@@ -3711,6 +3711,76 @@
       margin-left: auto;
       padding-left: 10px
     }
+
+    .flow-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 0 0 12px
+    }
+
+    .flow-seg {
+      display: inline-flex;
+      padding: 3px;
+      gap: 2px;
+      background: #eeece4;
+      border: 1px solid var(--line);
+      border-radius: 11px
+    }
+
+    .flow-seg button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 11px;
+      padding: 7px 11px;
+      border-radius: 8px
+    }
+
+    .flow-seg button:hover {
+      color: var(--ink)
+    }
+
+    .flow-seg button.active {
+      background: var(--ink);
+      color: #f8f7f2
+    }
+
+    .flow-month-nav {
+      display: flex;
+      align-items: center;
+      gap: 6px
+    }
+
+    .flow-month-title {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: -.2px;
+      text-transform: capitalize;
+      min-width: 104px;
+      text-align: center
+    }
+
+    .flow-nav {
+      width: 30px;
+      height: 30px;
+      border: 1px solid var(--line);
+      background: transparent;
+      border-radius: 10px;
+      color: var(--ink);
+      font-size: 14px
+    }
+
+    .flow-nav:hover:not(:disabled) {
+      background: var(--card)
+    }
+
+    .flow-nav:disabled {
+      opacity: .35;
+      cursor: default
+    }
   </style>
 </head>
 
@@ -4387,7 +4457,7 @@
     function disconnectGoogleCalendar() { $('connectGoogleBtn').hidden = false; $('connectGoogleBtn').textContent = 'Conectar Google'; $('connectGoogleBtn').disabled = false; googleAccessToken = null; localStorage.removeItem('ctrl_google_calendar_connected'); localStorage.removeItem(CALENDAR_STORAGE_KEY); calendarSavedState = { months: {} }; try { sessionStorage.removeItem('ctrl_google_calendar_token') } catch { }; googleCalendars = []; calendarEvents = []; $('calendarMainCard').hidden = true; $('calendarConnectCard').hidden = false; $('connectGoogleBtn').textContent = 'Conectar Google'; $('connectGoogleBtn').disabled = false; $('calendarEventsList').innerHTML = '<div class="empty">Conectá Google Calendar para ver tus eventos.</div>'; toast('Se desconectó Google Calendar de Ctrl. Para revocar el permiso por completo, hacelo desde tu cuenta de Google.') }
     function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.timer); toast.timer = setTimeout(() => t.classList.remove('show'), 2600) }
     /* Flujo de dinero — line chart con métricas seleccionables */
-    let flowMetric = 'income', flowLastWidth = 0;
+    let flowMetric = 'income', flowLastWidth = 0, flowRange = '6m', flowMonthOffset = 0;
     const FLOW_METRICS = [
       { key: 'income', label: 'Ingresos', color: '#627b47', lowerIsBetter: false },
       { key: 'expense', label: 'Gastos', color: '#d18b76', lowerIsBetter: true },
@@ -4395,7 +4465,16 @@
       { key: 'investment', label: 'Inversiones', color: '#8068bb', lowerIsBetter: false }
     ];
     const FLOW_ARROW = { up: '<svg viewBox="0 0 24 24"><path d="M12 19V5m-6 6 6-6 6 6"/></svg>', down: '<svg viewBox="0 0 24 24"><path d="M12 5v14m-6-6 6 6 6-6"/></svg>' };
-    function flowData() { return Array.from({ length: 6 }, (_, i) => { const off = i - 5, d = new Date(); d.setDate(1); d.setMonth(d.getMonth() + off); const t = totals(monthTx(off)); return { label: monthLabel(off), full: d.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' }), income: t.income, expense: t.expense, investment: t.investment, balance: t.income - t.expense } }) }
+    function flowMonthDate(off) { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() + off); return d }
+    function flowMonthTotals(off) { const t = totals(monthTx(off)); return { income: t.income, expense: t.expense, investment: t.investment, balance: t.income - t.expense } }
+    function flowData() { return Array.from({ length: 6 }, (_, i) => { const off = i - 5; return { label: monthLabel(off), full: flowMonthDate(off).toLocaleDateString('es-AR', { month: 'long', year: 'numeric' }), ...flowMonthTotals(off) } }) }
+    function flowDailyData(off) {
+      const first = flowMonthDate(off), y = first.getFullYear(), mo = first.getMonth(), n = new Date(y, mo + 1, 0).getDate(), today = dateNow();
+      const days = Array.from({ length: n }, (_, i) => { const day = i + 1, key = y + '-' + String(mo + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0'); return { label: String(day), day, key, full: new Date(y, mo, day).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' }), income: 0, expense: 0, investment: 0, balance: 0, future: key > today } });
+      monthTx(off).forEach(t => { const d = days[Number(String(t.date).slice(8, 10)) - 1]; if (!d) return; const a = Number(t.amount || 0); if (t.type === 'income') d.income += a; else if (t.type === 'expense') d.expense += a; else if (t.type === 'investment') d.investment += a });
+      days.forEach(d => d.balance = d.income - d.expense);
+      return days;
+    }
     function flowChange(m, cur, prev) {
       if (cur === prev) return { cls: 'flat', text: '0%', arrow: '' };
       const dir = cur > prev ? 1 : -1, good = m.lowerIsBetter ? dir < 0 : dir > 0, arrow = FLOW_ARROW[dir > 0 ? 'up' : 'down'];
@@ -4428,39 +4507,53 @@
     }
     function renderChart() {
       const host = $('financeChart'); if (!host) return;
-      const data = flowData(), m = FLOW_METRICS.find(k => k.key === flowMetric) || FLOW_METRICS[0], cur = data[5], prev = data[4];
+      const monthly = flowRange === 'month';
+      const data = monthly ? flowDailyData(flowMonthOffset) : flowData();
+      const m = FLOW_METRICS.find(k => k.key === flowMetric) || FLOW_METRICS[0];
+      const cur = flowMonthTotals(monthly ? flowMonthOffset : 0), prev = flowMonthTotals(monthly ? flowMonthOffset - 1 : -1);
+      const monthTitle = flowMonthDate(flowMonthOffset).toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
+
+      const toolbar = '<div class="flow-toolbar"><div class="flow-seg" role="group" aria-label="Rango del gráfico"><button type="button" data-flow-range="6m" class="' + (!monthly ? 'active' : '') + '">6 meses</button><button type="button" data-flow-range="month" class="' + (monthly ? 'active' : '') + '">Por día</button></div>'
+        + (monthly ? '<div class="flow-month-nav"><button type="button" class="flow-nav" data-flow-nav="-1" aria-label="Mes anterior">←</button><span class="flow-month-title">' + esc(monthTitle) + '</span><button type="button" class="flow-nav" data-flow-nav="1" aria-label="Mes siguiente"' + (flowMonthOffset >= 0 ? ' disabled' : '') + '>→</button></div>' : '') + '</div>';
+
       const header = '<div class="flow-metrics" role="group" aria-label="Métrica del gráfico">' + FLOW_METRICS.map(k => { const c = flowChange(k, cur[k.key], prev[k.key]); return '<button type="button" class="flow-metric' + (k.key === flowMetric ? ' selected' : '') + '" data-flow-metric="' + k.key + '" style="--metric:' + k.color + '" aria-pressed="' + (k.key === flowMetric) + '"><span class="flow-metric-top"><span class="flow-metric-label"><i></i>' + k.label + '</span><span class="flow-badge ' + c.cls + '">' + c.arrow + c.text + '</span></span><span class="flow-metric-value">' + esc(fmt(cur[k.key])) + '</span><small>Mes anterior: ' + esc(fmt(prev[k.key])) + '</small></button>' }).join('') + '</div>';
 
       const W = Math.max(260, Math.round(host.clientWidth || 600)); flowLastWidth = host.clientWidth || 0;
       const H = W < 520 ? 200 : 236, L = W < 420 ? 40 : 46, R = 12, T = 14, B = 28, PAD = 10, iw = W - L - R, ih = H - T - B;
-      const vals = data.map(d => d[m.key]), has = vals.some(v => v !== 0);
+      const live = data.filter(d => !d.future), count = data.length;
+      const vals = live.map(d => d[m.key]), has = vals.some(v => v !== 0);
       const ticks = has ? flowTicks(Math.min(0, ...vals), Math.max(0, ...vals), 5) : [0, 25000, 50000, 75000, 100000];
       const lo = ticks[0], hi = ticks[ticks.length - 1];
-      const x = i => L + PAD + i * (iw - PAD * 2) / 5, y = v => T + ih - (v - lo) / (hi - lo) * ih;
-      const pts = vals.map((v, i) => ({ x: x(i), y: y(v) })), path = flowMonotonePath(pts);
+      const x = i => L + PAD + i * (iw - PAD * 2) / (count - 1), y = v => T + ih - (v - lo) / (hi - lo) * ih;
+      const pts = vals.map((v, i) => ({ x: x(i), y: y(v) })), path = pts.length > 1 ? flowMonotonePath(pts) : '';
+      const step = W < 420 ? 10 : 5, showLabel = d => !monthly || d.day === 1 || d.day % step === 0;
 
-      const svg = '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Gráfico de ' + m.label.toLowerCase() + ' de los últimos seis meses">'
+      const svg = '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Gráfico de ' + m.label.toLowerCase() + (monthly ? ' por día en ' + esc(monthTitle) : ' de los últimos seis meses') + '">'
         + '<defs><pattern id="flowDots" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="8" cy="8" r="1" fill="#d7d8cb"/></pattern>'
         + '<filter id="flowLineShadow" filterUnits="userSpaceOnUse" x="0" y="0" width="' + W + '" height="' + H + '"><feDropShadow dx="3" dy="6" stdDeviation="7" flood-color="' + m.color + '" flood-opacity=".35"/></filter>'
         + '<filter id="flowDotShadow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="1" dy="2" stdDeviation="2.5" flood-color="#242522" flood-opacity=".3"/></filter></defs>'
         + '<rect x="' + L + '" y="' + T + '" width="' + iw + '" height="' + ih + '" rx="6" fill="url(#flowDots)" pointer-events="none"/>'
         + (lo < 0 ? '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(0) + '" y2="' + y(0) + '" stroke="#b9bbab" stroke-dasharray="3 4"/>' : '')
         + ticks.map(t => '<text class="flow-axis" x="' + (L - 8) + '" y="' + (y(t) + 3.5) + '" text-anchor="end">' + flowCompact(t) + '</text>').join('')
-        + data.map((d, i) => '<text class="flow-axis" x="' + x(i) + '" y="' + (H - 6) + '" text-anchor="middle">' + esc(d.label) + '</text>').join('')
-        + '<path class="flow-line" pathLength="1" d="' + path + '" stroke="' + m.color + '" filter="url(#flowLineShadow)"/>'
+        + data.map((d, i) => showLabel(d) ? '<text class="flow-axis" x="' + x(i) + '" y="' + (H - 6) + '" text-anchor="middle">' + esc(d.label) + '</text>' : '').join('')
+        + (path ? '<path class="flow-line" pathLength="1" d="' + path + '" stroke="' + m.color + '" filter="url(#flowLineShadow)"/>' : '')
+        + (pts.length === 1 ? '<circle cx="' + pts[0].x + '" cy="' + pts[0].y + '" r="4" fill="' + m.color + '"/>' : '')
         + '<line class="flow-cursor" y1="' + T + '" y2="' + (T + ih) + '" visibility="hidden"/>'
         + '<circle class="flow-dot" r="6" fill="' + m.color + '" stroke="#fff" stroke-width="2" filter="url(#flowDotShadow)" visibility="hidden"/>'
         + '<rect class="flow-hit" x="' + L + '" y="0" width="' + iw + '" height="' + (H - B + T) + '" fill="transparent"/></svg>';
 
-      host.innerHTML = header + '<div class="flow-plot">' + svg + '<div class="flow-tooltip" hidden></div></div>';
+      host.innerHTML = toolbar + header + '<div class="flow-plot">' + svg + '<div class="flow-tooltip" hidden></div></div>';
 
+      host.querySelectorAll('[data-flow-range]').forEach(b => b.onclick = () => { flowRange = b.dataset.flowRange; renderChart() });
+      host.querySelectorAll('[data-flow-nav]').forEach(b => b.onclick = () => { flowMonthOffset = Math.min(0, flowMonthOffset + Number(b.dataset.flowNav)); renderChart() });
       host.querySelectorAll('[data-flow-metric]').forEach(b => b.onclick = () => { flowMetric = b.dataset.flowMetric; renderChart() });
 
-      const plot = host.querySelector('.flow-plot'), el = plot.querySelector('svg'), tip = plot.querySelector('.flow-tooltip'), cursor = el.querySelector('.flow-cursor'), dot = el.querySelector('.flow-dot');
+      const plot = host.querySelector('.flow-plot'), el = plot.querySelector('svg'), tip = plot.querySelector('.flow-tooltip'), cursor = el.querySelector('.flow-cursor'), dot = el.querySelector('.flow-dot'), hit = el.querySelector('.flow-hit');
+      if (!pts.length) return;
       const show = ev => {
         const rect = el.getBoundingClientRect(), k = rect.width / W, px = (ev.clientX - rect.left) / k;
         let idx = 0, best = Infinity; pts.forEach((p, i) => { const dd = Math.abs(p.x - px); if (dd < best) { best = dd; idx = i } });
-        const p = pts[idx], d = data[idx];
+        const p = pts[idx], d = live[idx];
         cursor.setAttribute('x1', p.x); cursor.setAttribute('x2', p.x); cursor.setAttribute('visibility', 'visible');
         dot.setAttribute('cx', p.x); dot.setAttribute('cy', p.y); dot.setAttribute('visibility', 'visible');
         tip.innerHTML = '<b>' + esc(d.full) + '</b><span><i style="background:' + m.color + '"></i>' + m.label + '<strong>' + esc(fmt(d[m.key])) + '</strong></span>';
@@ -4470,7 +4563,6 @@
         tip.style.left = Math.max(0, left) + 'px'; tip.style.top = Math.max(0, p.y - th - 12) + 'px';
       };
       const hide = () => { cursor.setAttribute('visibility', 'hidden'); dot.setAttribute('visibility', 'hidden'); tip.hidden = true };
-      const hit = el.querySelector('.flow-hit');
       hit.addEventListener('pointermove', show); hit.addEventListener('pointerdown', show); hit.addEventListener('pointerleave', hide);
     }
     // Re-dibujar cuando cambia el ancho (la vista Finanzas arranca oculta)
