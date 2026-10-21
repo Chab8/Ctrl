@@ -375,7 +375,7 @@ function parseMercadoPagoCsv(text){
   }
   const transactions=[...groups.values()].map(g=>{
     const type=g.net<0?'expense':'income';
-    const description=[g.business,g.subUnit,g.transactionType].filter(Boolean).join(' · ')||('Movimiento Mercado Pago · '+g.transactionType);
+    const description=[g.business||'Mercado Pago',g.subUnit,g.transactionType].filter(Boolean).join(' · ');
     const details=[
       'Importado desde reporte de Mercado Pago',
       g.sourceId?'ID de origen: '+g.sourceId:'',
