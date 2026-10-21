@@ -103,7 +103,7 @@ input[type="date"]::-webkit-calendar-picker-indicator,input[type="time"]::-webki
 input[type="date"]::-webkit-calendar-picker-indicator:hover,input[type="time"]::-webkit-calendar-picker-indicator:hover,input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover{background:#e7e9df;opacity:1}
 @media(max-width:1050px){.finance-overview-layout{grid-template-columns:minmax(0,1fr) minmax(250px,.85fr)}}
 @media(max-width:700px){.finance-overview-layout{grid-template-columns:minmax(0,1fr);gap:10px;margin-bottom:10px}.finance-chart-card{padding:16px}.finance-chart-card .chart-wrap{height:155px!important}.finance-side-column{gap:10px}.finance-movements-card{margin-bottom:10px}.task-stat-button{padding:13px}.task-stat-button .stat-top{font-size:9px}}
-</style>
+.movement-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.mp-import-modal{width:min(100%,900px);max-height:88vh;overflow:auto}.mp-import-status{padding:14px 15px;border-radius:12px;background:#eeece4;color:var(--muted);font-size:12px;line-height:1.6}.mp-import-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}.mp-import-stat{padding:13px;border:1px solid var(--line);border-radius:12px;background:#fffefa}.mp-import-stat strong{display:block;font:600 22px 'DM Mono',monospace;letter-spacing:-.8px}.mp-import-stat span{display:block;color:var(--muted);font-size:10px;margin-top:5px}.mp-import-preview-wrap{margin-top:14px}.mp-import-preview-scroll{max-height:42vh;overflow:auto;border:1px solid var(--line);border-radius:12px}.mp-import-table{white-space:normal}.mp-import-table th{position:sticky;top:0;z-index:1}.mp-import-table td{font-size:11px;vertical-align:top}.mp-import-table .mp-import-duplicate{color:var(--muted);background:#f0efe9}.mp-import-table .mp-import-amount{font:11px 'DM Mono',monospace;white-space:nowrap}.mp-import-state{display:inline-block;padding:4px 7px;border-radius:7px;font-size:10px;background:#e3ebdc;color:#536d48}.mp-import-state.duplicate{background:#ebe9e1;color:#777970}.mp-import-footnote{font-size:10px;line-height:1.6;color:var(--muted);margin:10px 2px 0}.mp-import-summary[hidden],.mp-import-preview-wrap[hidden]{display:none}@media(max-width:700px){.movement-actions{justify-content:flex-end}.movement-actions button{font-size:10px;padding:9px 10px}.mp-import-summary{grid-template-columns:1fr 1fr}.mp-import-summary .mp-import-stat:last-child{grid-column:1/-1}.mp-import-modal{padding:16px}.mp-import-table th,.mp-import-table td{padding:10px 9px}}\n</style>
 </head>
 <body>
 <div class="mesh" aria-hidden="true"><i></i><i></i><i></i></div>
@@ -146,7 +146,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover,input[type="time"]::
 <div class="card"><div class="stat-top">Gastos <span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M12 5v14m-6-6 6 6 6-6"/></svg></span></div><div class="stat-value" id="finExpenses">$ 0</div><div class="stat-bottom"><span id="finExpenseCount">0 movimientos</span></div></div>
 </div>
 <div class="grid finance-overview-layout"><div class="finance-chart-column"><div class="card finance-chart-card"><div class="card-head"><div><div class="card-title">Flujo de dinero</div><div class="card-sub">Ingresos y gastos · últimos seis meses</div></div><span class="category-chip">ARS · registros manuales</span></div><div class="chart-wrap" id="financeChart" style="height:240px"></div><div class="legend"><span><i></i>Ingresos</span><span><i></i>Gastos</span></div></div></div><div class="finance-side-column"><div class="card"><div class="card-head"><div><div class="card-title">Presupuestos</div><div class="card-sub">Definí cuánto querés gastar por categoría</div></div><button class="icon-btn" id="addBudgetBtn" aria-label="Agregar presupuesto" style="width:31px;height:31px">+</button></div><div id="financeBudgets"></div><div class="helper-note">Los presupuestos son límites orientativos. Ctrl calcula el consumo usando los gastos registrados en el período actual.</div></div><div class="card"><div class="card-head"><div><div class="card-title">Cartera de inversiones</div><div class="card-sub">Valores que cargaste manualmente</div></div><button class="text-action" id="addInvestmentBtn">+ Agregar</button></div><div id="portfolioList"></div><div class="helper-note">Los valores y rendimientos son los que ingreses. Las cotizaciones automáticas se conectarán más adelante a una fuente de datos.</div></div>
-<div class="card table-card finance-movements-card"><div class="card-head"><div><div class="card-title">Movimientos</div><div class="card-sub">Tu historial de ingresos, gastos e inversiones</div></div><button class="secondary csv-quiet" id="exportCsvBtn">Exportar CSV ↓</button></div>
+<div class="card table-card finance-movements-card"><div class="card-head"><div><div class="card-title">Movimientos</div><div class="card-sub">Tu historial de ingresos, gastos e inversiones</div></div><div class="movement-actions"><button class="secondary" id="importMpBtn" type="button">Importar Mercado Pago ↑</button><button class="secondary csv-quiet" id="exportCsvBtn">Exportar CSV ↓</button></div></div>
 <div class="filters"><input class="search-input" id="transactionSearch" placeholder="Buscar movimientos..." aria-label="Buscar movimientos"><select class="filter-select" id="typeFilter" aria-label="Filtrar tipo"><option value="all">Todos los tipos</option><option value="expense">Gastos</option><option value="income">Ingresos</option><option value="investment">Inversiones</option></select><select class="filter-select" id="periodFilter" aria-label="Filtrar período"><option value="month">Este mes</option><option value="all">Todo el historial</option><option value="year">Este año</option></select></div>
 <div class="table-scroll"><table><thead><tr><th>Movimiento</th><th>Categoría</th><th>Fecha</th><th>Importe</th><th></th></tr></thead><tbody id="transactionRows"></tbody></table></div><div class="empty" id="transactionEmpty" hidden>No hay movimientos para estos filtros. Registrá uno nuevo para empezar.</div></div>
 <div class="footer-note">Tus datos se guardan en este dispositivo. Exportá un respaldo para conservarlos.</div>
@@ -180,7 +180,9 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover,input[type="time"]::
 <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal"><div class="modal-head"><div><h2 id="modalTitle">Nuevo movimiento</h2><p id="modalSubtitle">Registrá un ingreso, gasto o inversión.</p></div><button class="close-btn" id="closeModal" aria-label="Cerrar">×</button></div><form id="transactionForm"><div class="form-grid"><div class="field"><label for="txType">Tipo</label><select id="txType" required><option value="expense">Gasto</option><option value="income">Ingreso</option><option value="investment">Inversión</option></select></div><div class="field"><label for="txAmount">Importe (ARS)</label><input id="txAmount" type="number" min="0.01" step="0.01" placeholder="25000" required></div><div class="field full"><label for="txDescription">Descripción</label><input id="txDescription" maxlength="100" placeholder="Ej. Supermercado, sueldo, CEDEAR..." required></div><div class="field"><label for="txCategory">Categoría</label><select id="txCategory" required><option>Alimentación</option><option>Transporte</option><option>Entretenimiento</option><option>Tecnología</option><option>Educación</option><option>Salud</option><option>Hogar</option><option>Salario</option><option>Freelance</option><option>Inversiones</option><option>Dividendos</option><option>Otros</option></select></div><div class="field"><label for="txDate">Fecha</label><input id="txDate" type="date" required></div><div class="field"><label for="txAccount">Cuenta / medio</label><select id="txAccount"><option>Efectivo</option><option>Mercado Pago</option><option>Banco</option><option>Tarjeta</option><option>Broker</option><option>Otro</option></select></div><div class="field"><label for="txCurrency">Moneda</label><select id="txCurrency"><option value="ARS">ARS · Peso argentino</option><option value="USD">USD · Dólar estadounidense</option></select></div><div class="field full"><label for="txNotes">Notas (opcional)</label><textarea id="txNotes" placeholder="Detalles, etiquetas o contexto..."></textarea></div></div><div class="modal-actions"><button type="button" class="secondary" id="cancelModal">Cancelar</button><button class="primary" type="submit">Guardar movimiento ›</button></div></form></div></div>
 <div class="modal-backdrop" id="budgetBackdrop" role="dialog" aria-modal="true" aria-labelledby="budgetModalTitle"><div class="modal"><div class="modal-head"><div><h2 id="budgetModalTitle">Nuevo presupuesto</h2><p>Definí el límite mensual de una categoría.</p></div><button class="close-btn" id="closeBudget" aria-label="Cerrar">×</button></div><form id="budgetForm"><div class="form-grid"><div class="field full"><label for="budgetCategory">Categoría</label><select id="budgetCategory"><option>Alimentación</option><option>Transporte</option><option>Entretenimiento</option><option>Tecnología</option><option>Educación</option><option>Salud</option><option>Hogar</option><option>Otros</option></select></div><div class="field full"><label for="budgetLimit">Límite mensual (ARS)</label><input id="budgetLimit" type="number" min="1" step="1" placeholder="100000" required></div></div><div class="modal-actions"><button type="button" class="secondary" id="cancelBudget">Cancelar</button><button type="submit" class="primary">Guardar presupuesto ›</button></div></form></div></div>
 <div class="modal-backdrop" id="searchBackdrop" role="dialog" aria-modal="true" aria-labelledby="searchTitle"><div class="modal"><div class="modal-head"><div><h2 id="searchTitle">Buscar en Ctrl</h2><p>Encontrá movimientos financieros por nombre o categoría.</p></div><button class="close-btn" id="closeSearch" aria-label="Cerrar">×</button></div><div class="field"><label for="globalSearch">Búsqueda</label><input id="globalSearch" placeholder="Ej. supermercado, sueldo, tecnología..."></div><div class="modal-actions"><button class="primary" id="runSearch">Buscar ›</button></div></div></div>
-<div class="modal-backdrop" id="calendarEventBackdrop" role="dialog" aria-modal="true" aria-labelledby="calendarEventTitle"><div class="modal calendar-event-modal"><div class="modal-head"><div><h2 id="calendarEventTitle">Nuevo evento</h2><p>Se guardará directamente en Google Calendar.</p></div><button class="close-btn" id="closeCalendarEvent" aria-label="Cerrar">×</button></div><form id="calendarEventForm"><div class="form-grid"><div class="field full"><label for="eventSummary">Título</label><input id="eventSummary" maxlength="180" placeholder="Ej. Reunión, examen, entrenamiento…" required></div><div class="field full"><label for="eventCalendar">Guardar en</label><select id="eventCalendar" required></select></div><div class="field"><label for="eventDate">Fecha</label><input id="eventDate" type="date" required></div><div class="field"><label for="eventColor">Color del evento</label><select id="eventColor"><option value="">Color del calendario</option><option value="1">Lavanda</option><option value="2">Verde salvia</option><option value="3">Uva</option><option value="4">Flamenco</option><option value="5">Amarillo</option><option value="6">Mandarina</option><option value="7">Turquesa</option><option value="8">Grafito</option><option value="9">Azul</option><option value="10">Verde</option><option value="11">Rojo</option></select></div><div class="field"><label for="eventStart">Desde</label><input id="eventStart" type="time" value="09:00" required></div><div class="field"><label for="eventEnd">Hasta</label><input id="eventEnd" type="time" value="10:00" required></div><div class="field full event-all-day"><label><input id="eventAllDay" type="checkbox"> Todo el día</label></div><div class="field full"><label for="eventLocation">Ubicación (opcional)</label><input id="eventLocation" maxlength="300" placeholder="Lugar o enlace de reunión"></div><div class="field full"><label for="eventDescription">Descripción (opcional)</label><textarea id="eventDescription" rows="3" placeholder="Detalles o información importante…"></textarea></div></div><div class="modal-actions"><button type="button" class="secondary" id="cancelCalendarEvent">Cancelar</button><button class="primary" id="saveCalendarEventBtn" type="submit">Crear evento ›</button></div></form></div></div><div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="modal-backdrop" id="calendarEventBackdrop" role="dialog" aria-modal="true" aria-labelledby="calendarEventTitle"><div class="modal calendar-event-modal"><div class="modal-head"><div><h2 id="calendarEventTitle">Nuevo evento</h2><p>Se guardará directamente en Google Calendar.</p></div><button class="close-btn" id="closeCalendarEvent" aria-label="Cerrar">×</button></div><form id="calendarEventForm"><div class="form-grid"><div class="field full"><label for="eventSummary">Título</label><input id="eventSummary" maxlength="180" placeholder="Ej. Reunión, examen, entrenamiento…" required></div><div class="field full"><label for="eventCalendar">Guardar en</label><select id="eventCalendar" required></select></div><div class="field"><label for="eventDate">Fecha</label><input id="eventDate" type="date" required></div><div class="field"><label for="eventColor">Color del evento</label><select id="eventColor"><option value="">Color del calendario</option><option value="1">Lavanda</option><option value="2">Verde salvia</option><option value="3">Uva</option><option value="4">Flamenco</option><option value="5">Amarillo</option><option value="6">Mandarina</option><option value="7">Turquesa</option><option value="8">Grafito</option><option value="9">Azul</option><option value="10">Verde</option><option value="11">Rojo</option></select></div><div class="field"><label for="eventStart">Desde</label><input id="eventStart" type="time" value="09:00" required></div><div class="field"><label for="eventEnd">Hasta</label><input id="eventEnd" type="time" value="10:00" required></div><div class="field full event-all-day"><label><input id="eventAllDay" type="checkbox"> Todo el día</label></div><div class="field full"><label for="eventLocation">Ubicación (opcional)</label><input id="eventLocation" maxlength="300" placeholder="Lugar o enlace de reunión"></div><div class="field full"><label for="eventDescription">Descripción (opcional)</label><textarea id="eventDescription" rows="3" placeholder="Detalles o información importante…"></textarea></div></div><div class="modal-actions"><button type="button" class="secondary" id="cancelCalendarEvent">Cancelar</button><button class="primary" id="saveCalendarEventBtn" type="submit">Crear evento ›</button></div></form></div></div><input id="mpImportFile" type="file" accept=".csv,text/csv" hidden>
+<div class="modal-backdrop" id="mpImportBackdrop" role="dialog" aria-modal="true" aria-labelledby="mpImportTitle"><div class="modal mp-import-modal"><div class="modal-head"><div><h2 id="mpImportTitle">Importar movimientos</h2><p id="mpImportSubtitle">Revisá los movimientos detectados antes de añadirlos al historial.</p></div><button class="close-btn" id="closeMpImport" aria-label="Cerrar">×</button></div><div id="mpImportStatus" class="mp-import-status">Elegí un archivo CSV exportado desde Mercado Pago.</div><div id="mpImportSummary" class="mp-import-summary" hidden></div><div id="mpImportPreviewWrap" class="mp-import-preview-wrap" hidden><div class="mp-import-preview-scroll"><table class="mp-import-table"><thead><tr><th>Fecha</th><th>Movimiento detectado</th><th>Importe neto</th><th>Estado</th></tr></thead><tbody id="mpImportPreview"></tbody></table></div><p class="mp-import-footnote" id="mpImportFootnote"></p></div><div class="modal-actions"><button type="button" class="secondary" id="cancelMpImport">Cancelar</button><button type="button" class="primary" id="confirmMpImport" disabled>Importar movimientos ✓</button></div></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
@@ -282,6 +284,152 @@ function closeModal(id){$(id).classList.remove('open')}
 function addBudget(){ $('budgetForm').reset();$('budgetBackdrop').classList.add('open')}
 function exportBackup(){const blob=new Blob([JSON.stringify({app:'Ctrl',version:1,exportedAt:new Date().toISOString(),...state},null,2)],{type:'application/json'});downloadBlob(blob,'ctrl-respaldo-'+dateNow()+'.json');toast('Respaldo exportado')}
 function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+
+/* Importación de reportes CSV de Mercado Pago */
+let mpImportDraft=[];
+function parseCsvRows(text,delimiter){
+  const rows=[];let row=[],cell='',quoted=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(ch==='"'){
+      if(quoted&&text[i+1]==='"'){cell+='"';i++}
+      else quoted=!quoted;
+    }else if(ch===delimiter&&!quoted){row.push(cell);cell=''}
+    else if((ch==='\\n'||ch==='\\r')&&!quoted){
+      if(ch==='\\r'&&text[i+1]==='\\n')i++;
+      row.push(cell);cell='';
+      if(row.some(v=>String(v).trim()!==''))rows.push(row);
+      row=[];
+    }else cell+=ch;
+  }
+  if(cell!==''||row.length){row.push(cell);if(row.some(v=>String(v).trim()!==''))rows.push(row)}
+  return rows;
+}
+function detectCsvDelimiter(headerLine){
+  const candidates=['; ',',','\\t'];
+  let best=';',bestCount=-1;
+  for(const candidate of candidates){
+    const delimiter=candidate==='; '?';':candidate;
+    let quoted=false,count=0;
+    for(let i=0;i<headerLine.length;i++){const ch=headerLine[i];if(ch==='"')quoted=!quoted;else if(ch===delimiter&&!quoted)count++}
+    if(count>bestCount){best=delimiter;bestCount=count}
+  }
+  return best;
+}
+function importNumber(value){
+  let s=String(value??'').trim().replace(/\\s/g,'');
+  if(!s)return NaN;
+  if(s.includes(',')&&s.includes('.')){
+    if(s.lastIndexOf(',')>s.lastIndexOf('.'))s=s.replace(/\\./g,'').replace(',','.');
+    else s=s.replace(/,/g,'');
+  }else if(s.includes(','))s=s.replace(',','.');
+  const n=Number(s);return Number.isFinite(n)?n:NaN;
+}
+function importDate(value){
+  const s=String(value??'').trim();
+  const iso=s.match(/^(\\d{4})-(\\d{2})-(\\d{2})/);
+  if(iso)return iso[1]+'-'+iso[2]+'-'+iso[3];
+  const local=s.match(/^(\\d{1,2})[\\/.-](\\d{1,2})[\\/.-](\\d{4})$/);
+  if(local)return local[3]+'-'+String(local[2]).padStart(2,'0')+'-'+String(local[1]).padStart(2,'0');
+  const d=new Date(s);
+  return Number.isNaN(d.getTime())?'':d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function mpField(row,headers,name){const i=headers.indexOf(name);return i<0?'':String(row[i]??'').trim()}
+function mpImportKey(parts){return 'mercadopago-csv-v1|'+parts.map(v=>encodeURIComponent(String(v??'').trim())).join('|')}
+function parseMercadoPagoCsv(text){
+  const clean=String(text||'').replace(/^\\uFEFF/,'').trim();
+  if(!clean)throw new Error('El archivo está vacío.');
+  const firstLine=clean.split(/\\r?\\n/,1)[0];
+  const delimiter=detectCsvDelimiter(firstLine);
+  const rows=parseCsvRows(clean,delimiter);
+  if(rows.length<2)throw new Error('El CSV no contiene movimientos para importar.');
+  const headers=rows[0].map(h=>String(h??'').replace(/^\\uFEFF/,'').trim().toUpperCase());
+  const required=['SOURCE_ID','TRANSACTION_TYPE','TRANSACTION_DATE'];
+  const missing=required.filter(h=>!headers.includes(h));
+  if(missing.length)throw new Error('Este archivo no parece ser un reporte de Mercado Pago compatible. Faltan columnas: '+missing.join(', ')+'.');
+  if(!headers.includes('REAL_AMOUNT')&&!headers.includes('TRANSACTION_AMOUNT'))throw new Error('El archivo no incluye una columna de importe reconocible.');
+  const groups=new Map();let invalid=0,zero=0;
+  for(let index=1;index<rows.length;index++){
+    const row=rows[index];
+    const sourceId=mpField(row,headers,'SOURCE_ID');
+    const transactionType=mpField(row,headers,'TRANSACTION_TYPE').toUpperCase()||'MOVIMIENTO';
+    const rawDate=mpField(row,headers,'TRANSACTION_DATE')||mpField(row,headers,'SETTLEMENT_DATE');
+    const date=importDate(rawDate);
+    const amountText=mpField(row,headers,'REAL_AMOUNT')||mpField(row,headers,'TRANSACTION_AMOUNT');
+    const amount=importNumber(amountText);
+    if(!date||!Number.isFinite(amount)){invalid++;continue}
+    if(Math.abs(amount)<0.000001){zero++;continue}
+    const method=mpField(row,headers,'PAYMENT_METHOD_TYPE');
+    const business=mpField(row,headers,'BUSINESS_UNIT');
+    const subUnit=mpField(row,headers,'SUB_UNIT');
+    const settlementDate=mpField(row,headers,'SETTLEMENT_DATE');
+    const keyParts=sourceId?[sourceId,transactionType,rawDate,method,business,subUnit]:[transactionType,rawDate,method,business,subUnit,amountText,mpField(row,headers,'FEE_AMOUNT')];
+    const key=mpImportKey(keyParts);
+    if(!groups.has(key))groups.set(key,{key,sourceId,transactionType,date,method,business,subUnit,settlementDate,net:0,gross:0,fees:0,taxes:0,components:0});
+    const g=groups.get(key);
+    g.net+=amount;
+    const gross=importNumber(mpField(row,headers,'TRANSACTION_AMOUNT'));if(Number.isFinite(gross))g.gross+=gross;
+    const fee=importNumber(mpField(row,headers,'FEE_AMOUNT'));if(Number.isFinite(fee))g.fees+=fee;
+    const tax=importNumber(mpField(row,headers,'TAXES_AMOUNT'));if(Number.isFinite(tax))g.taxes+=tax;
+    g.components++;
+    if(settlementDate&&!g.settlementDate)g.settlementDate=settlementDate;
+  }
+  const transactions=[...groups.values()].map(g=>{
+    const type=g.net<0?'expense':'income';
+    const description=[g.business,g.subUnit,g.transactionType].filter(Boolean).join(' · ')||('Movimiento Mercado Pago · '+g.transactionType);
+    const details=[
+      'Importado desde reporte de Mercado Pago',
+      g.sourceId?'ID de origen: '+g.sourceId:'',
+      'Tipo de operación: '+g.transactionType,
+      g.method?'Medio: '+g.method:'',
+      g.business?'Unidad: '+g.business:'',
+      g.subUnit?'Subunidad: '+g.subUnit:'',
+      g.components>1?'Filas agrupadas: '+g.components:'',
+      Number.isFinite(g.gross)&&Math.abs(g.gross-g.net)>0.009?'Importe bruto acumulado: '+g.gross.toFixed(2):'',
+      Math.abs(g.fees)>0.0001?'Comisiones informadas: '+g.fees.toFixed(2):'',
+      Math.abs(g.taxes)>0.0001?'Impuestos informados: '+g.taxes.toFixed(2):'',
+      g.settlementDate?'Fecha de liquidación: '+g.settlementDate:''
+    ].filter(Boolean).join(' | ');
+    return {id:crypto.randomUUID(),type,amount:Math.round(Math.abs(g.net)*100)/100,description:description.slice(0,100),category:'Otros',date:g.date,account:'Mercado Pago',currency:'ARS',notes:details,createdAt:new Date().toISOString(),mpImportKey:g.key,mpSourceId:g.sourceId||''};
+  }).filter(t=>t.amount>0&&t.date);
+  return {transactions,invalid,zero,sourceRows:rows.length-1};
+}
+function moneyImportPreview(n){return new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:2}).format(n||0)}
+function openMpImport(){mpImportDraft=[];$('mpImportFile').value='';$('mpImportStatus').textContent='Elegí un archivo CSV exportado desde Mercado Pago.';$('mpImportSummary').hidden=true;$('mpImportPreviewWrap').hidden=true;$('mpImportPreview').innerHTML='';$('confirmMpImport').disabled=true;$('confirmMpImport').textContent='Importar movimientos ✓';$('mpImportBackdrop').classList.add('open')}
+function renderMpImportPreview(parsed){
+  const existing=new Set(state.transactions.map(t=>t.mpImportKey).filter(Boolean));
+  mpImportDraft=parsed.transactions.map(t=>({...t,duplicate:existing.has(t.mpImportKey)}));
+  const newCount=mpImportDraft.filter(t=>!t.duplicate).length;
+  const dupCount=mpImportDraft.length-newCount;
+  const totalNet=mpImportDraft.filter(t=>!t.duplicate).reduce((sum,t)=>sum+(t.type==='income'?t.amount:-t.amount),0);
+  $('mpImportSummary').innerHTML='<div class="mp-import-stat"><strong>'+mpImportDraft.length+'</strong><span>Operaciones detectadas</span></div><div class="mp-import-stat"><strong>'+newCount+'</strong><span>Nuevas para importar</span></div><div class="mp-import-stat"><strong>'+dupCount+'</strong><span>Ya importadas · se omitirán</span></div>';
+  $('mpImportSummary').hidden=false;
+  $('mpImportPreview').innerHTML=mpImportDraft.map(t=>'<tr class="'+(t.duplicate?'mp-import-duplicate':'')+'"><td>'+esc(new Date(t.date+'T12:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'}))+'</td><td><strong>'+esc(t.description)+'</strong><div style="font-size:10px;color:var(--muted);margin-top:5px">'+esc(t.notes)+'</div></td><td class="mp-import-amount '+(t.type==='income'?'positive':'negative')+'">'+(t.type==='income'?'+':'−')+moneyImportPreview(t.amount)+'</td><td><span class="mp-import-state '+(t.duplicate?'duplicate':'')+'">'+(t.duplicate?'Se omitirá':'Nueva')+'</span></td></tr>').join('');
+  $('mpImportPreviewWrap').hidden=false;
+  $('mpImportFootnote').textContent='Filas leídas: '+parsed.sourceRows+'. Filas inválidas omitidas: '+parsed.invalid+'. Filas con importe cero omitidas: '+parsed.zero+'. El importe neto se toma de REAL_AMOUNT cuando existe; las filas de una misma operación se agrupan y su detalle queda guardado en Notas. El archivo no proporciona categorías personales fiables, por eso se asigna “Otros” para que puedas corregirlas después.';
+  $('mpImportStatus').textContent='Revisá el resumen y la lista antes de confirmar. Solo se añadirán las operaciones nuevas.';
+  $('confirmMpImport').disabled=newCount===0;
+  $('confirmMpImport').textContent=newCount?'Importar '+newCount+' movimientos ✓':'No hay movimientos nuevos';
+}
+async function handleMpImportFile(file){
+  if(!file)return;
+  if(file.size>15*1024*1024){$('mpImportStatus').textContent='El archivo supera los 15 MB permitidos.';return}
+  $('mpImportStatus').textContent='Leyendo y analizando el archivo…';$('mpImportSummary').hidden=true;$('mpImportPreviewWrap').hidden=true;$('confirmMpImport').disabled=true;
+  try{
+    const text=await file.text();
+    const parsed=parseMercadoPagoCsv(text);
+    if(!parsed.transactions.length)throw new Error('No se encontraron movimientos válidos con importe distinto de cero.');
+    renderMpImportPreview(parsed);
+  }catch(error){mpImportDraft=[];$('mpImportStatus').textContent=error?.message||'No se pudo leer el archivo. Verificá que sea un CSV de Mercado Pago.'}
+}
+function confirmMpImport(){
+  const toAdd=mpImportDraft.filter(t=>!t.duplicate);
+  if(!toAdd.length)return;
+  state.transactions.push(...toAdd.map(({duplicate,...t})=>t));
+  $('periodFilter').value='all';$('transactionSearch').value='';
+  closeModal('mpImportBackdrop');save();
+  toast('Se importaron '+toAdd.length+' movimientos de Mercado Pago');
+}
 function exportCSV(){const header=['Tipo','Descripción','Categoría','Fecha','Importe','Moneda','Cuenta','Notas'];const lines=[header,...state.transactions.map(t=>[t.type,t.description,t.category,t.date,t.amount,t.currency||'ARS',t.account||'',t.notes||''])].map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');downloadBlob(new Blob(['\ufeff'+lines],{type:'text/csv;charset=utf-8;'}),'ctrl-movimientos-'+dateNow()+'.csv');toast('CSV exportado')}
 document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>setPage(b.dataset.page)));document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>setPage(b.dataset.goto)));
 $('connectGoogleBtn').onclick=connectGoogleCalendar;$('refreshCalendarBtn').onclick=()=>{if(googleAccessToken){googleCalendars=[];loadGoogleCalendarEvents()}else connectGoogleCalendar()};$('disconnectGoogleBtn').onclick=disconnectGoogleCalendar;$('calendarPrevBtn').onclick=()=>{calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()-1,1);calendarSelectedDate=dateKey(calendarMonth);saveCalendarPreferences();if(googleAccessToken){googleCalendars.length?loadGoogleCalendarEvents():renderCalendar()}else loadCachedCalendarMonth()};$('calendarNextBtn').onclick=()=>{calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+1,1);calendarSelectedDate=dateKey(calendarMonth);saveCalendarPreferences();if(googleAccessToken){googleCalendars.length?loadGoogleCalendarEvents():renderCalendar()}else loadCachedCalendarMonth()};$('calendarTodayBtn').onclick=()=>{calendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);calendarSelectedDate=dateNow();saveCalendarPreferences();if(googleAccessToken){googleCalendars.length?loadGoogleCalendarEvents():renderCalendar()}else loadCachedCalendarMonth()};
@@ -290,6 +438,12 @@ $('quickAddBtn').onclick=()=>{setPage('finance');openTransaction()};$('newTransa
 $('closeModal').onclick=$('cancelModal').onclick=()=>closeModal('modalBackdrop');$('modalBackdrop').addEventListener('click',e=>{if(e.target===$('modalBackdrop'))closeModal('modalBackdrop')});
 $('transactionForm').onsubmit=e=>{e.preventDefault();const editId=e.currentTarget.dataset.editId;const t={id:editId||crypto.randomUUID(),type:$('txType').value,amount:Number($('txAmount').value),description:$('txDescription').value.trim(),category:$('txCategory').value,date:$('txDate').value,account:$('txAccount').value,currency:$('txCurrency').value,notes:$('txNotes').value.trim(),createdAt:new Date().toISOString()};if(!t.description||t.amount<=0)return; if(editId){const i=state.transactions.findIndex(x=>x.id===editId);if(i>=0)state.transactions[i]=t}else state.transactions.push(t);closeModal('modalBackdrop');save();toast(editId?'Movimiento actualizado':'Movimiento guardado');};
 $('addBudgetBtn').onclick=addBudget;$('closeBudget').onclick=$('cancelBudget').onclick=()=>closeModal('budgetBackdrop');$('budgetBackdrop').addEventListener('click',e=>{if(e.target===$('budgetBackdrop'))closeModal('budgetBackdrop')});$('budgetForm').onsubmit=e=>{e.preventDefault();const category=$('budgetCategory').value,limit=Number($('budgetLimit').value);const old=state.budgets.find(b=>b.category===category);if(old)old.limit=limit;else state.budgets.push({category,limit});closeModal('budgetBackdrop');save();toast('Presupuesto guardado')};
+
+$('importMpBtn').onclick=openMpImport;
+$('mpImportFile').onchange=e=>{const file=e.target.files?.[0];if(file)handleMpImportFile(file)};
+$('closeMpImport').onclick=$('cancelMpImport').onclick=()=>closeModal('mpImportBackdrop');
+$('mpImportBackdrop').addEventListener('click',e=>{if(e.target===$('mpImportBackdrop'))closeModal('mpImportBackdrop')});
+$('confirmMpImport').onclick=confirmMpImport;
 $('transactionSearch').oninput=renderTransactions;$('typeFilter').onchange=renderTransactions;$('periodFilter').onchange=renderTransactions;$('exportCsvBtn').onclick=exportCSV;
 $('searchBtn').onclick=()=>{$('searchBackdrop').classList.add('open');setTimeout(()=>$('globalSearch').focus(),100)};$('closeSearch').onclick=()=>closeModal('searchBackdrop');$('searchBackdrop').addEventListener('click',e=>{if(e.target===$('searchBackdrop'))closeModal('searchBackdrop')});$('runSearch').onclick=()=>{const q=$('globalSearch').value.trim();closeModal('searchBackdrop');setPage('finance');$('transactionSearch').value=q;renderTransactions()};$('globalSearch').onkeydown=e=>{if(e.key==='Enter')$('runSearch').click()};$('notificationBtn').onclick=()=>toast(state.transactions.length?'Todo al día. Tenés '+state.transactions.length+' movimientos registrados.':'Todavía no hay movimientos. Empezá por registrar uno en Finanzas.');$('menuBtn').onclick=()=>toast('Usá la navegación inferior para cambiar de sección.');
 
