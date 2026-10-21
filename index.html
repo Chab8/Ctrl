@@ -4453,6 +4453,250 @@
         animation: none !important
       }
     }
+
+    /* ===== Compras / Wishlist ===== */
+    .shop-pills {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      margin-bottom: 16px
+    }
+
+    .shop-pill {
+      border: 1px solid var(--line);
+      background: #f7f6f0;
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 11px
+    }
+
+    .shop-pill:hover {
+      color: var(--ink);
+      background: var(--card)
+    }
+
+    .shop-pill.active {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: #f8f7f2
+    }
+
+    .shop-pill small {
+      font: 9px 'DM Mono', monospace;
+      margin-left: 6px;
+      opacity: .7
+    }
+
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(228px, 1fr));
+      gap: 15px
+    }
+
+    .shop-card {
+      padding: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column
+    }
+
+    .shop-media {
+      position: relative;
+      display: block;
+      width: 100%;
+      aspect-ratio: 4/3;
+      border: 0;
+      padding: 0;
+      background: var(--soft);
+      overflow: hidden
+    }
+
+    .shop-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .6s var(--ease-out), filter .3s, opacity .3s
+    }
+
+    .shop-card:hover .shop-media img {
+      transform: scale(1.045)
+    }
+
+    .shop-media-empty {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      color: #a0a196;
+      background: linear-gradient(135deg, #e7ebdc, #e4e1d8)
+    }
+
+    .shop-media-empty svg {
+      width: 34px;
+      height: 34px
+    }
+
+    .shop-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: #fdfcf9e6;
+      backdrop-filter: blur(8px)
+    }
+
+    .shop-prio {
+      position: absolute;
+      top: 10px;
+      right: 10px
+    }
+
+    .shop-bought-flag {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font: 9px 'DM Mono', monospace;
+      padding: 5px 7px;
+      border-radius: 7px;
+      background: var(--ink);
+      color: var(--accent)
+    }
+
+    .shop-card.is-bought .shop-media img {
+      filter: grayscale(1);
+      opacity: .5
+    }
+
+    .shop-card.is-bought .shop-price {
+      text-decoration: line-through;
+      color: var(--muted)
+    }
+
+    .shop-body {
+      padding: 14px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+      min-width: 0
+    }
+
+    .shop-name {
+      border: 0;
+      background: none;
+      padding: 0;
+      text-align: left;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: -.2px;
+      overflow-wrap: anywhere
+    }
+
+    .shop-store {
+      font-size: 10px;
+      color: var(--muted)
+    }
+
+    .shop-price {
+      font-size: 19px;
+      font-weight: 600;
+      letter-spacing: -.7px;
+      margin-top: 3px
+    }
+
+    .shop-desc {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden
+    }
+
+    .shop-foot {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: auto;
+      padding-top: 12px
+    }
+
+    .shop-link {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+      padding: 8px 11px;
+      font-size: 11px
+    }
+
+    .shop-photo-drop {
+      aspect-ratio: 16/9;
+      border: 1px dashed #c8c8bd;
+      border-radius: 14px;
+      background: #f6f5ef;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 11px;
+      text-align: center;
+      padding: 0;
+      width: 100%
+    }
+
+    .shop-photo-drop:hover {
+      border-color: #8c967d;
+      background: #f2f3eb
+    }
+
+    .shop-photo-drop img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover
+    }
+
+    .shop-photo-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px
+    }
+
+    @media(max-width:700px) {
+      .shop-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px
+      }
+
+      .shop-body {
+        padding: 11px 12px 13px
+      }
+
+      .shop-price {
+        font-size: 16px
+      }
+
+      .shop-desc {
+        display: none
+      }
+
+      .shop-link {
+        padding: 7px 9px;
+        font-size: 10px
+      }
+
+      .shop-pills {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 4px
+      }
+
+      .shop-pill {
+        white-space: nowrap
+      }
+    }
   </style>
 </head>
 
@@ -4489,6 +4733,10 @@
             <rect x="3" y="5" width="18" height="14" rx="2" />
             <path d="m3 7 9 6 9-6" />
           </svg>Mail</button>
+        <button class="nav-item" data-page="shop"><svg viewBox="0 0 24 24">
+            <path d="M6 7h12l1 13H5z" />
+            <path d="M9 7a3 3 0 0 1 6 0" />
+          </svg>Compras</button>
         <button class="nav-item" data-page="inbox"><svg viewBox="0 0 24 24">
             <path d="M4 4h16v16H4z" />
             <path d="M4 13h4l2 3h4l2-3h4" />
@@ -4872,7 +5120,65 @@
           </div>
         </div>
       </section>
-
+      <section id="shopView" class="view" hidden>
+        <div class="page-head">
+          <div>
+            <div class="eyebrow">LO QUE QUERÉS, ORDENADO</div>
+            <h1>Compras<span>.</span></h1>
+            <p>Tu wishlist: productos que querés comprar, con precio, link y foto.</p>
+          </div>
+          <button class="primary" id="newShopBtn"><svg viewBox="0 0 24 24">
+              <path d="M12 5v14M5 12h14" />
+            </svg> Nuevo producto</button>
+        </div>
+        <div class="grid task-stats-grid">
+          <div class="card task-stat">
+            <div class="stat-top">Pendientes</div>
+            <div class="stat-value" id="shopPendingCount">0</div>
+            <div class="stat-bottom" id="shopBoughtNote">0 comprados</div>
+          </div>
+          <div class="card task-stat">
+            <div class="stat-top">Por comprar · ARS</div>
+            <div class="stat-value" id="shopTotalArs">$ 0</div>
+            <div class="stat-bottom">Suma de pendientes</div>
+          </div>
+          <div class="card task-stat">
+            <div class="stat-top">Por comprar · USD</div>
+            <div class="stat-value" id="shopTotalUsd">US$ 0</div>
+            <div class="stat-bottom">Suma de pendientes</div>
+          </div>
+        </div>
+        <div class="card tasks-board">
+          <div class="shop-pills" id="shopCategoryPills"></div>
+          <div class="task-filters">
+            <input class="search-input" id="shopSearch" placeholder="Buscar productos..." aria-label="Buscar productos">
+            <input class="filter-select" id="shopMinPrice" type="number" min="0" placeholder="Precio mín."
+              aria-label="Precio mínimo">
+            <input class="filter-select" id="shopMaxPrice" type="number" min="0" placeholder="Precio máx."
+              aria-label="Precio máximo">
+            <select class="filter-select" id="shopCurrencyFilter" aria-label="Moneda">
+              <option value="all">Todas las monedas</option>
+              <option value="ARS">ARS</option>
+              <option value="USD">USD</option>
+            </select>
+            <select class="filter-select" id="shopStatusFilter" aria-label="Estado">
+              <option value="open">Pendientes</option>
+              <option value="bought">Comprados</option>
+              <option value="all">Todos</option>
+            </select>
+            <select class="filter-select" id="shopSort" aria-label="Ordenar">
+              <option value="recent">Más recientes</option>
+              <option value="price-asc">Precio: menor a mayor</option>
+              <option value="price-desc">Precio: mayor a menor</option>
+              <option value="priority">Prioridad</option>
+              <option value="name">Nombre (A–Z)</option>
+            </select>
+          </div>
+          <div class="shop-grid" id="shopGrid"></div>
+        </div>
+        <div class="footer-note">Tus productos se guardan en este dispositivo. Las fotos se reducen automáticamente para
+          ocupar poco.</div>
+      </section>
       <section id="placeholderView" class="view" hidden>
         <div class="page-head">
           <div>
@@ -4906,9 +5212,10 @@
         <path d="M16 3v4M8 3v4M3 10h18" />
       </svg>Calendario</button><button data-page="tasks"><svg viewBox="0 0 24 24">
         <path d="m4 12 4 4L20 4" />
-      </svg>Tareas</button><button data-page="inbox"><svg viewBox="0 0 24 24">
-        <path d="M4 4h16v16H4zM4 13h4l2 3h4l2-3h4" />
-      </svg>Inbox</button></nav>
+      </svg>Tareas</button><button data-page="shop"><svg viewBox="0 0 24 24">
+        <path d="M6 7h12l1 13H5z" />
+        <path d="M9 7a3 3 0 0 1 6 0" />
+      </svg>Compras</button></nav>
   <div class="modal-backdrop" id="taskModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="taskModalTitle">
     <div class="modal task-modal">
       <div class="modal-head">
@@ -5134,6 +5441,54 @@
             data-lucide="send"></i> Enviar</button></div>
     </form>
   </div>
+  <div class="modal-backdrop" id="shopModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="shopModalTitle">
+    <div class="modal task-modal">
+      <div class="modal-head">
+        <div>
+          <h2 id="shopModalTitle">Nuevo producto</h2>
+          <p id="shopModalSubtitle">Guardá algo que quieras comprar.</p>
+        </div>
+        <button class="close-btn" id="closeShopModal" aria-label="Cerrar">×</button>
+      </div>
+      <form id="shopForm">
+        <div class="form-grid">
+          <div class="field full"><label for="shopName">Nombre</label><input id="shopName" maxlength="120"
+              placeholder="Ej. Teclado mecánico" required></div>
+          <div class="field"><label for="shopPrice">Precio</label><input id="shopPrice" type="number" min="0.01"
+              step="0.01" placeholder="85000" required></div>
+          <div class="field"><label for="shopCurrency">Moneda</label><select id="shopCurrency">
+              <option value="ARS">ARS · Peso argentino</option>
+              <option value="USD">USD · Dólar</option>
+            </select></div>
+          <div class="field full"><label for="shopLink">Link de compra</label><input id="shopLink" type="text"
+              inputmode="url" placeholder="https://..."></div>
+          <div class="field"><label for="shopStore">Tienda (opcional)</label><input id="shopStore" maxlength="60"
+              placeholder="Mercado Libre, Amazon..."></div>
+          <div class="field"><label for="shopCategory">Categoría</label><input id="shopCategory" maxlength="40"
+              list="shopCategoryOptions" placeholder="Tecnología, ropa, hogar..." required><datalist
+              id="shopCategoryOptions"></datalist></div>
+          <div class="field full"><label for="shopPriority">Prioridad</label><select id="shopPriority">
+              <option value="high">Alta</option>
+              <option value="medium" selected>Media</option>
+              <option value="low">Baja</option>
+            </select></div>
+          <div class="field full"><label for="shopDescription">Descripción (opcional)</label><textarea
+              id="shopDescription" maxlength="600" placeholder="Modelo, color, por qué lo querés..."></textarea></div>
+          <div class="field full">
+            <label>Foto</label>
+            <button type="button" class="shop-photo-drop" id="shopPhotoDrop"><img id="shopPhotoPreview"
+                alt="Vista previa" hidden><span id="shopPhotoHint">Tocá para subir una foto</span></button>
+            <div class="shop-photo-actions"><button type="button" class="secondary" id="shopPhotoChoose">Subir
+                foto…</button><button type="button" class="secondary" id="shopPhotoRemove" hidden>Quitar foto</button>
+            </div>
+            <input type="file" id="shopPhotoInput" accept="image/*" hidden>
+          </div>
+        </div>
+        <div class="modal-actions"><button type="button" class="secondary" id="cancelShopModal">Cancelar</button><button
+            type="submit" class="primary">Guardar producto ›</button></div>
+      </form>
+    </div>
+  </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -5143,6 +5498,8 @@
     let state; try { state = JSON.parse(localStorage.getItem(KEY)) || structuredClone(defaults) } catch { state = structuredClone(defaults) }
     if (!Array.isArray(state.tasks) || state.tasks.some(t => typeof t !== 'object' || t === null)) state.tasks = [];
     state.tasks = state.tasks.map((t, i) => ({ ...t, id: t.id || 'task-' + i, priority: t.priority || 'medium', category: t.category || 'Personal', done: !!t.done, order: Number.isFinite(t.order) ? t.order : i }));
+    if (!Array.isArray(state.wishlist)) state.wishlist = [];
+    state.wishlist = state.wishlist.filter(p => p && typeof p === 'object' && p.id);
     function save() { localStorage.setItem(KEY, JSON.stringify(state)); renderAll() }
     const $ = id => document.getElementById(id);
     const fmt = (n, currency = 'ARS') => new Intl.NumberFormat('es-AR', { style: 'currency', currency, maximumFractionDigits: currency === 'ARS' ? 0 : 2 }).format(n || 0).replace('ARS', 'AR$');
@@ -5155,7 +5512,7 @@
     function svgIcon(type) { const names = { expense: 'arrow-down-left', income: 'arrow-up-right', investment: 'chart-no-axes-combined' }; if (window.lucide) return '<i data-lucide="' + (names[type] || 'circle-dollar-sign') + '"></i>'; const paths = { expense: '<path d="M12 5v14m-6-6 6 6 6-6"/>', income: '<path d="M12 19V5m-6 6 6-6 6 6"/>', investment: '<path d="m3 17 6-6 4 4 8-9"/><path d="M15 6h6v6"/>' }; return '<svg viewBox="0 0 24 24">' + (paths[type] || paths.expense) + '</svg>' }
     function refreshLucideIcons() {
       if (!window.lucide || !window.lucide.createIcons) return;
-      const icons = { home: 'layout-dashboard', finance: 'wallet', tasks: 'check-square', calendar: 'calendar-days', inbox: 'inbox', projects: 'folder-kanban' };
+      const icons = { home: 'layout-dashboard', finance: 'wallet', tasks: 'check-square', calendar: 'calendar-days', inbox: 'inbox', projects: 'folder-kanban', shop: 'shopping-bag' };
       document.querySelectorAll('.nav-item[data-page],.mobile-nav button[data-page]').forEach(b => { const n = icons[b.dataset.page], s = b.querySelector('svg'); if (n && s) { const i = document.createElement('i'); i.setAttribute('data-lucide', n); s.replaceWith(i) } });
       const buttons = { searchBtn: 'search', notificationBtn: 'bell', menuBtn: 'menu', quickAddBtn: 'plus', newTransactionBtn: 'plus', exportCsvBtn: 'file-spreadsheet', exportBtn: 'download', importBtn: 'upload', addBudgetBtn: 'sliders-horizontal', addInvestmentBtn: 'chart-no-axes-combined', runSearch: 'search' };
       Object.entries(buttons).forEach(([id, n]) => { const b = document.getElementById(id), s = b && b.querySelector('svg'); if (s) { const i = document.createElement('i'); i.setAttribute('data-lucide', n); s.replaceWith(i) } });
@@ -5165,7 +5522,20 @@
     }
     function totals(items) { return { income: sum(items, 'income'), expense: sum(items, 'expense'), investment: sum(items, 'investment') } }
     function moneyTotal(t) { return fmt(t.amount, t.currency || 'ARS') }
-    function setPage(page) { const isHome = page === 'home', isFinance = page === 'finance', isCalendar = page === 'calendar', isTasks = page === 'tasks', isMail = page === 'mail'; $('homeView').hidden = !isHome; $('financeView').hidden = !isFinance; $('calendarView').hidden = !isCalendar; $('tasksView').hidden = !isTasks; $('mailView').hidden = !isMail; $('placeholderView').hidden = isHome || isFinance || isCalendar || isTasks || isMail; $('placeholderTitle').textContent = ({ tasks: 'Tareas', calendar: 'Calendario', inbox: 'Inbox', projects: 'Proyectos' }[page] || 'Sección') + '.'; $('crumbCurrent').textContent = isHome ? 'Home' : isFinance ? 'Finanzas' : isMail ? 'Mail' : page[0].toUpperCase() + page.slice(1); document.querySelectorAll('[data-page]').forEach(b => b.classList.toggle('active', b.dataset.page === page)); window.scrollTo({ top: 0, behavior: 'smooth' }); if (isFinance) renderAll(); if (isTasks) renderTasks(); if (isMail && gmailAccessToken && !gmailMessages.length) loadGmailMessages() }
+    const PAGE_VIEWS = { home: 'homeView', finance: 'financeView', tasks: 'tasksView', calendar: 'calendarView', mail: 'mailView', shop: 'shopView' };
+    const PAGE_NAMES = { home: 'Home', finance: 'Finanzas', tasks: 'Tareas', calendar: 'Calendario', mail: 'Mail', shop: 'Compras', inbox: 'Inbox', projects: 'Proyectos' };
+    function setPage(page) {
+      Object.entries(PAGE_VIEWS).forEach(([k, id]) => $(id).hidden = k !== page);
+      $('placeholderView').hidden = !!PAGE_VIEWS[page];
+      $('placeholderTitle').textContent = (PAGE_NAMES[page] || 'Sección') + '.';
+      $('crumbCurrent').textContent = PAGE_NAMES[page] || 'Sección';
+      document.querySelectorAll('[data-page]').forEach(b => b.classList.toggle('active', b.dataset.page === page));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (page === 'finance') renderAll();
+      if (page === 'tasks') renderTasks();
+      if (page === 'shop') renderShop();
+      if (page === 'mail' && gmailAccessToken && !gmailMessages.length) loadGmailMessages();
+    }
 
     const GOOGLE_CLIENT_ID = '255712569055-lh0fvi39j506fd9f6ube4cmo1s1p8im2.apps.googleusercontent.com';
     const GOOGLE_CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events';
@@ -5531,6 +5901,158 @@
     $('gmailCloseCompose').onclick = $('gmailCancelCompose').onclick = () => $('gmailComposeBackdrop').classList.remove('open');
     $('gmailComposeBackdrop').addEventListener('click', e => { if (e.target === $('gmailComposeBackdrop')) $('gmailComposeBackdrop').classList.remove('open') });
     try { const savedGmail = JSON.parse(sessionStorage.getItem('ctrl_gmail_token') || 'null'); if (savedGmail?.accessToken && savedGmail.expiresAt > Date.now()) { gmailAccessToken = savedGmail.accessToken; $('mailConnectCard').hidden = true; $('mailWorkspace').hidden = false } } catch { }
+    /* ===== Compras / Wishlist ===== */
+    const SHOP_PRIORITY_RANK = { high: 0, medium: 1, low: 2 };
+    const SHOP_DEFAULT_CATEGORIES = ['Tecnología', 'Ropa', 'Hogar', 'Accesorios', 'Gimnasio', 'Regalos', 'Otro'];
+    let shopCategory = 'all', shopPhotoData = '';
+
+    function shopNormalizeUrl(raw) {
+      const v = String(raw || '').trim(); if (!v) return '';
+      try { const u = new URL(/^https?:\/\//i.test(v) ? v : 'https://' + v); return /^https?:$/.test(u.protocol) ? u.href : null } catch { return null }
+    }
+    function shopHost(link) { try { return new URL(link).hostname.replace(/^www\./, '') } catch { return '' } }
+
+    function shopFiltered() {
+      const q = $('shopSearch').value.trim().toLowerCase(), cur = $('shopCurrencyFilter').value, status = $('shopStatusFilter').value, sort = $('shopSort').value;
+      const min = parseFloat($('shopMinPrice').value), max = parseFloat($('shopMaxPrice').value);
+      const sorters = {
+        recent: (a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''),
+        'price-asc': (a, b) => a.currency === b.currency ? a.price - b.price : a.currency.localeCompare(b.currency),
+        'price-desc': (a, b) => a.currency === b.currency ? b.price - a.price : a.currency.localeCompare(b.currency),
+        priority: (a, b) => (SHOP_PRIORITY_RANK[a.priority] ?? 1) - (SHOP_PRIORITY_RANK[b.priority] ?? 1) || (b.createdAt || '').localeCompare(a.createdAt || ''),
+        name: (a, b) => a.name.localeCompare(b.name, 'es')
+      };
+      return state.wishlist.filter(p => {
+        if (shopCategory !== 'all' && p.category !== shopCategory) return false;
+        if (cur !== 'all' && p.currency !== cur) return false;
+        if (status === 'open' && p.bought) return false;
+        if (status === 'bought' && !p.bought) return false;
+        if (cur !== 'all') { if (Number.isFinite(min) && p.price < min) return false; if (Number.isFinite(max) && p.price > max) return false }
+        return !q || [p.name, p.description, p.store, p.category].join(' ').toLowerCase().includes(q);
+      }).sort((a, b) => (!!a.bought - !!b.bought) || sorters[sort](a, b));
+    }
+
+    function shopCardMarkup(p) {
+      const id = esc(p.id), store = p.store || shopHost(p.link), prioLabel = { high: 'Alta', medium: 'Media', low: 'Baja' }[p.priority] || 'Media';
+      const media = p.photo ? '<img src="' + esc(p.photo) + '" alt="' + esc(p.name) + '" loading="lazy">' : '<span class="shop-media-empty"><i data-lucide="image"></i></span>';
+      return '<article class="card shop-card' + (p.bought ? ' is-bought' : '') + '">'
+        + '<button type="button" class="shop-media" data-shop-edit="' + id + '" aria-label="Editar ' + esc(p.name) + '">' + media
+        + '<span class="category-chip shop-badge">' + esc(p.category) + '</span>'
+        + (p.bought ? '<span class="shop-bought-flag">Comprado</span>' : '<span class="priority priority-' + esc(p.priority || 'medium') + ' shop-prio">' + prioLabel + '</span>') + '</button>'
+        + '<div class="shop-body"><button type="button" class="shop-name" data-shop-edit="' + id + '">' + esc(p.name) + '</button>'
+        + (store ? '<div class="shop-store">' + esc(store) + '</div>' : '')
+        + '<div class="shop-price">' + esc(fmt(p.price, p.currency)) + '</div>'
+        + (p.description ? '<div class="shop-desc">' + esc(p.description) + '</div>' : '')
+        + '<div class="shop-foot">' + (p.link ? '<a class="secondary shop-link" href="' + esc(p.link) + '" target="_blank" rel="noopener noreferrer">Ver tienda ›</a>' : '')
+        + '<span style="flex:1"></span>'
+        + '<button type="button" class="tiny-btn" data-shop-bought="' + id + '" title="' + (p.bought ? 'Marcar como pendiente' : 'Marcar como comprado') + '" aria-label="' + (p.bought ? 'Marcar como pendiente' : 'Marcar como comprado') + '"><i data-lucide="' + (p.bought ? 'rotate-ccw' : 'check') + '"></i></button>'
+        + '<button type="button" class="tiny-btn" data-shop-edit="' + id + '" title="Editar" aria-label="Editar producto"><i data-lucide="pencil"></i></button>'
+        + '<button type="button" class="tiny-btn" data-shop-delete="' + id + '" title="Eliminar" aria-label="Eliminar producto"><i data-lucide="trash-2"></i></button>'
+        + '</div></div></article>';
+    }
+
+    function renderShop() {
+      if (!$('shopGrid')) return;
+      const all = state.wishlist, counts = {};
+      all.forEach(p => counts[p.category] = (counts[p.category] || 0) + 1);
+      const cats = Object.keys(counts).sort((a, b) => a.localeCompare(b, 'es'));
+      if (shopCategory !== 'all' && !counts[shopCategory]) shopCategory = 'all';
+      $('shopCategoryPills').innerHTML = all.length ? '<button type="button" class="shop-pill' + (shopCategory === 'all' ? ' active' : '') + '" data-shop-cat="all">Todo<small>' + all.length + '</small></button>' + cats.map(c => '<button type="button" class="shop-pill' + (shopCategory === c ? ' active' : '') + '" data-shop-cat="' + esc(c) + '">' + esc(c) + '<small>' + counts[c] + '</small></button>').join('') : '';
+
+      const open = all.filter(p => !p.bought), total = cur => open.filter(p => p.currency === cur).reduce((a, p) => a + p.price, 0);
+      $('shopPendingCount').textContent = open.length;
+      $('shopBoughtNote').textContent = (all.length - open.length) + ' comprados';
+      $('shopTotalArs').textContent = fmt(total('ARS'));
+      $('shopTotalUsd').textContent = fmt(total('USD'), 'USD');
+
+      const cur = $('shopCurrencyFilter').value;
+      $('shopMinPrice').disabled = $('shopMaxPrice').disabled = cur === 'all';
+      $('shopMinPrice').placeholder = cur === 'all' ? 'Elegí moneda' : 'Precio mín.';
+      $('shopMaxPrice').placeholder = cur === 'all' ? 'Elegí moneda' : 'Precio máx.';
+
+      const items = shopFiltered();
+      if (items.length) $('shopGrid').innerHTML = items.map(shopCardMarkup).join('');
+      else $('shopGrid').innerHTML = '<div class="empty" style="grid-column:1/-1">' + (all.length
+        ? 'No hay productos que coincidan con estos filtros. <button class="text-action" id="shopClearFilters">Limpiar filtros</button>'
+        : 'Tu wishlist está vacía. Agregá el primer producto que quieras comprar.') + '</div>';
+      refreshLucideIcons();
+    }
+
+    function setShopPhoto(data) {
+      shopPhotoData = data || '';
+      const img = $('shopPhotoPreview');
+      img.hidden = !shopPhotoData;
+      if (shopPhotoData) img.src = shopPhotoData; else img.removeAttribute('src');
+      $('shopPhotoHint').hidden = !!shopPhotoData;
+      $('shopPhotoRemove').hidden = !shopPhotoData;
+    }
+    function shopCompressImage(file) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file), img = new Image();
+        img.onload = () => {
+          const s = Math.min(1, 720 / Math.max(img.width, img.height)), w = Math.round(img.width * s), h = Math.round(img.height * s);
+          const c = document.createElement('canvas'); c.width = w; c.height = h;
+          const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(img, 0, 0, w, h);
+          URL.revokeObjectURL(url); resolve(c.toDataURL('image/jpeg', .78));
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('No se pudo leer la imagen')) };
+        img.src = url;
+      });
+    }
+
+    function openShopModal(p) {
+      $('shopForm').reset(); $('shopForm').dataset.editId = p?.id || '';
+      $('shopName').value = p?.name || ''; $('shopPrice').value = p?.price ?? ''; $('shopCurrency').value = p?.currency || 'ARS';
+      $('shopLink').value = p?.link || ''; $('shopStore').value = p?.store || '';
+      $('shopCategory').value = p?.category || (shopCategory !== 'all' ? shopCategory : '');
+      $('shopPriority').value = p?.priority || 'medium'; $('shopDescription').value = p?.description || '';
+      setShopPhoto(p?.photo || '');
+      const cats = [...new Set([...SHOP_DEFAULT_CATEGORIES, ...state.wishlist.map(x => x.category)])];
+      $('shopCategoryOptions').innerHTML = cats.map(c => '<option value="' + esc(c) + '">').join('');
+      $('shopModalTitle').textContent = p ? 'Editar producto' : 'Nuevo producto';
+      $('shopModalSubtitle').textContent = p ? 'Actualizá los datos del producto.' : 'Guardá algo que quieras comprar.';
+      $('shopModalBackdrop').classList.add('open'); setTimeout(() => $('shopName').focus(), 80);
+    }
+
+    $('newShopBtn').onclick = () => openShopModal();
+    $('closeShopModal').onclick = $('cancelShopModal').onclick = () => closeModal('shopModalBackdrop');
+    $('shopModalBackdrop').addEventListener('click', e => { if (e.target === $('shopModalBackdrop')) closeModal('shopModalBackdrop') });
+    $('shopPhotoDrop').onclick = $('shopPhotoChoose').onclick = () => $('shopPhotoInput').click();
+    $('shopPhotoRemove').onclick = () => setShopPhoto('');
+    $('shopPhotoInput').onchange = async e => {
+      const file = e.target.files?.[0]; e.target.value = '';
+      if (!file) return;
+      if (!file.type.startsWith('image/')) { toast('Elegí un archivo de imagen.'); return }
+      if (file.size > 20 * 1024 * 1024) { toast('La imagen supera los 20 MB.'); return }
+      try { setShopPhoto(await shopCompressImage(file)) } catch (err) { toast(err.message) }
+    };
+
+    $('shopForm').onsubmit = e => {
+      e.preventDefault();
+      const id = e.currentTarget.dataset.editId, name = $('shopName').value.trim(), price = Number($('shopPrice').value), category = $('shopCategory').value.trim();
+      if (!name || !(price > 0) || !category) { toast('Completá nombre, precio y categoría.'); return }
+      const link = shopNormalizeUrl($('shopLink').value);
+      if (link === null) { toast('El link de compra no es válido.'); return }
+      const existing = state.wishlist.find(p => p.id === id);
+      const item = { id: id || crypto.randomUUID(), name, price: Math.round(price * 100) / 100, currency: $('shopCurrency').value, link, store: $('shopStore').value.trim(), category, priority: $('shopPriority').value, description: $('shopDescription').value.trim(), photo: shopPhotoData, bought: existing?.bought || false, boughtAt: existing?.boughtAt || null, createdAt: existing?.createdAt || new Date().toISOString(), updatedAt: new Date().toISOString() };
+      if (existing) state.wishlist = state.wishlist.map(p => p.id === id ? item : p); else state.wishlist.push(item);
+      closeModal('shopModalBackdrop'); save(); renderShop(); toast(existing ? 'Producto actualizado' : 'Producto agregado a tu wishlist');
+    };
+
+    $('shopGrid').addEventListener('click', e => {
+      if (e.target.closest('#shopClearFilters')) {
+        shopCategory = 'all'; $('shopSearch').value = ''; $('shopMinPrice').value = ''; $('shopMaxPrice').value = ''; $('shopCurrencyFilter').value = 'all'; $('shopStatusFilter').value = 'all'; renderShop(); return;
+      }
+      const t = e.target.closest('[data-shop-edit],[data-shop-bought],[data-shop-delete]'); if (!t) return;
+      const id = t.dataset.shopEdit || t.dataset.shopBought || t.dataset.shopDelete, p = state.wishlist.find(x => x.id === id); if (!p) return;
+      if (t.hasAttribute('data-shop-edit')) openShopModal(p);
+      else if (t.hasAttribute('data-shop-bought')) { p.bought = !p.bought; p.boughtAt = p.bought ? new Date().toISOString() : null; save(); renderShop(); toast(p.bought ? 'Marcado como comprado' : 'Vuelve a pendientes') }
+      else if (confirm('¿Eliminar “' + p.name + '”?')) { state.wishlist = state.wishlist.filter(x => x.id !== id); save(); renderShop(); toast('Producto eliminado') }
+    });
+    $('shopCategoryPills').addEventListener('click', e => { const b = e.target.closest('[data-shop-cat]'); if (!b) return; shopCategory = b.dataset.shopCat; renderShop() });
+    ['shopSearch', 'shopMinPrice', 'shopMaxPrice'].forEach(id => $(id).addEventListener('input', renderShop));
+    ['shopCurrencyFilter', 'shopStatusFilter', 'shopSort'].forEach(id => $(id).addEventListener('change', renderShop));
+    renderShop();
     renderAll();
     renderTasks();
     restoreCalendarPersistence();
@@ -5701,7 +6223,7 @@
         });
       }
 
-      const views = ['homeView', 'financeView', 'tasksView', 'calendarView', 'mailView', 'placeholderView'];
+      const views = ['homeView', 'financeView', 'tasksView', 'calendarView', 'mailView', 'shopView', 'placeholderView'];
       const activeView = () => views.map(id => document.getElementById(id)).find(v => v && !v.hidden);
       const afterPaint = fn => requestAnimationFrame(() => requestAnimationFrame(fn));
 
