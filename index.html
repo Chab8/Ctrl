@@ -3781,6 +3781,50 @@
       opacity: .35;
       cursor: default
     }
+
+    /* Mail */
+    .mail-layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px;align-items:start}
+    .mail-folders{padding:12px;display:flex;flex-direction:column;gap:5px}
+    .mail-folder{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;border-radius:9px;padding:11px 12px;text-align:left;color:var(--muted);cursor:pointer;font:inherit}
+    .mail-folder:hover,.mail-folder.active{background:var(--surface-2);color:var(--text)}
+    .mail-folder.active{font-weight:700}
+    .mail-folder svg{width:17px;height:17px;flex-shrink:0}
+    .mail-folder-count{margin-left:auto;font-size:11px}
+    .mail-main{min-width:0;overflow:hidden}
+    .mail-toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:16px}
+    .mail-search{display:flex;align-items:center;gap:8px;flex:1;min-width:180px;border:1px solid var(--line);border-radius:10px;padding:0 12px;background:var(--surface)}
+    .mail-search input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:var(--text);padding:11px 0;font:inherit}
+    .mail-status{font-size:12px;color:var(--muted);margin:0 0 12px}
+    .mail-list{display:flex;flex-direction:column}
+    .mail-row{display:grid;grid-template-columns:28px minmax(110px,170px) minmax(0,1fr) 72px;gap:10px;align-items:center;width:100%;text-align:left;padding:15px 14px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--text);cursor:pointer}
+    .mail-row:hover{background:var(--surface-2)}
+    .mail-row.unread{background:color-mix(in srgb,var(--surface-2) 45%,transparent)}
+    .mail-row.unread .mail-sender,.mail-row.unread .mail-subject{font-weight:750}
+    .mail-star{border:0;background:transparent;color:var(--muted);cursor:pointer;padding:4px;font-size:17px}
+    .mail-star.starred{color:#b18c55}
+    .mail-sender,.mail-subject{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .mail-sender{font-size:13px}.mail-snippet{font-size:12px;color:var(--muted);font-weight:400}
+    .mail-time{font-size:11px;color:var(--muted);text-align:right;white-space:nowrap}
+    .mail-connect{max-width:600px;margin:35px auto;text-align:center;padding:34px}
+    .mail-connect-icon{width:56px;height:56px;display:grid;place-items:center;border-radius:17px;background:var(--surface-2);margin:0 auto 18px}
+    .mail-connect-icon svg{width:28px;height:28px}
+    .mail-detail{padding:22px}
+    .mail-detail-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:22px}
+    .mail-detail-title{font-size:22px;font-weight:700;line-height:1.3;margin:0 0 18px;overflow-wrap:anywhere}
+    .mail-detail-meta{display:flex;gap:12px;align-items:flex-start;color:var(--muted);font-size:12px;margin-bottom:20px}
+    .mail-detail-meta strong{display:block;color:var(--text);font-size:13px;margin-bottom:3px}
+    .mail-body{min-height:180px;border-top:1px solid var(--line);padding:24px 0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.7}
+    .mail-compose-backdrop{position:fixed;inset:0;background:#1115;z-index:1000;display:none;align-items:center;justify-content:center;padding:18px}
+    .mail-compose-backdrop.open{display:flex}
+    .mail-compose{width:min(680px,100%);max-height:90vh;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:0 24px 80px #0002}
+    .mail-compose h2{font-size:20px;margin:0 0 18px}
+    .mail-compose label{display:block;font-size:12px;color:var(--muted);margin:12px 0 5px}
+    .mail-compose input,.mail-compose textarea{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--text);padding:11px;font:inherit}
+    .mail-compose textarea{min-height:190px;resize:vertical}
+    .mail-compose-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+    .mail-empty{padding:44px 18px;text-align:center;color:var(--muted);font-size:13px}
+    .mail-empty svg{width:28px;height:28px;margin-bottom:12px;opacity:.65}
+    @media(max-width:800px){.mail-layout{grid-template-columns:1fr}.mail-folders{display:flex;flex-direction:row;overflow:auto;padding:8px;gap:3px}.mail-folder{white-space:nowrap;width:auto;padding:9px}.mail-row{grid-template-columns:22px minmax(80px,115px) minmax(0,1fr) 48px;gap:7px;padding:13px 8px}.mail-time{font-size:10px}.mail-detail{padding:16px}.mail-detail-title{font-size:19px}}
   </style>
 </head>
 
@@ -3813,6 +3857,7 @@
             <rect x="3" y="5" width="18" height="16" rx="3" />
             <path d="M16 3v4M8 3v4M3 10h18" />
           </svg>Calendario</button>
+        <button class="nav-item" data-page="mail"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>Mail</button>
         <button class="nav-item" data-page="inbox"><svg viewBox="0 0 24 24">
             <path d="M4 4h16v16H4z" />
             <path d="M4 13h4l2 3h4l2-3h4" />
@@ -4146,6 +4191,42 @@
         <div class="footer-note">Los eventos se sincronizan con Google Calendar y se muestran en tu horario local.</div>
       </section>
 
+      <section id="mailView" class="view" hidden>
+        <div class="page-head">
+          <div><div class="eyebrow">COMUNICACIÓN</div><h1>Mail<span>.</span></h1><p>Tu correo de Gmail, integrado en Ctrl.</p></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="secondary" id="mailRefreshBtn"><i data-lucide="refresh-cw"></i> Actualizar</button><button class="primary" id="mailComposeBtn"><i data-lucide="square-pen"></i> Redactar</button></div>
+        </div>
+        <div class="card mail-connect" id="mailConnectCard">
+          <div class="mail-connect-icon"><i data-lucide="mail"></i></div>
+          <h2 style="margin:0 0 8px">Conectá tu Gmail</h2>
+          <p class="card-sub" style="max-width:430px;margin:0 auto 20px">Autorizá a Ctrl para leer, organizar y enviar correos desde tu cuenta de Google. Podés revocar el acceso cuando quieras.</p>
+          <button class="primary" id="connectGmailBtn"><i data-lucide="mail"></i> Conectar con Google</button>
+          <p class="card-sub" style="font-size:11px;margin-top:14px">Ctrl solicitará permisos de correo para mostrar tu inbox y enviar mensajes.</p>
+        </div>
+        <div id="mailWorkspace" hidden>
+          <div class="mail-layout">
+            <aside class="card mail-folders" aria-label="Carpetas de correo">
+              <button class="mail-folder active" data-mail-folder="INBOX"><i data-lucide="inbox"></i> Recibidos <span class="mail-folder-count" id="mailUnreadCount"></span></button>
+              <button class="mail-folder" data-mail-folder="STARRED"><i data-lucide="star"></i> Destacados</button>
+              <button class="mail-folder" data-mail-folder="SENT"><i data-lucide="send"></i> Enviados</button>
+              <button class="mail-folder" data-mail-folder="DRAFT"><i data-lucide="file-pen-line"></i> Borradores</button>
+              <button class="mail-folder" data-mail-folder="IMPORTANT"><i data-lucide="bookmark"></i> Importantes</button>
+              <button class="mail-folder" data-mail-folder="TRASH"><i data-lucide="trash-2"></i> Papelera</button>
+              <button class="mail-folder" id="disconnectGmailBtn"><i data-lucide="log-out"></i> Desconectar Gmail</button>
+            </aside>
+            <div class="card mail-main">
+              <div class="mail-toolbar" style="padding:14px 14px 0">
+                <label class="mail-search"><i data-lucide="search"></i><input id="mailSearchInput" type="search" placeholder="Buscar correos…"></label>
+                <button class="secondary" id="mailSearchBtn">Buscar</button>
+              </div>
+              <p class="mail-status" id="mailConnectionStatus" style="padding:0 14px">Conectando con Gmail…</p>
+              <div id="mailList" class="mail-list"><div class="mail-empty">Tus correos aparecerán acá.</div></div>
+              <div id="mailDetail" class="mail-detail" hidden></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="placeholderView" class="view" hidden>
         <div class="page-head">
           <div>
@@ -4388,7 +4469,19 @@
           type="button" class="primary" id="confirmMpImport" disabled>Importar movimientos ✓</button></div>
     </div>
   </div>
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="mail-compose-backdrop" id="gmailComposeBackdrop" role="dialog" aria-modal="true" aria-label="Redactar correo">
+    <form class="mail-compose" id="gmailComposeForm">
+      <div style="display:flex;align-items:center;gap:10px"><h2 style="flex:1">Nuevo mensaje</h2><button type="button" class="icon-btn" id="gmailCloseCompose" aria-label="Cerrar">×</button></div>
+      <label for="gmailTo">Para</label><input id="gmailTo" type="text" autocomplete="email" required placeholder="nombre@ejemplo.com">
+      <label for="gmailCc">CC</label><input id="gmailCc" type="text" placeholder="Opcional">
+      <label for="gmailBcc">CCO</label><input id="gmailBcc" type="text" placeholder="Opcional">
+      <label for="gmailSubject">Asunto</label><input id="gmailSubject" type="text" placeholder="Asunto del correo">
+      <label for="gmailBody">Mensaje</label><textarea id="gmailBody" placeholder="Escribí tu mensaje…"></textarea>
+      <div class="mail-compose-actions"><button type="button" class="secondary" id="gmailCancelCompose">Cancelar</button><button type="submit" class="primary" id="gmailSendBtn"><i data-lucide="send"></i> Enviar</button></div>
+    </form>
+  </div>
+\n  <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script>
@@ -4419,7 +4512,7 @@
     }
     function totals(items) { return { income: sum(items, 'income'), expense: sum(items, 'expense'), investment: sum(items, 'investment') } }
     function moneyTotal(t) { return fmt(t.amount, t.currency || 'ARS') }
-    function setPage(page) { const isHome = page === 'home', isFinance = page === 'finance', isCalendar = page === 'calendar', isTasks = page === 'tasks'; $('homeView').hidden = !isHome; $('financeView').hidden = !isFinance; $('calendarView').hidden = !isCalendar; $('tasksView').hidden = !isTasks; $('placeholderView').hidden = isHome || isFinance || isCalendar || isTasks; $('placeholderTitle').textContent = ({ tasks: 'Tareas', calendar: 'Calendario', inbox: 'Inbox', projects: 'Proyectos' }[page] || 'Sección') + '.'; $('crumbCurrent').textContent = isHome ? 'Home' : isFinance ? 'Finanzas' : page[0].toUpperCase() + page.slice(1); document.querySelectorAll('[data-page]').forEach(b => b.classList.toggle('active', b.dataset.page === page)); window.scrollTo({ top: 0, behavior: 'smooth' }); if (isFinance) renderAll(); if (isTasks) renderTasks() }
+    function setPage(page) { const isHome = page === 'home', isFinance = page === 'finance', isCalendar = page === 'calendar', isTasks = page === 'tasks', isMail = page === 'mail'; $('homeView').hidden = !isHome; $('financeView').hidden = !isFinance; $('calendarView').hidden = !isCalendar; $('tasksView').hidden = !isTasks; $('mailView').hidden = !isMail; $('placeholderView').hidden = isHome || isFinance || isCalendar || isTasks || isMail; $('placeholderTitle').textContent = ({ tasks: 'Tareas', calendar: 'Calendario', inbox: 'Inbox', projects: 'Proyectos' }[page] || 'Sección') + '.'; $('crumbCurrent').textContent = isHome ? 'Home' : isFinance ? 'Finanzas' : isMail ? 'Mail' : page[0].toUpperCase() + page.slice(1); document.querySelectorAll('[data-page]').forEach(b => b.classList.toggle('active', b.dataset.page === page)); window.scrollTo({ top: 0, behavior: 'smooth' }); if (isFinance) renderAll(); if (isTasks) renderTasks(); if (isMail && gmailAccessToken && !gmailMessages.length) loadGmailMessages() }
 
     const GOOGLE_CLIENT_ID = '255712569055-lh0fvi39j506fd9f6ube4cmo1s1p8im2.apps.googleusercontent.com';
     const GOOGLE_CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events';
@@ -4455,7 +4548,26 @@
     document.addEventListener('click', e => { if (!e.target.closest('.calendar-toolbar-actions')) $('calendarOverflowMenu').hidden = true });
     $('calendarEventForm').onsubmit = async e => { e.preventDefault(); if (!googleAccessToken) { toast('Volvé a conectar Google Calendar.'); return } const calendarId = $('eventCalendar').value, date = $('eventDate').value, title = $('eventSummary').value.trim(), allDay = $('eventAllDay').checked, startTime = $('eventStart').value, endTime = $('eventEnd').value; if (!calendarId || !date || !title) { toast('Completá el título, calendario y fecha.'); return } if (!allDay && (!startTime || !endTime || endTime <= startTime)) { toast('La hora de finalización debe ser posterior a la de inicio.'); return } const payload = { summary: title }; if (allDay) { const end = new Date(date + 'T12:00:00'); end.setDate(end.getDate() + 1); payload.start = { date }; payload.end = { date: dateKey(end) } } else { payload.start = { dateTime: eventDateTime(date, startTime) }; payload.end = { dateTime: eventDateTime(date, endTime) } } const location = $('eventLocation').value.trim(), description = $('eventDescription').value.trim(), colorId = $('eventColor').value; if (location) payload.location = location; if (description) payload.description = description; if (colorId) payload.colorId = colorId; const button = $('saveCalendarEventBtn'); button.disabled = true; button.textContent = 'Guardando…'; try { const created = await fetch('https://www.googleapis.com/calendar/v3/calendars/' + encodeURIComponent(calendarId) + '/events', { method: 'POST', headers: { Authorization: 'Bearer ' + googleAccessToken, 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); if (!created.ok) { let detail = 'Error ' + created.status; try { const data = await created.json(); detail = data.error?.message || detail } catch { } throw new Error(detail) } await created.json(); closeModal('calendarEventBackdrop'); calendarSelectedDate = date; calendarMonth = new Date(Number(date.slice(0, 4)), Number(date.slice(5, 7)) - 1, 1); saveCalendarPreferences(); await loadGoogleCalendarEvents(); renderCalendar(); toast('Evento guardado en Google Calendar') } catch (error) { console.error(error); toast('No se pudo crear el evento: ' + error.message) } finally { button.disabled = false; button.textContent = 'Crear evento ›' } };
     function disconnectGoogleCalendar() { $('connectGoogleBtn').hidden = false; $('connectGoogleBtn').textContent = 'Conectar Google'; $('connectGoogleBtn').disabled = false; googleAccessToken = null; localStorage.removeItem('ctrl_google_calendar_connected'); localStorage.removeItem(CALENDAR_STORAGE_KEY); calendarSavedState = { months: {} }; try { sessionStorage.removeItem('ctrl_google_calendar_token') } catch { }; googleCalendars = []; calendarEvents = []; $('calendarMainCard').hidden = true; $('calendarConnectCard').hidden = false; $('connectGoogleBtn').textContent = 'Conectar Google'; $('connectGoogleBtn').disabled = false; $('calendarEventsList').innerHTML = '<div class="empty">Conectá Google Calendar para ver tus eventos.</div>'; toast('Se desconectó Google Calendar de Ctrl. Para revocar el permiso por completo, hacelo desde tu cuenta de Google.') }
-    function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.timer); toast.timer = setTimeout(() => t.classList.remove('show'), 2600) }
+
+    // Gmail — acceso directo mediante OAuth de Google y Gmail API.
+    const GMAIL_SCOPE = 'https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/gmail.send';
+    let gmailTokenClient = null, gmailAccessToken = null, gmailFolder = 'INBOX', gmailMessages = [], gmailCurrentMessage = null, gmailBusy = false, gmailSearchTimer = null;
+    function gmailAuthReady(){return !!(window.google&&google.accounts&&google.accounts.oauth2)}
+    function connectGmail(){if(!gmailAuthReady()){toast('Google todavía está cargando. Esperá unos segundos e intentá de nuevo.');return}if(!gmailTokenClient){gmailTokenClient=google.accounts.oauth2.initTokenClient({client_id:GOOGLE_CLIENT_ID,scope:GMAIL_SCOPE,callback:async response=>{if(response.error||!response.access_token){toast('No se pudo autorizar Gmail: '+(response.error||'sin token'));return}gmailAccessToken=response.access_token;try{sessionStorage.setItem('ctrl_gmail_token',JSON.stringify({accessToken:response.access_token,expiresAt:Date.now()+(Number(response.expires_in||3600)*1000)-60000}))}catch{}$('mailConnectCard').hidden=true;$('mailWorkspace').hidden=false;await loadGmailMessages()}})}gmailTokenClient.requestAccessToken({prompt:gmailAccessToken?'':'consent'})}
+    async function gmailApi(path,options={}){if(!gmailAccessToken)throw new Error('Conectá Gmail para continuar.');const response=await fetch('https://gmail.googleapis.com/gmail/v1/users/me/'+path,{...options,headers:{Authorization:'Bearer '+gmailAccessToken,...(options.body?{'Content-Type':'application/json'}:{}),...(options.headers||{})}});if(!response.ok){let detail='Error '+response.status;try{const data=await response.json();detail=data.error?.message||detail}catch{}if(response.status===401){gmailAccessToken=null;try{sessionStorage.removeItem('ctrl_gmail_token')}catch{}}throw new Error(detail)}return response.status===204?null:response.json()}
+    function gmailDecode(data){if(!data)return'';const normalized=data.replace(/-/g,'+').replace(/_/g,'/');try{const bytes=Uint8Array.from(atob(normalized),c=>c.charCodeAt(0));return new TextDecoder().decode(bytes)}catch{return''}}
+    function gmailEncode(text){const bytes=new TextEncoder().encode(text);let binary='';bytes.forEach(b=>binary+=String.fromCharCode(b));return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+    function gmailHeader(message,name){return(message.payload?.headers||[]).find(h=>h.name?.toLowerCase()===name.toLowerCase())?.value||''}
+    function gmailBody(payload){if(!payload)return'';if(payload.mimeType==='text/plain'&&payload.body?.data)return gmailDecode(payload.body.data);if(payload.parts){for(const p of payload.parts){const found=gmailBody(p);if(found)return found}}if(payload.body?.data)return gmailDecode(payload.body.data);return''}
+    function gmailDate(ms){const d=new Date(Number(ms));if(Number.isNaN(d.getTime()))return'';const now=new Date();return d.toDateString()===now.toDateString()?d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}):d.toLocaleDateString('es-AR',{day:'2-digit',month:'short'})}
+    function gmailFromLabel(from){const match=from.match(/^"?([^"<]+)"?\s*<[^>]+>$/);return(match?match[1].trim():from).replace(/^"|"$/g,'')||from}
+    async function loadGmailMessages(queryOverride){if(!gmailAccessToken||gmailBusy)return;gmailBusy=true;$('mailConnectionStatus').textContent='Actualizando correos…';$('mailList').innerHTML='<div class="mail-empty">Cargando correos…</div>';$('mailDetail').hidden=true;$('mailList').hidden=false;try{const query=queryOverride!==undefined?queryOverride:$('mailSearchInput').value.trim();const params=new URLSearchParams({maxResults:'35'});if(query)params.set('q',query);else if(gmailFolder==='INBOX')params.set('labelIds','INBOX');else if(gmailFolder==='STARRED')params.set('labelIds','STARRED');else if(gmailFolder==='SENT')params.set('labelIds','SENT');else if(gmailFolder==='DRAFT')params.set('labelIds','DRAFT');else if(gmailFolder==='IMPORTANT')params.set('labelIds','IMPORTANT');else if(gmailFolder==='TRASH')params.set('labelIds','TRASH');const list=await gmailApi('messages?'+params.toString());const raw=list.messages||[];gmailMessages=await Promise.all(raw.map(async item=>{try{return await gmailApi('messages/'+encodeURIComponent(item.id)+'?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date')}catch{return null}}));gmailMessages=gmailMessages.filter(Boolean);renderGmailMessages();$('mailConnectionStatus').textContent=gmailMessages.length+' correos'+(query?' · resultados de búsqueda':'');const unread=gmailMessages.filter(m=>m.labelIds?.includes('UNREAD')).length;$('mailUnreadCount').textContent=unread?String(unread):''}catch(error){$('mailConnectionStatus').textContent='No se pudo cargar Gmail';$('mailList').innerHTML='<div class="mail-empty">'+esc(error.message)+'<br><br>Verificá que Gmail API esté habilitada en el proyecto de Google Cloud y que el acceso esté autorizado.</div>';if(!gmailAccessToken){$('mailConnectCard').hidden=false;$('mailWorkspace').hidden=true}}finally{gmailBusy=false}}
+    function renderGmailMessages(){if(!gmailMessages.length){$('mailList').innerHTML='<div class="mail-empty">No hay correos en esta carpeta.</div>';return}$('mailList').innerHTML=gmailMessages.map(m=>{const from=gmailHeader(m,'From'),subject=gmailHeader(m,'Subject')||'(Sin asunto)',snippet=m.snippet||'',unread=m.labelIds?.includes('UNREAD'),starred=m.labelIds?.includes('STARRED');return '<div class="mail-row '+(unread?'unread':'')+'"><button class="mail-star '+(starred?'starred':'')+'" data-gmail-star="'+esc(m.id)+'" aria-label="'+(starred?'Quitar destacado':'Destacar')+'">'+(starred?'★':'☆')+'</button><button class="mail-sender" data-gmail-open="'+esc(m.id)+'" style="border:0;background:none;text-align:left;color:inherit;cursor:pointer;min-width:0">'+esc(gmailFromLabel(from))+'</button><button data-gmail-open="'+esc(m.id)+'" style="border:0;background:none;text-align:left;color:inherit;cursor:pointer;min-width:0;overflow:hidden"><div class="mail-subject">'+esc(subject)+'</div><div class="mail-snippet">'+esc(snippet)+'</div></button><span class="mail-time">'+esc(gmailDate(m.internalDate))+'</span></div>'}).join('');$('mailList').querySelectorAll('[data-gmail-open]').forEach(b=>b.onclick=()=>openGmailMessage(b.dataset.gmailOpen));$('mailList').querySelectorAll('[data-gmail-star]').forEach(b=>b.onclick=async()=>{const m=gmailMessages.find(x=>x.id===b.dataset.gmailStar);if(!m)return;try{await gmailApi('messages/'+encodeURIComponent(m.id)+'/modify',{method:'POST',body:JSON.stringify(m.labelIds?.includes('STARRED')?{removeLabelIds:['STARRED']}:{addLabelIds:['STARRED']})});await loadGmailMessages()}catch(e){toast('No se pudo actualizar el destacado: '+e.message)}});if(window.lucide)lucide.createIcons()}
+    async function openGmailMessage(id){try{const m=await gmailApi('messages/'+encodeURIComponent(id)+'?format=full');gmailCurrentMessage=m;const headers=m.payload?.headers||[],from=gmailHeader(m,'From'),to=gmailHeader(m,'To'),subject=gmailHeader(m,'Subject')||'(Sin asunto)',date=gmailHeader(m,'Date');const body=gmailBody(m.payload);$('mailList').hidden=true;$('mailDetail').hidden=false;$('mailDetail').innerHTML='<div class="mail-detail-head"><button class="secondary" id="gmailBackBtn"><i data-lucide="arrow-left"></i> Volver</button><span style="flex:1"></span><button class="secondary" id="gmailArchiveBtn"><i data-lucide="archive"></i> Archivar</button><button class="secondary" id="gmailDeleteBtn"><i data-lucide="trash-2"></i></button></div><h2 class="mail-detail-title">'+esc(subject)+'</h2><div class="mail-detail-meta"><i data-lucide="circle-user-round"></i><div><strong>'+esc(gmailFromLabel(from))+'</strong><div>'+esc(from)+'</div><div>Para: '+esc(to||'vos')+' · '+esc(date)+'</div></div></div><div class="mail-body">'+esc(body||'No se encontró una versión de texto de este correo.')+'</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="primary" id="gmailReplyBtn"><i data-lucide="reply"></i> Responder</button><button class="secondary" id="gmailForwardBtn"><i data-lucide="forward"></i> Reenviar</button></div>';if(window.lucide)lucide.createIcons();$('gmailBackBtn').onclick=()=>{$('mailDetail').hidden=true;$('mailList').hidden=false};$('gmailReplyBtn').onclick=()=>openGmailCompose({to:from.replace(/^.*<([^>]+)>.*$/,'$1'),subject:/^re:/i.test(subject)?subject:'Re: '+subject,body:'\n\n--- Mensaje original ---\n'+body,threadId:m.threadId,replyTo:gmailHeader(m,'Message-ID')});$('gmailForwardBtn').onclick=()=>openGmailCompose({subject:/^fwd?:/i.test(subject)?subject:'Fwd: '+subject,body:'\n\n--- Mensaje reenviado ---\nDe: '+from+'\nFecha: '+date+'\nAsunto: '+subject+'\n\n'+body});$('gmailArchiveBtn').onclick=async()=>{try{await gmailApi('messages/'+encodeURIComponent(id)+'/modify',{method:'POST',body:JSON.stringify({removeLabelIds:['INBOX']})});toast('Correo archivado');await loadGmailMessages()}catch(e){toast('No se pudo archivar: '+e.message)}};$('gmailDeleteBtn').onclick=async()=>{try{await gmailApi('messages/'+encodeURIComponent(id)+'/trash',{method:'POST'});toast('Correo movido a la papelera');await loadGmailMessages()}catch(e){toast('No se pudo eliminar: '+e.message)}};if(m.labelIds?.includes('UNREAD'))await gmailApi('messages/'+encodeURIComponent(id)+'/modify',{method:'POST',body:JSON.stringify({removeLabelIds:['UNREAD']})})}catch(error){toast('No se pudo abrir el correo: '+error.message)}}
+    function openGmailCompose(prefill={}){const backdrop=$('gmailComposeBackdrop');backdrop.classList.add('open');$('gmailTo').value=prefill.to||'';$('gmailCc').value=prefill.cc||'';$('gmailBcc').value=prefill.bcc||'';$('gmailSubject').value=prefill.subject||'';$('gmailBody').value=prefill.body||'';$('gmailComposeForm').dataset.threadId=prefill.threadId||'';$('gmailComposeForm').dataset.replyTo=prefill.replyTo||'';setTimeout(()=>$('gmailTo').focus(),50)}
+    async function sendGmailMessage(event){event.preventDefault();const to=$('gmailTo').value.trim(),cc=$('gmailCc').value.trim(),bcc=$('gmailBcc').value.trim(),subject=$('gmailSubject').value,body=$('gmailBody').value;if(!to){toast('Ingresá al menos un destinatario.');return}const headers=['To: '+to];if(cc)headers.push('Cc: '+cc);if(bcc)headers.push('Bcc: '+bcc);headers.push('Subject: =?UTF-8?B?'+btoa(unescape(encodeURIComponent(subject)))+'?=');const replyTo=$('gmailComposeForm').dataset.replyTo;if(replyTo){headers.push('In-Reply-To: '+replyTo,'References: '+replyTo)}headers.push('MIME-Version: 1.0','Content-Type: text/plain; charset=UTF-8','Content-Transfer-Encoding: 8bit');const raw=gmailEncode(headers.join('\r\n')+'\r\n\r\n'+body);const button=$('gmailSendBtn');button.disabled=true;button.textContent='Enviando…';try{const payload={raw};const threadId=$('gmailComposeForm').dataset.threadId;if(threadId)payload.threadId=threadId;await gmailApi('messages/send',{method:'POST',body:JSON.stringify(payload)});$('gmailComposeBackdrop').classList.remove('open');toast('Correo enviado');gmailFolder='SENT';document.querySelectorAll('[data-mail-folder]').forEach(b=>b.classList.toggle('active',b.dataset.mailFolder===gmailFolder));await loadGmailMessages()}catch(error){toast('No se pudo enviar el correo: '+error.message)}finally{button.disabled=false;button.textContent='Enviar'}}
+    function disconnectGmail(){gmailAccessToken=null;gmailMessages=[];gmailCurrentMessage=null;try{sessionStorage.removeItem('ctrl_gmail_token')}catch{}$('mailConnectCard').hidden=false;$('mailWorkspace').hidden=true;$('mailSearchInput').value='';$('mailList').innerHTML='<div class="mail-empty">Conectá Gmail para ver tus correos.</div>';toast('Gmail desconectado de Ctrl. Para revocar todos los permisos, hacelo desde tu cuenta de Google.')}
+    \n    function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.timer); toast.timer = setTimeout(() => t.classList.remove('show'), 2600) }
     /* Flujo de dinero — line chart con métricas seleccionables */
     let flowMetric = 'income', flowLastWidth = 0, flowRange = '6m', flowMonthOffset = 0;
     const FLOW_METRICS = [
@@ -4754,7 +4866,19 @@
     $('transactionSearch').oninput = renderTransactions; $('typeFilter').onchange = renderTransactions; $('periodFilter').onchange = renderTransactions; $('exportCsvBtn').onclick = exportCSV;
     $('searchBtn').onclick = () => { $('searchBackdrop').classList.add('open'); setTimeout(() => $('globalSearch').focus(), 100) }; $('closeSearch').onclick = () => closeModal('searchBackdrop'); $('searchBackdrop').addEventListener('click', e => { if (e.target === $('searchBackdrop')) closeModal('searchBackdrop') }); $('runSearch').onclick = () => { const q = $('globalSearch').value.trim(); closeModal('searchBackdrop'); setPage('finance'); $('transactionSearch').value = q; renderTransactions() }; $('globalSearch').onkeydown = e => { if (e.key === 'Enter') $('runSearch').click() }; $('notificationBtn').onclick = () => toast(state.transactions.length ? 'Todo al día. Tenés ' + state.transactions.length + ' movimientos registrados.' : 'Todavía no hay movimientos. Empezá por registrar uno en Finanzas.'); $('menuBtn').onclick = () => toast('Usá la navegación inferior para cambiar de sección.');
 
-    renderAll();
+
+    $('connectGmailBtn').onclick=connectGmail;
+    $('mailRefreshBtn').onclick=()=>loadGmailMessages();
+    $('mailComposeBtn').onclick=()=>gmailAccessToken?openGmailCompose():connectGmail();
+    $('mailSearchBtn').onclick=()=>loadGmailMessages($('mailSearchInput').value.trim());
+    $('mailSearchInput').onkeydown=e=>{if(e.key==='Enter')loadGmailMessages($('mailSearchInput').value.trim())};
+    document.querySelectorAll('[data-mail-folder]').forEach(b=>b.onclick=()=>{gmailFolder=b.dataset.mailFolder;document.querySelectorAll('[data-mail-folder]').forEach(x=>x.classList.toggle('active',x===b));$('mailSearchInput').value='';loadGmailMessages('')});
+    $('disconnectGmailBtn').onclick=disconnectGmail;
+    $('gmailComposeForm').onsubmit=sendGmailMessage;
+    $('gmailCloseCompose').onclick=$('gmailCancelCompose').onclick=()=>$('gmailComposeBackdrop').classList.remove('open');
+    $('gmailComposeBackdrop').addEventListener('click',e=>{if(e.target===$('gmailComposeBackdrop'))$('gmailComposeBackdrop').classList.remove('open')});
+    try{const savedGmail=JSON.parse(sessionStorage.getItem('ctrl_gmail_token')||'null');if(savedGmail?.accessToken&&savedGmail.expiresAt>Date.now()){gmailAccessToken=savedGmail.accessToken;$('mailConnectCard').hidden=true;$('mailWorkspace').hidden=false}}catch{}
+\n    renderAll();
     renderTasks();
     restoreCalendarPersistence();
     renderCalendar();
