@@ -67,7 +67,7 @@ thead th:first-child{border-radius:10px 0 0 10px}thead th:last-child{border-radi
 .home-brand-link:hover{opacity:.8}
 .crumb-home{appearance:none;-webkit-appearance:none;border:0;background:transparent;color:var(--muted);font:inherit;padding:0;cursor:pointer}
 .crumb-home:hover{color:var(--ink)}
-.home-activity-grid{grid-template-columns:minmax(0,1fr)}
+.home-activity-grid,.home-bottom-grid{grid-template-columns:minmax(0,1fr)}
 .csv-quiet{font-size:10px;padding:6px 8px;opacity:.65;border-color:transparent}
 .csv-quiet:hover{opacity:1;border-color:var(--line)}
 .finance-chart-card{margin-top:16px;padding:24px}
@@ -118,7 +118,7 @@ thead th:first-child{border-radius:10px 0 0 10px}thead th:last-child{border-radi
 <div class="grid section-grid home-activity-grid">
 <div class="card"><div class="card-head"><div><div class="card-title">Actividad reciente</div><div class="card-sub">Últimos movimientos registrados</div></div><button class="text-action" data-goto="finance">Ver todo ↗</button></div><div class="activity-list" id="homeActivity"></div></div>
 </div>
-<div class="grid bottom-grid">
+<div class="grid bottom-grid home-bottom-grid">
 <div class="card"><div class="card-head"><div><div class="card-title">Tu foco de hoy</div><div class="card-sub">Un espacio para lo importante</div></div><span class="category-chip">Hoy</span></div><div class="task-list" id="homeTasks"><div class="task"><button class="check" aria-label="Completar tarea" data-task="0"></button><div class="task-text"><strong>Revisar gastos de la semana</strong><small>Finanzas · 10 min</small></div><span class="priority">Prioridad</span></div><div class="task"><button class="check" aria-label="Completar tarea" data-task="1"></button><div class="task-text"><strong>Actualizar el seguimiento de inversiones</strong><small>Finanzas · 15 min</small></div><span class="priority low">Personal</span></div><div class="task"><button class="check" aria-label="Completar tarea" data-task="2"></button><div class="task-text"><strong>Definir las prioridades del día</strong><small>Planificación · 5 min</small></div><span class="priority low">Rápida</span></div></div></div>
 </div><div class="footer-note">Ctrl · Tu centro de control personal</div>
 </section>
@@ -137,7 +137,7 @@ thead th:first-child{border-radius:10px 0 0 10px}thead th:last-child{border-radi
 <div class="card"><div class="card-head"><div><div class="card-title">Presupuestos</div><div class="card-sub">Definí cuánto querés gastar por categoría</div></div><button class="icon-btn" id="addBudgetBtn" aria-label="Agregar presupuesto" style="width:31px;height:31px">+</button></div><div id="financeBudgets"></div><div class="helper-note">Los presupuestos son límites orientativos. Ctrl calcula el consumo usando los gastos registrados en el período actual.</div></div>
 <div class="card"><div class="card-head"><div><div class="card-title">Cartera de inversiones</div><div class="card-sub">Valores que cargaste manualmente</div></div><button class="text-action" id="addInvestmentBtn">+ Agregar</button></div><div id="portfolioList"></div><div class="helper-note">Los valores y rendimientos son los que ingreses. Las cotizaciones automáticas se conectarán más adelante a una fuente de datos.</div></div>
 </div></div>
-<div class="card"><div class="card-head"><div><div class="card-title">Evolución mensual</div><div class="card-sub">Compará los ingresos y gastos de los últimos seis meses</div></div><span class="category-chip">ARS · registros manuales</span></div><div class="chart-wrap" id="financeChart" style="height:220px"></div><div class="legend"><span><i></i>Ingresos</span><span><i></i>Gastos</span></div></div>
+<div class="card finance-chart-card"><div class="card-head"><div><div class="card-title">Flujo de dinero</div><div class="card-sub">Ingresos y gastos · últimos seis meses</div></div><span class="category-chip">ARS · registros manuales</span></div><div class="chart-wrap" id="financeChart" style="height:240px"></div><div class="legend"><span><i></i>Ingresos</span><span><i></i>Gastos</span></div></div>
 <div class="footer-note">Tus datos se guardan en este dispositivo. Exportá un respaldo para conservarlos.</div>
 </section>
 
