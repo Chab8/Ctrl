@@ -295,8 +295,8 @@ function parseCsvRows(text,delimiter){
       if(quoted&&text[i+1]==='"'){cell+='"';i++}
       else quoted=!quoted;
     }else if(ch===delimiter&&!quoted){row.push(cell);cell=''}
-    else if((ch==='\\n'||ch==='\\r')&&!quoted){
-      if(ch==='\\r'&&text[i+1]==='\\n')i++;
+    else if((ch==='\n'||ch==='\r')&&!quoted){
+      if(ch==='\r'&&text[i+1]==='\n')i++;
       row.push(cell);cell='';
       if(row.some(v=>String(v).trim()!==''))rows.push(row);
       row=[];
@@ -306,10 +306,9 @@ function parseCsvRows(text,delimiter){
   return rows;
 }
 function detectCsvDelimiter(headerLine){
-  const candidates=['; ',',','\\t'];
+  const candidates=[';',',','\t'];
   let best=';',bestCount=-1;
-  for(const candidate of candidates){
-    const delimiter=candidate==='; '?';':candidate;
+  for(const delimiter of candidates){
     let quoted=false,count=0;
     for(let i=0;i<headerLine.length;i++){const ch=headerLine[i];if(ch==='"')quoted=!quoted;else if(ch===delimiter&&!quoted)count++}
     if(count>bestCount){best=delimiter;bestCount=count}
@@ -317,19 +316,19 @@ function detectCsvDelimiter(headerLine){
   return best;
 }
 function importNumber(value){
-  let s=String(value??'').trim().replace(/\\s/g,'');
+  let s=String(value??'').trim().replace(/\s/g,'');
   if(!s)return NaN;
   if(s.includes(',')&&s.includes('.')){
-    if(s.lastIndexOf(',')>s.lastIndexOf('.'))s=s.replace(/\\./g,'').replace(',','.');
+    if(s.lastIndexOf(',')>s.lastIndexOf('.'))s=s.replace(/\./g,'').replace(',','.');
     else s=s.replace(/,/g,'');
   }else if(s.includes(','))s=s.replace(',','.');
   const n=Number(s);return Number.isFinite(n)?n:NaN;
 }
 function importDate(value){
   const s=String(value??'').trim();
-  const iso=s.match(/^(\\d{4})-(\\d{2})-(\\d{2})/);
+  const iso=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
   if(iso)return iso[1]+'-'+iso[2]+'-'+iso[3];
-  const local=s.match(/^(\\d{1,2})[\\/.-](\\d{1,2})[\\/.-](\\d{4})$/);
+  const local=s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);
   if(local)return local[3]+'-'+String(local[2]).padStart(2,'0')+'-'+String(local[1]).padStart(2,'0');
   const d=new Date(s);
   return Number.isNaN(d.getTime())?'':d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -337,13 +336,13 @@ function importDate(value){
 function mpField(row,headers,name){const i=headers.indexOf(name);return i<0?'':String(row[i]??'').trim()}
 function mpImportKey(parts){return 'mercadopago-csv-v1|'+parts.map(v=>encodeURIComponent(String(v??'').trim())).join('|')}
 function parseMercadoPagoCsv(text){
-  const clean=String(text||'').replace(/^\\uFEFF/,'').trim();
+  const clean=String(text||'').replace(/^\uFEFF/,'').trim();
   if(!clean)throw new Error('El archivo está vacío.');
-  const firstLine=clean.split(/\\r?\\n/,1)[0];
+  const firstLine=clean.split(/\r?\n/,1)[0];
   const delimiter=detectCsvDelimiter(firstLine);
   const rows=parseCsvRows(clean,delimiter);
   if(rows.length<2)throw new Error('El CSV no contiene movimientos para importar.');
-  const headers=rows[0].map(h=>String(h??'').replace(/^\\uFEFF/,'').trim().toUpperCase());
+  const headers=rows[0].map(h=>String(h??'').replace(/^\uFEFF/,'').trim().toUpperCase());
   const required=['SOURCE_ID','TRANSACTION_TYPE','TRANSACTION_DATE'];
   const missing=required.filter(h=>!headers.includes(h));
   if(missing.length)throw new Error('Este archivo no parece ser un reporte de Mercado Pago compatible. Faltan columnas: '+missing.join(', ')+'.');
