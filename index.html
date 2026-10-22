@@ -7545,10 +7545,23 @@
         return (r.data || '').replace(/-/g, '+').replace(/_/g, '/');
       }
       function mailFrameDoc(html, text, allowImages) {
+        const LT = '<', GT = '>';
+        const tag = (name, attrs = '') => LT + name + (attrs ? ' ' + attrs : '') + GT;
+        const close = name => LT + '/' + name + GT;
+
         const csp = "default-src 'none'; img-src data:" + (allowImages ? ' https:' : '') + "; style-src 'unsafe-inline'; font-src data:";
-        const clean = String(html || '').replace(/<(meta|base|link)\b[^>]*>/gi, '').replace(/<script[\s\S]*?<\/script>/gi, '');
-        const body = clean || '<div style="white-space:pre-wrap">' + esc(text || '(Mensaje vacío)') + '</div>';
-        return '<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="' + csp + '"><base target="_blank"><style>html,body{margin:0}body{font:14px/1.6 -apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#202124;background:#fff;padding:18px;overflow-wrap:anywhere;word-break:break-word}img{max-width:100%;height:auto}table{max-width:100%}blockquote{margin:8px 0 8px 4px;padding-left:12px;border-left:3px solid #dadce0;color:#5f6368}a{color:#1a73e8}</style></head><body>' + body + '</body></html>';
+        const clean = String(html || '')
+          .replace(/<(meta|base|link)\b[^>]*>/gi, '')
+          .replace(new RegExp(LT + 'scr' + 'ipt[\\s\\S]*?' + LT + '\\/scr' + 'ipt' + GT, 'gi'), '');
+        const body = clean || (tag('div', 'style="white-space:pre-wrap"') + esc(text || '(Mensaje vacío)') + close('div'));
+        const css = 'html,body{margin:0}body{font:14px/1.6 -apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#202124;background:#fff;padding:18px;overflow-wrap:anywhere;word-break:break-word}img{max-width:100%;height:auto}table{max-width:100%}blockquote{margin:8px 0 8px 4px;padding-left:12px;border-left:3px solid #dadce0;color:#5f6368}a{color:#1a73e8}';
+
+        return LT + '!doctype html' + GT + tag('html') + tag('head')
+          + tag('meta', 'charset="utf-8"')
+          + tag('meta', 'http-equiv="Content-Security-Policy" content="' + csp + '"')
+          + tag('base', 'target="_blank"')
+          + tag('style') + css + close('style')
+          + close('head') + tag('body') + body + close('body') + close('html');
       }
 
       window.openGmailMessage = async function (id) {
