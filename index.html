@@ -8,6 +8,12 @@
   <meta name="description" content="Ctrl — tu centro de control personal">
   <link rel="manifest" href="./manifest.json">
   <title>Ctrl</title>
+  <script>
+    try {
+      if (localStorage.getItem('ctrl.theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+      if (localStorage.getItem('ctrl.sidebar.collapsed') === '1') document.documentElement.classList.add('sb-collapsed');
+    } catch (e) { }
+  </script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap');
 
@@ -4697,6 +4703,1017 @@
         white-space: nowrap
       }
     }
+
+    /* ===== Barra lateral colapsable ===== */
+    .app {
+      transition: grid-template-columns .35s var(--ease)
+    }
+
+    .sidebar {
+      transition: width .35s var(--ease), padding .35s var(--ease)
+    }
+
+    #sidebarToggle {
+      margin-bottom: 6px
+    }
+
+    @media(min-width:701px) {
+      html.sb-collapsed .app {
+        grid-template-columns: 72px minmax(0, 1fr)
+      }
+
+      html.sb-collapsed .sidebar {
+        width: 72px;
+        padding: 20px 12px
+      }
+
+      html.sb-collapsed .home-brand-link {
+        justify-content: center;
+        padding: 3px 0 22px
+      }
+
+      html.sb-collapsed .home-brand-link>span {
+        display: none
+      }
+
+      html.sb-collapsed .nav-label {
+        font-size: 0;
+        height: 1px;
+        padding: 0 !important;
+        margin: 12px 8px;
+        background: var(--line)
+      }
+
+      html.sb-collapsed .nav-item {
+        font-size: 0;
+        gap: 0;
+        justify-content: center;
+        padding: 12px 0
+      }
+
+      html.sb-collapsed .nav-item .nav-soon,
+      html.sb-collapsed .nav-item.active:after {
+        display: none
+      }
+
+      html.sb-collapsed #sidebarToggle svg {
+        transform: rotate(180deg)
+      }
+
+      html.sb-collapsed .profile {
+        justify-content: center;
+        padding: 14px 0 2px
+      }
+
+      html.sb-collapsed .profile>div:not(.avatar) {
+        display: none
+      }
+    }
+
+    /* ===== Botón de tema ===== */
+    #themeBtn .i-sun {
+      display: none
+    }
+
+    html[data-theme="dark"] #themeBtn .i-sun {
+      display: block
+    }
+
+    html[data-theme="dark"] #themeBtn .i-moon {
+      display: none
+    }
+
+    /* ===== Modo oscuro ===== */
+    html[data-theme="dark"] {
+      --bg: #171815;
+      --paper: #1f201c;
+      --card: #262722;
+      --ink: #f1efe8;
+      --muted: #9a9b90;
+      --line: #383931;
+      --soft: #2e2f2a;
+      --surface: #262722;
+      --surface-2: #2e2f2a;
+      --text: #f1efe8;
+      --shadow: 0 2px 3px #0005, 0 14px 35px #0005;
+      color-scheme: dark
+    }
+
+    html[data-theme="dark"] .mesh {
+      opacity: .35
+    }
+
+    html[data-theme="dark"] .mesh i:nth-child(1) {
+      background: #3b4a22
+    }
+
+    html[data-theme="dark"] .mesh i:nth-child(2) {
+      background: #5a3a30
+    }
+
+    html[data-theme="dark"] .mesh i:nth-child(3) {
+      background: #28405f
+    }
+
+    /* superficies */
+    html[data-theme="dark"] .sidebar {
+      background: #1f201cc7;
+      border-color: #ffffff12
+    }
+
+    html[data-theme="dark"] .card {
+      background: #262722d1;
+      border-color: #ffffff10
+    }
+
+    html[data-theme="dark"] .card:hover {
+      border-color: #ffffff1c
+    }
+
+    html[data-theme="dark"] .card:not(.task-stat-button):hover {
+      border-color: #ffffff10 !important
+    }
+
+    html[data-theme="dark"] .modal,
+    html[data-theme="dark"] .mail-compose {
+      border-color: #ffffff14
+    }
+
+    html[data-theme="dark"] .modal-backdrop,
+    html[data-theme="dark"] .mail-compose-backdrop {
+      background: #0a0a0899
+    }
+
+    html[data-theme="dark"] .icon-btn,
+    html[data-theme="dark"] .date-pill {
+      background: #262722b0
+    }
+
+    html[data-theme="dark"] .mobile-nav {
+      background: #1f201cf2;
+      border-color: #ffffff14
+    }
+
+    html[data-theme="dark"] .mobile-nav button {
+      color: #9a9b90
+    }
+
+    /* navegación */
+    html[data-theme="dark"] .nav-item {
+      color: #a9aa9f
+    }
+
+    html[data-theme="dark"] .nav-item:hover {
+      background: #2e2f2a;
+      color: var(--ink)
+    }
+
+    html[data-theme="dark"] .nav-item.active,
+    html[data-theme="dark"] .mobile-nav button.active {
+      background: #ebe9e1;
+      color: #242522;
+      box-shadow: none
+    }
+
+    html[data-theme="dark"] .nav-item.active:after {
+      background: #4d7654;
+      box-shadow: 0 0 0 4px #4d765533
+    }
+
+    html[data-theme="dark"] .brand-mark {
+      background: var(--accent);
+      color: #243019;
+      box-shadow: 3px 3px 0 #0006
+    }
+
+    /* elementos que usaban --ink como fondo */
+    html[data-theme="dark"] .primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #243019
+    }
+
+    html[data-theme="dark"] .primary:hover {
+      background: #d4f58f
+    }
+
+    html[data-theme="dark"] .calendar-day.today .day-number,
+    html[data-theme="dark"] .flow-seg button.active,
+    html[data-theme="dark"] .shop-pill.active,
+    html[data-theme="dark"] .shop-bought-flag {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #243019
+    }
+
+    html[data-theme="dark"] .check.checked {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #243019
+    }
+
+    html[data-theme="dark"] .toast {
+      background: #ebe9e1;
+      color: #242522
+    }
+
+    html[data-theme="dark"] .balance-card {
+      border-color: #ffffff12
+    }
+
+    /* inputs */
+    html[data-theme="dark"] .search-input,
+    html[data-theme="dark"] .filter-select,
+    html[data-theme="dark"] .field input,
+    html[data-theme="dark"] .field select,
+    html[data-theme="dark"] .field textarea,
+    html[data-theme="dark"] .mail-compose input,
+    html[data-theme="dark"] .mail-compose textarea,
+    html[data-theme="dark"] input[type="date"],
+    html[data-theme="dark"] input[type="time"],
+    html[data-theme="dark"] input[type="datetime-local"],
+    html[data-theme="dark"] input[type="month"],
+    html[data-theme="dark"] input[type="week"] {
+      background: #2a2b26;
+      border-color: #3d3e36;
+      color: var(--ink);
+      color-scheme: dark
+    }
+
+    html[data-theme="dark"] input[type="date"]:hover,
+    html[data-theme="dark"] input[type="time"]:hover {
+      background: #30312b;
+      border-color: #55574b
+    }
+
+    html[data-theme="dark"] input[type="date"]:focus,
+    html[data-theme="dark"] input[type="time"]:focus,
+    html[data-theme="dark"] .mail-compose input:focus,
+    html[data-theme="dark"] .mail-compose textarea:focus {
+      background: #30312b;
+      border-color: #8fa070;
+      box-shadow: 0 0 0 3px #a8c46a26
+    }
+
+    html[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,
+    html[data-theme="dark"] input[type="time"]::-webkit-calendar-picker-indicator,
+    html[data-theme="dark"] input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+      filter: invert(.85)
+    }
+
+    html[data-theme="dark"] .field label,
+    html[data-theme="dark"] .mail-compose label {
+      color: #a9aa9f
+    }
+
+    /* tablas */
+    html[data-theme="dark"] thead {
+      background: #2b2c27
+    }
+
+    html[data-theme="dark"] th {
+      color: #9a9b90
+    }
+
+    html[data-theme="dark"] td,
+    html[data-theme="dark"] .task,
+    html[data-theme="dark"] .task-row,
+    html[data-theme="dark"] .portfolio-row,
+    html[data-theme="dark"] .calendar-agenda .activity {
+      border-bottom-color: #33342d
+    }
+
+    html[data-theme="dark"] tbody tr:hover {
+      background: #2b2c26
+    }
+
+    html[data-theme="dark"] .category-chip {
+      background: #2e2f2a;
+      color: #c3c5b3;
+      border-color: #3d3e36
+    }
+
+    html[data-theme="dark"] .ticker,
+    html[data-theme="dark"] .activity-icon {
+      background: #2e2f2a;
+      color: #c6f277
+    }
+
+    html[data-theme="dark"] .activity-icon svg {
+      stroke: #c3c5b3
+    }
+
+    html[data-theme="dark"] .helper-note,
+    html[data-theme="dark"] .mp-import-status {
+      background: #2a2b26
+    }
+
+    html[data-theme="dark"] .bar {
+      background: #34352e
+    }
+
+    html[data-theme="dark"] .check {
+      border-color: #55574b
+    }
+
+    /* iconos de tarjetas */
+    html[data-theme="dark"] .stats .card:nth-child(1) .stat-icon {
+      background: #c6f27720;
+      color: #c6f277
+    }
+
+    html[data-theme="dark"] .stats .card:nth-child(2) .stat-icon,
+    html[data-theme="dark"] .finance-summary .card:nth-child(2) .stat-icon {
+      background: #9bbcf724;
+      color: #9bbcf7
+    }
+
+    html[data-theme="dark"] .stats .card:nth-child(3) .stat-icon,
+    html[data-theme="dark"] .finance-summary .card:nth-child(3) .stat-icon {
+      background: #ef9b8326;
+      color: #ef9b83
+    }
+
+    html[data-theme="dark"] .stats .card:nth-child(4) .stat-icon {
+      background: #c2b4f226;
+      color: #c2b4f2
+    }
+
+    /* chips y estados */
+    html[data-theme="dark"] .trend,
+    html[data-theme="dark"] .flow-badge.up,
+    html[data-theme="dark"] .mp-import-state {
+      background: #4d765433;
+      border-color: #4d765455;
+      color: #9fd1a6
+    }
+
+    html[data-theme="dark"] .flow-badge.down {
+      background: #c9695233;
+      border-color: #c9695255;
+      color: #f0a998
+    }
+
+    html[data-theme="dark"] .flow-badge.flat,
+    html[data-theme="dark"] .mp-import-state.duplicate {
+      background: #34352e;
+      border-color: #43443b;
+      color: #9a9b90
+    }
+
+    html[data-theme="dark"] .priority {
+      background: #f1cb7d26;
+      color: #e9c47c
+    }
+
+    html[data-theme="dark"] .priority-medium {
+      background: #f1cb7d26;
+      color: #e9c47c
+    }
+
+    html[data-theme="dark"] .priority-high {
+      background: #ef9b8326;
+      color: #f0a998
+    }
+
+    html[data-theme="dark"] .priority-low {
+      background: #9ddbc526;
+      color: #9ddbc5
+    }
+
+    html[data-theme="dark"] .task-category {
+      background: #2e2f2a;
+      color: #a9aa9f
+    }
+
+    html[data-theme="dark"] .task-row.dragging {
+      background: #2f3425
+    }
+
+    /* flujo de dinero */
+    html[data-theme="dark"] .flow-metric,
+    html[data-theme="dark"] .flow-seg {
+      background: #2a2b26;
+      border-color: #3d3e36
+    }
+
+    html[data-theme="dark"] .flow-metric:hover {
+      background: #30312b
+    }
+
+    html[data-theme="dark"] .flow-metric.selected,
+    html[data-theme="dark"] .task-stat-button.selected {
+      background: #30322a
+    }
+
+    html[data-theme="dark"] .flow-cursor {
+      stroke: #6a6b60
+    }
+
+    html[data-theme="dark"] #flowDots circle {
+      fill: #3a3b34
+    }
+
+    html[data-theme="dark"] .flow-tooltip {
+      box-shadow: 0 8px 24px #0007
+    }
+
+    /* calendario */
+    html[data-theme="dark"] .calendar-day {
+      background: #23241f;
+      border-color: #33342d
+    }
+
+    html[data-theme="dark"] .calendar-day:nth-child(7n),
+    html[data-theme="dark"] .calendar-day:nth-last-child(-n+7) {
+      border-color: #33342d
+    }
+
+    html[data-theme="dark"] .calendar-day:hover {
+      background: #2b2c26
+    }
+
+    html[data-theme="dark"] .calendar-day.outside {
+      background: #1c1d19;
+      color: #6c6d63
+    }
+
+    html[data-theme="dark"] .calendar-day.selected {
+      background: #2c3322;
+      box-shadow: inset 0 0 0 1.5px #8fa070
+    }
+
+    html[data-theme="dark"] .calendar-toolbar-actions .calendar-nav-btn:hover,
+    html[data-theme="dark"] .calendar-toolbar-actions>#calendarTodayBtn:hover,
+    html[data-theme="dark"] .calendar-quiet-action:hover {
+      background: #2e2f2a;
+      border-color: #3d3e36
+    }
+
+    html[data-theme="dark"] .calendar-overflow-menu {
+      box-shadow: 0 12px 35px #0008
+    }
+
+    /* compras */
+    html[data-theme="dark"] .shop-pill {
+      background: #2a2b26;
+      border-color: #3d3e36
+    }
+
+    html[data-theme="dark"] .shop-pill:hover {
+      background: #30312b
+    }
+
+    html[data-theme="dark"] .shop-badge {
+      background: #262722e6
+    }
+
+    html[data-theme="dark"] .shop-media-empty {
+      background: linear-gradient(135deg, #2c3322, #2a2b26);
+      color: #6c6d63
+    }
+
+    html[data-theme="dark"] .shop-photo-drop {
+      background: #2a2b26;
+      border-color: #4a4b41
+    }
+
+    html[data-theme="dark"] .shop-photo-drop:hover {
+      background: #30322a
+    }
+
+    /* importación Mercado Pago */
+    html[data-theme="dark"] .mp-import-stat {
+      background: #2a2b26
+    }
+
+    html[data-theme="dark"] .mp-import-table .mp-import-duplicate {
+      background: #23241f
+    }
+
+    /* ===== Redactor de correo ===== */
+    .mail-compose.mc-rich {
+      width: min(100%, 860px);
+      padding: 22px
+    }
+
+    .mc-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px
+    }
+
+    .mc-head h2 {
+      flex: 1;
+      margin: 0
+    }
+
+    .mc-row[hidden],
+    .mc-sched[hidden],
+    .mc-attachments[hidden] {
+      display: none
+    }
+
+    .mc-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--line);
+      padding: 2px 0
+    }
+
+    .mail-compose .mc-row label {
+      margin: 0;
+      width: 54px;
+      flex-shrink: 0;
+      font-size: 11px
+    }
+
+    .mail-compose.mc-rich .mc-row input,
+    .mail-compose.mc-rich .mc-row input:focus {
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      border-radius: 0;
+      padding: 11px 4px;
+      flex: 1
+    }
+
+    .mc-link {
+      border: 0;
+      background: none;
+      color: var(--muted);
+      font-size: 11px;
+      padding: 6px;
+      border-radius: 8px
+    }
+
+    .mc-link:hover {
+      color: var(--ink);
+      background: var(--soft)
+    }
+
+    .mc-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 2px;
+      margin-top: 14px;
+      padding: 6px;
+      border: 1px solid var(--line);
+      border-bottom: 0;
+      border-radius: 12px 12px 0 0;
+      background: #f6f5ef
+    }
+
+    .mc-toolbar button,
+    .mc-color {
+      width: 30px;
+      height: 30px;
+      border: 0;
+      background: transparent;
+      border-radius: 8px;
+      display: inline-grid;
+      place-items: center;
+      color: var(--ink);
+      position: relative;
+      cursor: pointer
+    }
+
+    .mc-toolbar button:hover,
+    .mc-color:hover {
+      background: var(--soft)
+    }
+
+    .mc-toolbar button.on {
+      background: var(--soft);
+      box-shadow: inset 0 0 0 1px var(--line)
+    }
+
+    .mc-toolbar svg {
+      width: 16px;
+      height: 16px
+    }
+
+    .mc-toolbar select {
+      height: 30px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--ink);
+      border-radius: 8px;
+      font-size: 11px;
+      padding: 0 6px;
+      max-width: 116px
+    }
+
+    .mc-sep {
+      width: 1px;
+      height: 18px;
+      background: var(--line);
+      margin: 0 4px
+    }
+
+    .mc-color input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+      padding: 0;
+      border: 0
+    }
+
+    .mc-color-a {
+      font-weight: 700;
+      font-size: 14px;
+      border-bottom: 3px solid currentColor;
+      line-height: 1;
+      padding-bottom: 1px
+    }
+
+    .mc-editor {
+      min-height: 230px;
+      max-height: 42vh;
+      overflow: auto;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 0 0 12px 12px;
+      background: #fffefa;
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.55;
+      outline: none;
+      overflow-wrap: anywhere
+    }
+
+    .mc-editor:focus {
+      border-color: #7b896c;
+      box-shadow: 0 0 0 3px #87967524
+    }
+
+    .mc-editor:empty:before {
+      content: attr(data-placeholder);
+      color: var(--muted);
+      pointer-events: none
+    }
+
+    .mc-editor blockquote {
+      margin: 6px 0 6px 4px;
+      padding-left: 12px;
+      border-left: 3px solid var(--line);
+      color: var(--muted)
+    }
+
+    .mc-editor a {
+      color: #3b6fb6
+    }
+
+    .mc-editor img {
+      max-width: 100%
+    }
+
+    .mc-attachments {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px
+    }
+
+    .mc-att {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 8px 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card);
+      font-size: 11px;
+      max-width: 100%
+    }
+
+    .mc-att svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0
+    }
+
+    .mc-att-name {
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    .mc-att small {
+      color: var(--muted)
+    }
+
+    .mc-att button {
+      border: 0;
+      background: none;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1;
+      padding: 0 2px
+    }
+
+    .mc-att button:hover {
+      color: var(--ink)
+    }
+
+    .mc-foot {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+      flex-wrap: wrap
+    }
+
+    .mc-spacer {
+      flex: 1
+    }
+
+    .mc-send-group {
+      display: flex;
+      position: relative
+    }
+
+    .mc-send-group .primary:first-child {
+      border-radius: 13px 0 0 13px
+    }
+
+    .mc-sched-btn {
+      border-radius: 0 13px 13px 0 !important;
+      padding: 12px 10px !important;
+      border-left: 1px solid #ffffff30 !important
+    }
+
+    .mc-sched {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 0;
+      width: 300px;
+      z-index: 5;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 8px;
+      box-shadow: 0 14px 40px #24252226
+    }
+
+    .mc-sched-title {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 8px 10px 6px
+    }
+
+    .mc-sched>button {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      width: 100%;
+      border: 0;
+      background: none;
+      text-align: left;
+      color: var(--ink);
+      padding: 9px 10px;
+      border-radius: 9px;
+      font-size: 12px
+    }
+
+    .mc-sched>button:hover {
+      background: var(--soft)
+    }
+
+    .mc-sched small {
+      color: var(--muted);
+      font-size: 10px
+    }
+
+    .mc-sched-custom {
+      display: flex;
+      gap: 6px;
+      padding: 8px 6px 4px;
+      border-top: 1px solid var(--line);
+      margin-top: 6px
+    }
+
+    .mc-sched-custom input {
+      flex: 1;
+      min-width: 0
+    }
+
+    .mc-sched-custom .primary {
+      padding: 8px 12px
+    }
+
+    .mc-sched-note {
+      font-size: 10px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin: 8px 6px 4px
+    }
+
+    .mc-rich.drag {
+      outline: 2px dashed #8fa070;
+      outline-offset: -8px
+    }
+
+    /* ===== Lectura de correo ===== */
+    .mail-frame-wrap {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden
+    }
+
+    .mail-frame {
+      display: block;
+      width: 100%;
+      border: 0;
+      min-height: 120px;
+      background: #fff
+    }
+
+    .mail-img-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      background: var(--soft);
+      border-radius: 10px;
+      font-size: 11px;
+      color: var(--muted)
+    }
+
+    .mail-atts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0 0 14px
+    }
+
+    .mail-att {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--ink);
+      padding: 8px 11px;
+      border-radius: 10px;
+      font-size: 11px;
+      max-width: 100%;
+      cursor: pointer
+    }
+
+    .mail-att:hover {
+      background: var(--soft)
+    }
+
+    .mail-att svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0
+    }
+
+    .mail-att span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 220px
+    }
+
+    .mail-att small {
+      color: var(--muted)
+    }
+
+    /* ===== Detalle de evento ===== */
+    .cal-detail {
+      max-width: 520px;
+      max-height: calc(100dvh - 36px);
+      overflow: auto
+    }
+
+    .cal-detail h2 {
+      overflow-wrap: anywhere
+    }
+
+    .cal-row {
+      display: flex;
+      gap: 12px;
+      padding: 12px 0;
+      border-top: 1px solid var(--line);
+      font-size: 12px;
+      line-height: 1.55;
+      min-width: 0
+    }
+
+    .cal-row:first-child {
+      border-top: 0
+    }
+
+    .cal-row>svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      margin-top: 3px;
+      color: var(--muted)
+    }
+
+    .cal-row>div {
+      min-width: 0;
+      flex: 1;
+      overflow-wrap: anywhere
+    }
+
+    .cal-row small {
+      display: block;
+      font-size: 10px;
+      color: var(--muted);
+      margin-bottom: 3px
+    }
+
+    .cal-row a {
+      color: #3b6fb6
+    }
+
+    .cal-dot {
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      margin-right: 7px
+    }
+
+    .cal-guests {
+      display: grid;
+      gap: 5px
+    }
+
+    .cal-guest {
+      display: flex;
+      gap: 8px;
+      justify-content: space-between
+    }
+
+    .cal-guest span:last-child {
+      color: var(--muted);
+      font-size: 10px;
+      white-space: nowrap
+    }
+
+    .calendar-event-item {
+      cursor: pointer;
+      margin: 0 -8px;
+      padding-left: 8px !important;
+      padding-right: 8px !important;
+      border-radius: 12px
+    }
+
+    .calendar-event-item:hover,
+    .calendar-event-item:focus-visible {
+      background: var(--soft)
+    }
+
+    .calendar-event-item .ev-chev {
+      width: 16px;
+      height: 16px;
+      color: var(--muted);
+      align-self: center;
+      flex-shrink: 0
+    }
+
+    /* modo oscuro */
+    html[data-theme="dark"] .mc-toolbar {
+      background: #2e2f2a
+    }
+
+    html[data-theme="dark"] .mc-toolbar select {
+      background: #262722
+    }
+
+    html[data-theme="dark"] .mc-editor {
+      background: #2a2b26;
+      border-color: #3d3e36
+    }
+
+    html[data-theme="dark"] .mc-editor:focus {
+      border-color: #8fa070
+    }
+
+    html[data-theme="dark"] .mc-editor a,
+    html[data-theme="dark"] .cal-row a {
+      color: #8fb4ee
+    }
+
+    html[data-theme="dark"] .mc-sched {
+      box-shadow: 0 14px 40px #000a
+    }
   </style>
 </head>
 
@@ -4747,6 +5764,10 @@
           </svg>Proyectos <span class="nav-soon">SOON</span></button>
       </nav>
       <div class="sidebar-bottom">
+        <button class="nav-item" id="sidebarToggle" type="button" aria-label="Contraer barra lateral"
+          aria-expanded="true"><svg viewBox="0 0 24 24">
+            <path d="m11 17-5-5 5-5M18 17l-5-5 5-5" />
+          </svg>Contraer menú</button>
         <div class="profile">
           <div class="avatar">MC</div>
           <div><strong>Mi espacio</strong><span>Personal · Privado</span></div>
@@ -4761,8 +5782,17 @@
             </svg></button><button class="crumb-home" type="button" data-goto="home"
             aria-label="Ir a Home">Ctrl</button><span> / </span><b id="crumbCurrent">Home</b></div>
         <div class="top-actions"><span class="date-pill" id="todayPill"></span><span class="date-pill" id="currentTime"
-            aria-label="Hora actual">00:00</span><button class="icon-btn" id="searchBtn" aria-label="Buscar"><svg
-              viewBox="0 0 24 24">
+            aria-label="Hora actual">00:00</span><button class="icon-btn" id="themeBtn" type="button"
+            aria-label="Activar modo oscuro" title="Modo oscuro">
+            <svg class="i-moon" viewBox="0 0 24 24">
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+            </svg>
+            <svg class="i-sun" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="4" />
+              <path
+                d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+            </svg>
+          </button><button class="icon-btn" id="searchBtn" aria-label="Buscar"><svg viewBox="0 0 24 24">
               <circle cx="10.8" cy="10.8" r="6.8" />
               <path d="m16 16 5 5" />
             </svg></button><button class="icon-btn" id="notificationBtn" aria-label="Notificaciones"><svg
@@ -5097,6 +6127,8 @@
                   class="mail-folder-count" id="mailUnreadCount"></span></button>
               <button class="mail-folder" data-mail-folder="STARRED"><i data-lucide="star"></i> Destacados</button>
               <button class="mail-folder" data-mail-folder="SENT"><i data-lucide="send"></i> Enviados</button>
+              <button class="mail-folder" data-mail-folder="SCHEDULED"><i data-lucide="clock"></i> Programados <span
+                  class="mail-folder-count" id="mailSchedCount"></span></button>
               <button class="mail-folder" data-mail-folder="DRAFT"><i data-lucide="file-pen-line"></i>
                 Borradores</button>
               <button class="mail-folder" data-mail-folder="IMPORTANT"><i data-lucide="bookmark"></i>
@@ -5425,20 +6457,101 @@
 
   <div class="mail-compose-backdrop" id="gmailComposeBackdrop" role="dialog" aria-modal="true"
     aria-label="Redactar correo">
-    <form class="mail-compose" id="gmailComposeForm">
-      <div style="display:flex;align-items:center;gap:10px">
-        <h2 style="flex:1">Nuevo mensaje</h2><button type="button" class="icon-btn" id="gmailCloseCompose"
-          aria-label="Cerrar">×</button>
+    <form class="mail-compose mc-rich" id="gmailComposeForm" novalidate>
+      <div class="mc-head">
+        <h2>Nuevo mensaje</h2>
+        <button type="button" class="icon-btn" id="gmailCloseCompose" aria-label="Cerrar">×</button>
       </div>
-      <label for="gmailTo">Para</label><input id="gmailTo" type="text" autocomplete="email" required
-        placeholder="nombre@ejemplo.com">
-      <label for="gmailCc">CC</label><input id="gmailCc" type="text" placeholder="Opcional">
-      <label for="gmailBcc">CCO</label><input id="gmailBcc" type="text" placeholder="Opcional">
-      <label for="gmailSubject">Asunto</label><input id="gmailSubject" type="text" placeholder="Asunto del correo">
-      <label for="gmailBody">Mensaje</label><textarea id="gmailBody" placeholder="Escribí tu mensaje…"></textarea>
-      <div class="mail-compose-actions"><button type="button" class="secondary"
-          id="gmailCancelCompose">Cancelar</button><button type="submit" class="primary" id="gmailSendBtn"><i
-            data-lucide="send"></i> Enviar</button></div>
+      <div class="mc-row"><label for="gmailTo">Para</label><input id="gmailTo" type="text" autocomplete="off"
+          placeholder="nombre@ejemplo.com, otro@ejemplo.com"><button type="button" class="mc-link" id="mcToggleCc">Cc /
+          Cco</button></div>
+      <div class="mc-row mc-cc" hidden><label for="gmailCc">Cc</label><input id="gmailCc" type="text"
+          autocomplete="off"></div>
+      <div class="mc-row mc-cc" hidden><label for="gmailBcc">Cco</label><input id="gmailBcc" type="text"
+          autocomplete="off"></div>
+      <div class="mc-row"><label for="gmailSubject">Asunto</label><input id="gmailSubject" type="text"
+          autocomplete="off"></div>
+
+      <div class="mc-toolbar" id="mcToolbar" role="toolbar" aria-label="Formato del mensaje">
+        <button type="button" data-cmd="undo" title="Deshacer"><i data-lucide="undo-2"></i></button>
+        <button type="button" data-cmd="redo" title="Rehacer"><i data-lucide="redo-2"></i></button>
+        <span class="mc-sep"></span>
+        <select id="mcFont" title="Tipo de letra" aria-label="Tipo de letra">
+          <option value="">Fuente</option>
+          <option value="Arial">Arial</option>
+          <option value="Verdana">Verdana</option>
+          <option value="Tahoma">Tahoma</option>
+          <option value="Trebuchet MS">Trebuchet MS</option>
+          <option value="Georgia">Georgia</option>
+          <option value="Times New Roman">Times New Roman</option>
+          <option value="Garamond">Garamond</option>
+          <option value="Courier New">Courier New</option>
+          <option value="Comic Sans MS">Comic Sans MS</option>
+        </select>
+        <select id="mcSize" title="Tamaño" aria-label="Tamaño de letra">
+          <option value="">Tamaño</option>
+          <option value="1">Muy chica</option>
+          <option value="2">Chica</option>
+          <option value="3">Normal</option>
+          <option value="5">Grande</option>
+          <option value="6">Enorme</option>
+        </select>
+        <span class="mc-sep"></span>
+        <button type="button" data-cmd="bold" title="Negrita"><i data-lucide="bold"></i></button>
+        <button type="button" data-cmd="italic" title="Cursiva"><i data-lucide="italic"></i></button>
+        <button type="button" data-cmd="underline" title="Subrayado"><i data-lucide="underline"></i></button>
+        <button type="button" data-cmd="strikeThrough" title="Tachado"><i data-lucide="strikethrough"></i></button>
+        <label class="mc-color" title="Color del texto"><span class="mc-color-a">A</span><input type="color"
+            id="mcColor" value="#000000"></label>
+        <label class="mc-color" title="Resaltado"><i data-lucide="highlighter"></i><input type="color" id="mcHilite"
+            value="#ffe66d"></label>
+        <span class="mc-sep"></span>
+        <button type="button" data-cmd="justifyLeft" title="Alinear a la izquierda"><i
+            data-lucide="align-left"></i></button>
+        <button type="button" data-cmd="justifyCenter" title="Centrar"><i data-lucide="align-center"></i></button>
+        <button type="button" data-cmd="justifyRight" title="Alinear a la derecha"><i
+            data-lucide="align-right"></i></button>
+        <button type="button" data-cmd="justifyFull" title="Justificar"><i data-lucide="align-justify"></i></button>
+        <span class="mc-sep"></span>
+        <button type="button" data-cmd="insertUnorderedList" title="Lista con viñetas"><i
+            data-lucide="list"></i></button>
+        <button type="button" data-cmd="insertOrderedList" title="Lista numerada"><i
+            data-lucide="list-ordered"></i></button>
+        <button type="button" data-cmd="outdent" title="Reducir sangría"><i data-lucide="indent-decrease"></i></button>
+        <button type="button" data-cmd="indent" title="Aumentar sangría"><i data-lucide="indent-increase"></i></button>
+        <button type="button" data-cmd="quote" title="Cita"><i data-lucide="quote"></i></button>
+        <span class="mc-sep"></span>
+        <button type="button" data-cmd="createLink" title="Insertar enlace"><i data-lucide="link"></i></button>
+        <button type="button" data-cmd="unlink" title="Quitar enlace"><i data-lucide="unlink"></i></button>
+        <button type="button" data-cmd="removeFormat" title="Borrar formato"><i
+            data-lucide="remove-formatting"></i></button>
+      </div>
+      <div class="mc-editor" id="gmailBody" contenteditable="true" role="textbox" aria-multiline="true"
+        aria-label="Mensaje" data-placeholder="Escribí tu mensaje…"></div>
+      <div class="mc-attachments" id="mcAttachments" hidden></div>
+
+      <div class="mc-foot">
+        <div class="mc-send-group">
+          <button type="submit" class="primary" id="gmailSendBtn"><i data-lucide="send"></i> Enviar</button>
+          <button type="button" class="primary mc-sched-btn" id="mcSchedBtn" aria-label="Programar envío"
+            title="Programar envío"><i data-lucide="chevron-down"></i></button>
+          <div class="mc-sched" id="mcSchedPanel" hidden>
+            <div class="mc-sched-title">Programar envío</div>
+            <button type="button" data-sched="tomorrow8">Mañana por la mañana <small></small></button>
+            <button type="button" data-sched="tomorrow14">Mañana por la tarde <small></small></button>
+            <button type="button" data-sched="monday8">El lunes por la mañana <small></small></button>
+            <div class="mc-sched-custom"><input type="datetime-local" id="mcSchedInput"
+                aria-label="Fecha y hora de envío"><button type="button" class="primary"
+                id="mcSchedConfirm">Programar</button></div>
+            <p class="mc-sched-note">Se envía automáticamente mientras Ctrl esté abierto y Gmail conectado.</p>
+          </div>
+        </div>
+        <button type="button" class="icon-btn" id="mcAttachBtn" title="Adjuntar archivos"
+          aria-label="Adjuntar archivos"><i data-lucide="paperclip"></i></button>
+        <span class="mc-spacer"></span>
+        <button type="button" class="secondary" id="gmailCancelCompose">Descartar</button>
+      </div>
+      <input type="file" id="mcFileInput" multiple hidden>
     </form>
   </div>
   <div class="modal-backdrop" id="shopModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="shopModalTitle">
@@ -5487,6 +6600,23 @@
         <div class="modal-actions"><button type="button" class="secondary" id="cancelShopModal">Cancelar</button><button
             type="submit" class="primary">Guardar producto ›</button></div>
       </form>
+    </div>
+  </div>
+  <div class="modal-backdrop" id="calendarDetailBackdrop" role="dialog" aria-modal="true"
+    aria-labelledby="calDetailTitle">
+    <div class="modal cal-detail">
+      <div class="modal-head">
+        <div style="min-width:0">
+          <h2 id="calDetailTitle">Evento</h2>
+          <p id="calDetailWhen"></p>
+        </div>
+        <button class="close-btn" id="closeCalDetail" aria-label="Cerrar">×</button>
+      </div>
+      <div id="calDetailBody"></div>
+      <div class="modal-actions">
+        <button type="button" class="secondary" id="calDetailDelete">Eliminar</button>
+        <button type="button" class="primary" id="calDetailEdit">Editar</button>
+      </div>
     </div>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -6311,6 +7441,584 @@
         const b = document.getElementById('gmailComposeBackdrop');
         if (b) b.classList.remove('open');
       });
+    })();
+  </script>
+  <script>
+    (function () {
+      const root = document.documentElement;
+      const themeMeta = document.querySelector('meta[name="theme-color"]');
+      const navItems = () => document.querySelectorAll('.sidebar .nav-item');
+
+      /* Modo oscuro */
+      function applyTheme(theme) {
+        const dark = theme === 'dark';
+        root.setAttribute('data-theme', dark ? 'dark' : 'light');
+        if (themeMeta) themeMeta.setAttribute('content', dark ? '#171815' : '#ebe8e1');
+        const btn = $('themeBtn');
+        btn.setAttribute('aria-label', dark ? 'Activar modo claro' : 'Activar modo oscuro');
+        btn.title = dark ? 'Modo claro' : 'Modo oscuro';
+        try { localStorage.setItem('ctrl.theme', dark ? 'dark' : 'light'); } catch (e) { }
+      }
+      $('themeBtn').onclick = () => applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+      applyTheme(root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+
+      /* Barra lateral colapsable */
+      function applySidebar(collapsed) {
+        root.classList.toggle('sb-collapsed', collapsed);
+        const t = $('sidebarToggle');
+        t.setAttribute('aria-expanded', String(!collapsed));
+        t.setAttribute('aria-label', collapsed ? 'Expandir barra lateral' : 'Contraer barra lateral');
+        navItems().forEach(b => {
+          if (collapsed) b.title = (b.id === 'sidebarToggle' ? 'Expandir menú' : b.textContent.replace('SOON', '').trim());
+          else b.removeAttribute('title');
+        });
+        try { localStorage.setItem('ctrl.sidebar.collapsed', collapsed ? '1' : '0'); } catch (e) { }
+      }
+      $('sidebarToggle').onclick = () => applySidebar(!root.classList.contains('sb-collapsed'));
+      applySidebar(root.classList.contains('sb-collapsed'));
+    })();
+  </script>
+  <script>
+    (function () {
+      const icons = () => { if (window.lucide) lucide.createIcons({ attrs: { 'stroke-width': 1.8 } }); };
+      const fmtSize = b => b < 1024 ? b + ' B' : b < 1048576 ? Math.round(b / 1024) + ' KB' : (b / 1048576).toFixed(1) + ' MB';
+      const fmtWhen = ms => new Date(ms).toLocaleString('es-AR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+      const b64ToBlob = (b64, type) => { const bin = atob(b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return new Blob([u], { type: type || 'application/octet-stream' }); };
+      const readB64 = f => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1] || ''); r.onerror = rej; r.readAsDataURL(f); });
+
+      /* ---------- Sanitizador (descripciones de eventos, citas de respuesta, pegado) ---------- */
+      const OK_TAGS = new Set('A,B,BLOCKQUOTE,BR,CENTER,CODE,DIV,EM,FONT,H1,H2,H3,H4,H5,H6,HR,I,IMG,LI,OL,P,PRE,S,SMALL,SPAN,STRIKE,STRONG,SUB,SUP,TABLE,TBODY,TD,TFOOT,TH,THEAD,TR,U,UL'.split(','));
+      const DROP_TAGS = new Set('SCRIPT,STYLE,IFRAME,OBJECT,EMBED,LINK,META,FORM,INPUT,BUTTON,TEXTAREA,SELECT,SVG,MATH,VIDEO,AUDIO,BASE,TITLE,HEAD,NOSCRIPT,TEMPLATE'.split(','));
+      const OK_ATTRS = new Set(['color', 'size', 'face', 'align', 'colspan', 'rowspan', 'alt', 'width', 'height', 'border', 'cellpadding', 'cellspacing']);
+      function sanitizeHtml(html, opts) {
+        const images = !!(opts && opts.images);
+        const doc = new DOMParser().parseFromString('<body>' + (html || ''), 'text/html');
+        (function walk(node) {
+          [...node.childNodes].forEach(ch => {
+            if (ch.nodeType === 3) return;
+            if (ch.nodeType !== 1) { ch.remove(); return; }
+            const tag = ch.tagName;
+            if (DROP_TAGS.has(tag)) { ch.remove(); return; }
+            walk(ch);
+            if (!OK_TAGS.has(tag)) { ch.replaceWith(...ch.childNodes); return; }
+            [...ch.attributes].forEach(a => {
+              const n = a.name.toLowerCase(), v = a.value.trim();
+              if (n === 'href' && tag === 'A') { if (!/^(https?:|mailto:|tel:)/i.test(v)) ch.removeAttribute(a.name); }
+              else if (n === 'src' && tag === 'IMG') { if (!(/^data:image\//i.test(v) || (images && /^https:/i.test(v)))) ch.removeAttribute(a.name); }
+              else if (n === 'style') { const c = v.split(';').filter(d => d.trim() && !/url\(|expression|behavior|@import|javascript:/i.test(d)).join(';'); c ? ch.setAttribute('style', c) : ch.removeAttribute('style'); }
+              else if (!OK_ATTRS.has(n)) ch.removeAttribute(a.name);
+            });
+            if (tag === 'A' && ch.hasAttribute('href')) { ch.setAttribute('target', '_blank'); ch.setAttribute('rel', 'noopener noreferrer'); }
+          });
+        })(doc.body);
+        return doc.body.innerHTML;
+      }
+      function htmlToText(html) {
+        const t = html.replace(/<br\s*\/?>/gi, '\n').replace(/<\/(div|p|li|h[1-6]|blockquote|tr)>/gi, '\n');
+        return (new DOMParser().parseFromString(t, 'text/html').body.textContent || '').replace(/\n{3,}/g, '\n\n').trim();
+      }
+      const linkify = s => s.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+
+      /* =====================================================================
+         MAIL — lectura
+         ===================================================================== */
+      function gmailParts(payload) {
+        const out = { html: '', text: '', attachments: [], inline: {} };
+        (function walk(p) {
+          if (!p) return;
+          const mime = p.mimeType || '';
+          const hdr = n => (p.headers || []).find(h => h.name.toLowerCase() === n)?.value || '';
+          const cid = hdr('content-id').replace(/[<>\s]/g, '');
+          if (p.body?.attachmentId) {
+            if (cid && mime.startsWith('image/')) out.inline[cid] = { id: p.body.attachmentId, mime };
+            else if (p.filename) out.attachments.push({ id: p.body.attachmentId, name: p.filename, mime, size: p.body.size || 0 });
+          } else if (!p.filename && p.body?.data) {
+            if (mime === 'text/html') out.html += gmailDecode(p.body.data);
+            else if (mime === 'text/plain') out.text += gmailDecode(p.body.data);
+          }
+          (p.parts || []).forEach(walk);
+        })(payload);
+        return out;
+      }
+      async function gmailAttachmentB64(msgId, attId) {
+        const r = await gmailApi('messages/' + encodeURIComponent(msgId) + '/attachments/' + encodeURIComponent(attId));
+        return (r.data || '').replace(/-/g, '+').replace(/_/g, '/');
+      }
+      function mailFrameDoc(html, text, allowImages) {
+        const csp = "default-src 'none'; img-src data:" + (allowImages ? ' https:' : '') + "; style-src 'unsafe-inline'; font-src data:";
+        const clean = String(html || '').replace(/<(meta|base|link)\b[^>]*>/gi, '').replace(/<script[\s\S]*?<\/script>/gi, '');
+        const body = clean || '<div style="white-space:pre-wrap">' + esc(text || '(Mensaje vacío)') + '</div>';
+        return '<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="' + csp + '"><base target="_blank"><style>html,body{margin:0}body{font:14px/1.6 -apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#202124;background:#fff;padding:18px;overflow-wrap:anywhere;word-break:break-word}img{max-width:100%;height:auto}table{max-width:100%}blockquote{margin:8px 0 8px 4px;padding-left:12px;border-left:3px solid #dadce0;color:#5f6368}a{color:#1a73e8}</style></head><body>' + body + '</body></html>';
+      }
+
+      window.openGmailMessage = async function (id) {
+        try {
+          const m = await gmailApi('messages/' + encodeURIComponent(id) + '?format=full');
+          const from = gmailHeader(m, 'From'), to = gmailHeader(m, 'To'), cc = gmailHeader(m, 'Cc'), date = gmailHeader(m, 'Date');
+          const subject = gmailHeader(m, 'Subject') || '(Sin asunto)', msgId = gmailHeader(m, 'Message-ID');
+          const parts = gmailParts(m.payload);
+          let html = parts.html;
+          const cids = Object.keys(parts.inline);
+          if (html && cids.length) {
+            await Promise.all(cids.slice(0, 12).map(async cid => {
+              try { const b64 = await gmailAttachmentB64(m.id, parts.inline[cid].id); html = html.split('cid:' + cid).join('data:' + parts.inline[cid].mime + ';base64,' + b64); } catch { }
+            }));
+          }
+          const hasRemote = /<img[^>]+src=["']?https?:/i.test(html) || /url\(\s*["']?https?:/i.test(html);
+          const atts = parts.attachments.length ? '<div class="mail-atts">' + parts.attachments.map((a, i) => '<button type="button" class="mail-att" data-att="' + i + '"><i data-lucide="paperclip"></i><span>' + esc(a.name) + '</span><small>' + fmtSize(a.size) + '</small></button>').join('') + '</div>' : '';
+          const imgBar = hasRemote ? '<div class="mail-img-bar">Se bloquearon las imágenes remotas para proteger tu privacidad. <button type="button" class="text-action" id="mailShowImgs">Mostrar imágenes</button></div>' : '';
+          const d = $('mailDetail');
+          $('mailList').hidden = true; d.hidden = false;
+          d.innerHTML = '<div class="mail-detail-head"><button class="secondary" id="gmailBackBtn"><i data-lucide="arrow-left"></i> Volver</button><span style="flex:1"></span><button class="secondary" id="gmailArchiveBtn"><i data-lucide="archive"></i> Archivar</button><button class="secondary" id="gmailDeleteBtn" aria-label="Eliminar"><i data-lucide="trash-2"></i></button></div>'
+            + '<h2 class="mail-detail-title">' + esc(subject) + '</h2>'
+            + '<div class="mail-detail-meta"><i data-lucide="circle-user-round"></i><div><strong>' + esc(gmailFromLabel(from)) + '</strong><div>' + esc(from) + '</div><div>Para: ' + esc(to || 'vos') + (cc ? ' · Cc: ' + esc(cc) : '') + '</div><div>' + esc(date) + '</div></div></div>'
+            + atts + imgBar
+            + '<div class="mail-frame-wrap"><iframe class="mail-frame" title="Contenido del correo" sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe></div>'
+            + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:18px"><button class="primary" id="gmailReplyBtn"><i data-lucide="reply"></i> Responder</button><button class="secondary" id="gmailForwardBtn"><i data-lucide="forward"></i> Reenviar</button></div>';
+          icons();
+          const frame = d.querySelector('.mail-frame');
+          frame.addEventListener('load', () => {
+            const doc = frame.contentDocument; if (!doc) return;
+            const fit = () => { frame.style.height = Math.max(120, doc.documentElement.scrollHeight) + 'px'; };
+            fit(); if ('ResizeObserver' in window) new ResizeObserver(fit).observe(doc.body);
+          });
+          frame.srcdoc = mailFrameDoc(html, parts.text, false);
+          const showImgs = d.querySelector('#mailShowImgs');
+          if (showImgs) showImgs.onclick = () => { frame.srcdoc = mailFrameDoc(html, parts.text, true); d.querySelector('.mail-img-bar').remove(); };
+
+          d.querySelectorAll('[data-att]').forEach(b => b.onclick = async () => {
+            const a = parts.attachments[+b.dataset.att]; b.disabled = true;
+            try { const b64 = await gmailAttachmentB64(m.id, a.id); downloadBlob(b64ToBlob(b64, a.mime), a.name); }
+            catch (err) { toast('No se pudo descargar: ' + err.message); }
+            b.disabled = false;
+          });
+
+          const quote = sanitizeHtml(html || ('<div style="white-space:pre-wrap">' + esc(parts.text) + '</div>'));
+          const refs = (gmailHeader(m, 'References') + ' ' + msgId).trim();
+          $('gmailBackBtn').onclick = () => { d.hidden = true; $('mailList').hidden = false; renderGmailMessages(); icons(); };
+          $('gmailReplyBtn').onclick = () => openGmailCompose({
+            to: (gmailHeader(m, 'Reply-To') || from).replace(/^.*<([^>]+)>.*$/, '$1'),
+            subject: /^re:/i.test(subject) ? subject : 'Re: ' + subject,
+            html: '<div>El ' + esc(date) + ', ' + esc(from) + ' escribió:</div><blockquote style="margin:0 0 0 .8ex;border-left:1px solid #ccc;padding-left:1ex">' + quote + '</blockquote>',
+            threadId: m.threadId, replyTo: msgId, references: refs
+          });
+          $('gmailForwardBtn').onclick = async () => {
+            const files = [];
+            if (parts.attachments.length) {
+              toast('Adjuntando archivos…');
+              for (const a of parts.attachments) { try { files.push({ name: a.name, type: a.mime, size: a.size, data: await gmailAttachmentB64(m.id, a.id) }); } catch { } }
+            }
+            openGmailCompose({
+              subject: /^fwd?:/i.test(subject) ? subject : 'Fwd: ' + subject,
+              html: '<div>---------- Mensaje reenviado ----------<br>De: ' + esc(from) + '<br>Fecha: ' + esc(date) + '<br>Asunto: ' + esc(subject) + '<br>Para: ' + esc(to) + '</div><br>' + quote,
+              attachments: files
+            });
+          };
+          $('gmailArchiveBtn').onclick = async () => { try { await gmailApi('messages/' + encodeURIComponent(id) + '/modify', { method: 'POST', body: JSON.stringify({ removeLabelIds: ['INBOX'] }) }); toast('Correo archivado'); await loadGmailMessages(); } catch (e) { toast('No se pudo archivar: ' + e.message); } };
+          $('gmailDeleteBtn').onclick = async () => { try { await gmailApi('messages/' + encodeURIComponent(id) + '/trash', { method: 'POST' }); toast('Correo movido a la papelera'); await loadGmailMessages(); } catch (e) { toast('No se pudo eliminar: ' + e.message); } };
+
+          if (m.labelIds?.includes('UNREAD')) {
+            try {
+              await gmailApi('messages/' + encodeURIComponent(id) + '/modify', { method: 'POST', body: JSON.stringify({ removeLabelIds: ['UNREAD'] }) });
+              const li = gmailMessages.find(x => x.id === id); if (li) li.labelIds = (li.labelIds || []).filter(l => l !== 'UNREAD');
+            } catch { }
+          }
+        } catch (error) { toast('No se pudo abrir el correo: ' + error.message); }
+      };
+
+      /* =====================================================================
+         MAIL — redactor
+         ===================================================================== */
+      const ed = $('gmailBody'), form = $('gmailComposeForm');
+      let mcAtt = [], mcDirty = false, savedRange = null;
+      const MAX_ATT = 25 * 1024 * 1024, MAX_SCHED_ATT = 1.5 * 1024 * 1024;
+      const composeOpen = () => $('gmailComposeBackdrop').classList.contains('open');
+      const closeCompose = () => { $('gmailComposeBackdrop').classList.remove('open'); $('mcSchedPanel').hidden = true; };
+
+      document.addEventListener('selectionchange', () => {
+        if (!composeOpen()) return;
+        const s = getSelection();
+        if (s.rangeCount && ed.contains(s.anchorNode)) { savedRange = s.getRangeAt(0).cloneRange(); updateState(); }
+      });
+      function restoreSel() { ed.focus(); if (savedRange) { const s = getSelection(); s.removeAllRanges(); s.addRange(savedRange); } }
+      function exec(cmd, val) { restoreSel(); document.execCommand('styleWithCSS', false, true); document.execCommand(cmd, false, val ?? null); mcDirty = true; updateState(); }
+      const STATE_CMDS = ['bold', 'italic', 'underline', 'strikeThrough', 'justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull', 'insertUnorderedList', 'insertOrderedList'];
+      function updateState() {
+        $('mcToolbar').querySelectorAll('[data-cmd]').forEach(b => {
+          if (!STATE_CMDS.includes(b.dataset.cmd)) return;
+          let on = false; try { on = document.queryCommandState(b.dataset.cmd); } catch { }
+          b.classList.toggle('on', on);
+        });
+      }
+      function addLink() {
+        restoreSel();
+        let url = prompt('Dirección del enlace', 'https://'); if (!url) return;
+        url = url.trim();
+        if (!/^(https?:|mailto:)/i.test(url)) url = (/@/.test(url) && !/\s/.test(url)) ? 'mailto:' + url : 'https://' + url;
+        if (getSelection().isCollapsed) exec('insertHTML', '<a href="' + esc(url) + '">' + esc(url.replace(/^mailto:/, '')) + '</a>');
+        else exec('createLink', url);
+      }
+      const tb = $('mcToolbar');
+      tb.addEventListener('mousedown', e => { if (e.target.closest('button')) e.preventDefault(); });
+      tb.addEventListener('click', e => {
+        const b = e.target.closest('button[data-cmd]'); if (!b) return;
+        const c = b.dataset.cmd;
+        if (c === 'createLink') return addLink();
+        if (c === 'quote') return exec('formatBlock', 'blockquote');
+        exec(c);
+      });
+      $('mcFont').onchange = e => { if (e.target.value) exec('fontName', e.target.value); };
+      $('mcSize').onchange = e => { if (e.target.value) exec('fontSize', e.target.value); };
+      $('mcColor').oninput = e => exec('foreColor', e.target.value);
+      $('mcHilite').oninput = e => exec('hiliteColor', e.target.value);
+
+      ed.addEventListener('paste', e => {
+        const cd = e.clipboardData; if (!cd) return;
+        if (cd.files && cd.files.length) { e.preventDefault(); addFiles(cd.files); return; }
+        e.preventDefault();
+        const html = cd.getData('text/html');
+        if (html) exec('insertHTML', sanitizeHtml(html)); else exec('insertText', cd.getData('text/plain'));
+      });
+      form.addEventListener('input', () => { mcDirty = true; });
+      $('mcToggleCc').onclick = () => form.querySelectorAll('.mc-cc').forEach(r => r.hidden = !r.hidden);
+
+      /* adjuntos */
+      async function addFiles(list) {
+        for (const f of list) {
+          const total = mcAtt.reduce((a, x) => a + x.size, 0);
+          if (total + f.size > MAX_ATT) { toast('Superaste el límite de 25 MB de adjuntos.'); break; }
+          try { mcAtt.push({ name: f.name || 'archivo', type: f.type, size: f.size, data: await readB64(f) }); mcDirty = true; }
+          catch { toast('No se pudo leer ' + f.name); }
+        }
+        renderAtt();
+      }
+      function renderAtt() {
+        const box = $('mcAttachments'); box.hidden = !mcAtt.length;
+        box.innerHTML = mcAtt.map((a, i) => '<span class="mc-att"><i data-lucide="paperclip"></i><span class="mc-att-name">' + esc(a.name) + '</span><small>' + fmtSize(a.size) + '</small><button type="button" data-rm-att="' + i + '" aria-label="Quitar ' + esc(a.name) + '">×</button></span>').join('');
+        icons();
+      }
+      $('mcAttachments').addEventListener('click', e => { const b = e.target.closest('[data-rm-att]'); if (!b) return; mcAtt.splice(+b.dataset.rmAtt, 1); renderAtt(); });
+      $('mcAttachBtn').onclick = () => $('mcFileInput').click();
+      $('mcFileInput').onchange = e => { addFiles([...e.target.files]); e.target.value = ''; };
+      ['dragenter', 'dragover'].forEach(t => form.addEventListener(t, e => { if (e.dataTransfer && [...e.dataTransfer.types].includes('Files')) { e.preventDefault(); form.classList.add('drag'); } }));
+      form.addEventListener('dragleave', e => { if (!form.contains(e.relatedTarget)) form.classList.remove('drag'); });
+      form.addEventListener('drop', e => { if (e.dataTransfer?.files?.length) { e.preventDefault(); form.classList.remove('drag'); addFiles([...e.dataTransfer.files]); } });
+
+      /* abrir */
+      window.openGmailCompose = function (p) {
+        p = p || {};
+        $('gmailTo').value = p.to || ''; $('gmailCc').value = p.cc || ''; $('gmailBcc').value = p.bcc || '';
+        $('gmailSubject').value = p.subject || '';
+        ed.innerHTML = p.html ? '<div><br></div>' + p.html : '';
+        form.dataset.threadId = p.threadId || ''; form.dataset.replyTo = p.replyTo || ''; form.dataset.references = p.references || '';
+        form.querySelectorAll('.mc-cc').forEach(r => r.hidden = !(p.cc || p.bcc));
+        mcAtt = (p.attachments || []).slice(); renderAtt();
+        $('mcSchedPanel').hidden = true; savedRange = null; mcDirty = false;
+        $('gmailComposeBackdrop').classList.add('open');
+        icons();
+        setTimeout(() => {
+          if (!$('gmailTo').value) $('gmailTo').focus();
+          else { ed.focus(); const r = document.createRange(); r.setStart(ed, 0); r.collapse(true); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+        }, 60);
+      };
+
+      /* confirmar antes de descartar */
+      const guard = e => { if (mcDirty && !confirm('¿Descartar este mensaje?')) { e.stopImmediatePropagation(); e.preventDefault(); } };
+      ['gmailCloseCompose', 'gmailCancelCompose'].forEach(id => $(id).addEventListener('click', guard, true));
+      $('gmailComposeBackdrop').addEventListener('click', e => { if (e.target === e.currentTarget) guard(e); }, true);
+      document.addEventListener('keydown', e => {
+        if (e.key !== 'Escape' || !composeOpen()) return;
+        e.stopImmediatePropagation();
+        if (!mcDirty || confirm('¿Descartar este mensaje?')) closeCompose();
+      }, true);
+
+      /* ---------- MIME ---------- */
+      const b64Lines = s => s.replace(/(.{76})/g, '$1\r\n');
+      function utf8b64(str) { const bytes = new TextEncoder().encode(str); let bin = ''; for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(bin); }
+      const encWord = s => /^[\x20-\x7e]*$/.test(s) ? s : '=?UTF-8?B?' + utf8b64(s) + '?=';
+      const encSubject = s => /^[\x20-\x7e]*$/.test(s) ? s : (s.match(/[\s\S]{1,30}/gu) || []).map(encWord).join('\r\n ');
+      function buildMime(m) {
+        const rnd = Math.random().toString(36).slice(2), alt = 'ctrl_alt_' + rnd, mix = 'ctrl_mix_' + rnd, N = '\r\n';
+        const h = ['To: ' + m.to];
+        if (m.cc) h.push('Cc: ' + m.cc);
+        if (m.bcc) h.push('Bcc: ' + m.bcc);
+        h.push('Subject: ' + encSubject(m.subject || ''));
+        if (m.replyTo) { h.push('In-Reply-To: ' + m.replyTo); h.push('References: ' + (m.references || m.replyTo)); }
+        h.push('MIME-Version: 1.0');
+        const htmlDoc = '<div dir="ltr">' + m.html + '</div>';
+        const altBody = ['--' + alt, 'Content-Type: text/plain; charset="UTF-8"', 'Content-Transfer-Encoding: base64', '', b64Lines(utf8b64(m.text || '')),
+        '--' + alt, 'Content-Type: text/html; charset="UTF-8"', 'Content-Transfer-Encoding: base64', '', b64Lines(utf8b64(htmlDoc)), '--' + alt + '--', ''].join(N);
+        if (!m.attachments.length) { h.push('Content-Type: multipart/alternative; boundary="' + alt + '"'); return h.join(N) + N + N + altBody; }
+        h.push('Content-Type: multipart/mixed; boundary="' + mix + '"');
+        let body = '--' + mix + N + 'Content-Type: multipart/alternative; boundary="' + alt + '"' + N + N + altBody + N;
+        m.attachments.forEach(a => {
+          const nm = encWord(String(a.name).replace(/"/g, "'"));
+          body += '--' + mix + N + 'Content-Type: ' + (a.type || 'application/octet-stream') + '; name="' + nm + '"' + N + 'Content-Transfer-Encoding: base64' + N + 'Content-Disposition: attachment; filename="' + nm + '"' + N + N + b64Lines(a.data) + N;
+        });
+        body += '--' + mix + '--' + N;
+        return h.join(N) + N + N + body;
+      }
+      async function sendMimeNow(m) {
+        const mime = buildMime(m);
+        if (!m.attachments.length) {
+          const payload = { raw: gmailEncode(mime) }; if (m.threadId) payload.threadId = m.threadId;
+          return gmailApi('messages/send', { method: 'POST', body: JSON.stringify(payload) });
+        }
+        if (!gmailAccessToken) throw new Error('Conectá Gmail para continuar.');
+        const b = 'ctrl_up_' + Math.random().toString(36).slice(2);
+        const meta = JSON.stringify(m.threadId ? { threadId: m.threadId } : {});
+        const body = new Blob(['--' + b + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + meta + '\r\n--' + b + '\r\nContent-Type: message/rfc822\r\n\r\n', mime, '\r\n--' + b + '--']);
+        const r = await fetch('https://gmail.googleapis.com/upload/gmail/v1/users/me/messages/send?uploadType=multipart', { method: 'POST', headers: { Authorization: 'Bearer ' + gmailAccessToken, 'Content-Type': 'multipart/related; boundary=' + b }, body });
+        if (!r.ok) {
+          let detail = 'Error ' + r.status; try { detail = (await r.json()).error?.message || detail; } catch { }
+          if (r.status === 401) { gmailAccessToken = null; try { sessionStorage.removeItem('ctrl_gmail_token'); } catch { } }
+          throw new Error(detail);
+        }
+        return r.json();
+      }
+
+      /* ---------- recolectar, enviar, programar ---------- */
+      const EMAIL_RE = /[^\s@<>,;]+@[^\s@<>,;]+\.[^\s@<>,;]+/;
+      const parseAddrs = s => s.split(/[,;]+/).map(x => x.trim()).filter(Boolean);
+      function collect() {
+        const to = parseAddrs($('gmailTo').value), cc = parseAddrs($('gmailCc').value), bcc = parseAddrs($('gmailBcc').value);
+        if (!to.length) { toast('Ingresá al menos un destinatario.'); return null; }
+        const bad = [...to, ...cc, ...bcc].find(a => !EMAIL_RE.test(a));
+        if (bad) { toast('La dirección «' + bad + '» no es válida.'); return null; }
+        const html = sanitizeHtml(ed.innerHTML), text = htmlToText(html);
+        if (!text && !mcAtt.length && !/<img/i.test(html) && !confirm('El mensaje está vacío. ¿Enviarlo igual?')) return null;
+        const subject = $('gmailSubject').value.trim();
+        if (!subject && !confirm('¿Enviar sin asunto?')) return null;
+        return { id: 'sched-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), to: to.join(', '), cc: cc.join(', '), bcc: bcc.join(', '), subject, html, text, threadId: form.dataset.threadId || '', replyTo: form.dataset.replyTo || '', references: form.dataset.references || '', attachments: mcAtt.map(a => ({ ...a })) };
+      }
+      form.onsubmit = async e => {
+        e.preventDefault();
+        if (!gmailAccessToken) { toast('Conectá Gmail para enviar.'); return; }
+        const m = collect(); if (!m) return;
+        const btn = $('gmailSendBtn'); btn.disabled = true; btn.textContent = 'Enviando…';
+        try {
+          await sendMimeNow(m);
+          mcDirty = false; closeCompose(); toast('Correo enviado');
+          gmailFolder = 'SENT'; document.querySelectorAll('[data-mail-folder]').forEach(b => b.classList.toggle('active', b.dataset.mailFolder === 'SENT'));
+          await loadGmailMessages('');
+        } catch (err) { toast('No se pudo enviar el correo: ' + err.message); }
+        finally { btn.disabled = false; btn.innerHTML = '<i data-lucide="send"></i> Enviar'; icons(); }
+      };
+
+      const SCHED_KEY = 'ctrl.mail.scheduled';
+      const getSched = () => { try { return JSON.parse(localStorage.getItem(SCHED_KEY) || '[]'); } catch { return []; } };
+      const setSched = a => { try { localStorage.setItem(SCHED_KEY, JSON.stringify(a)); return true; } catch { return false; } };
+      const updateSchedCount = () => { const n = getSched().length; const el = $('mailSchedCount'); if (el) el.textContent = n ? String(n) : ''; };
+
+      function presets() {
+        const at = (add, h) => { const x = new Date(); x.setDate(x.getDate() + add); x.setHours(h, 0, 0, 0); return x; };
+        const mon = new Date(); mon.setDate(mon.getDate() + ((8 - mon.getDay()) % 7 || 7)); mon.setHours(8, 0, 0, 0);
+        return { tomorrow8: at(1, 8), tomorrow14: at(1, 14), monday8: mon };
+      }
+      $('mcSchedBtn').onclick = () => {
+        const p = $('mcSchedPanel'); p.hidden = !p.hidden; if (p.hidden) return;
+        const pr = presets();
+        p.querySelectorAll('[data-sched]').forEach(b => { b.querySelector('small').textContent = fmtWhen(pr[b.dataset.sched].getTime()); });
+        $('mcSchedInput').min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      };
+      $('mcSchedPanel').querySelectorAll('[data-sched]').forEach(b => b.onclick = () => schedule(presets()[b.dataset.sched].getTime()));
+      $('mcSchedConfirm').onclick = () => {
+        const v = $('mcSchedInput').value; if (!v) { toast('Elegí una fecha y hora.'); return; }
+        schedule(new Date(v).getTime());
+      };
+      function schedule(sendAt) {
+        if (!(sendAt > Date.now() + 60000)) { toast('Elegí un momento al menos un minuto en el futuro.'); return; }
+        const m = collect(); if (!m) return;
+        if (m.attachments.reduce((a, x) => a + x.size, 0) > MAX_SCHED_ATT) { toast('Los correos programados admiten hasta 1,5 MB de adjuntos.'); return; }
+        m.sendAt = sendAt;
+        if (!setSched([...getSched(), m])) { toast('No hay espacio local para programar este correo.'); return; }
+        mcDirty = false; closeCompose(); updateSchedCount();
+        toast('Programado para el ' + fmtWhen(sendAt));
+        if (gmailFolder === 'SCHEDULED') renderScheduledList();
+      }
+
+      let schedBusy = false;
+      async function runScheduled() {
+        if (schedBusy || !gmailAccessToken) return;
+        const due = getSched().filter(s => s.sendAt <= Date.now() && !s.error);
+        if (!due.length) return;
+        schedBusy = true;
+        for (const s of due) {
+          try {
+            await sendMimeNow(s);
+            setSched(getSched().filter(x => x.id !== s.id));
+            toast('Se envió el correo programado: ' + (s.subject || '(Sin asunto)'));
+          } catch (err) {
+            if (!gmailAccessToken) break;
+            setSched(getSched().map(x => x.id === s.id ? { ...x, error: err.message } : x));
+            toast('No se pudo enviar un correo programado: ' + err.message);
+          }
+        }
+        schedBusy = false; updateSchedCount();
+        if (gmailFolder === 'SCHEDULED') renderScheduledList();
+      }
+      setInterval(runScheduled, 20000);
+
+      function renderScheduledList() {
+        const list = getSched().sort((a, b) => a.sendAt - b.sendAt);
+        $('mailDetail').hidden = true; $('mailList').hidden = false;
+        $('mailConnectionStatus').textContent = list.length + ' correos programados' + (gmailAccessToken ? '' : ' · conectá Gmail para que se envíen');
+        $('mailList').innerHTML = list.length ? list.map(s => '<div class="mail-row"><span class="mail-star" aria-hidden="true"><i data-lucide="clock"></i></span><span class="mail-sender">' + esc(s.to) + '</span><div style="min-width:0;overflow:hidden"><div class="mail-subject">' + esc(s.subject || '(Sin asunto)') + '</div><div class="mail-snippet">' + (s.error ? 'No se pudo enviar: ' + esc(s.error) : 'Se enviará el ' + esc(fmtWhen(s.sendAt))) + '</div></div><button type="button" class="tiny-btn" data-sched-cancel="' + esc(s.id) + '" title="Cancelar envío" aria-label="Cancelar envío"><i data-lucide="x"></i></button></div>').join('') : '<div class="mail-empty">No tenés correos programados.</div>';
+        $('mailList').querySelectorAll('[data-sched-cancel]').forEach(b => b.onclick = () => {
+          if (!confirm('¿Cancelar este envío programado?')) return;
+          setSched(getSched().filter(x => x.id !== b.dataset.schedCancel)); updateSchedCount(); renderScheduledList(); toast('Envío cancelado');
+        });
+        icons();
+      }
+      const origLoad = window.loadGmailMessages;
+      window.loadGmailMessages = async function () {
+        updateSchedCount();
+        if (gmailFolder === 'SCHEDULED') { renderScheduledList(); return; }
+        const r = await origLoad.apply(this, arguments);
+        runScheduled();
+        return r;
+      };
+      updateSchedCount();
+      if (gmailAccessToken) setTimeout(runScheduled, 1500);
+
+      /* =====================================================================
+         CALENDARIO — detalle dentro de Ctrl
+         ===================================================================== */
+      const evKey = e => (e._calendarId || 'ctrl') + '|' + e.id;
+      const allEvents = () => [...calendarEvents, ...taskCalendarEvents()];
+      const evWritable = e => !!googleAccessToken && ['owner', 'writer'].includes(googleCalendars.find(c => c.id === e._calendarId)?.accessRole);
+      const evMulti = e => {
+        if (e.start?.date) return (new Date((e.end?.date || e.start.date) + 'T12:00:00') - new Date(e.start.date + 'T12:00:00')) / 864e5 > 1;
+        return new Date(e.start.dateTime).toDateString() !== new Date(e.end?.dateTime || e.start.dateTime).toDateString();
+      };
+      function evRange(e) {
+        const day = d => d.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' });
+        const time = d => d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+        if (e.start?.date) {
+          const s = parseCalendarDate(e.start.date), en = parseCalendarDate(e.end?.date || e.start.date); en.setDate(en.getDate() - 1);
+          return (en > s ? day(s) + ' – ' + day(en) : day(s)) + ' · Todo el día';
+        }
+        const s = new Date(e.start.dateTime), en = new Date(e.end?.dateTime || e.start.dateTime);
+        return s.toDateString() === en.toDateString() ? day(s) + ' · ' + time(s) + ' – ' + time(en) : day(s) + ' ' + time(s) + ' – ' + day(en) + ' ' + time(en);
+      }
+
+      window.renderCalendarAgenda = function () {
+        const d = parseCalendarDate(calendarSelectedDate) || new Date();
+        const items = allEvents().filter(e => eventOccursOn(e, calendarSelectedDate)).sort((a, b) => eventStart(a).localeCompare(eventStart(b)));
+        $('calendarAgendaTitle').textContent = d.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' });
+        $('calendarAgendaSubtitle').textContent = calendarSelectedDate === dateNow() ? 'Tu agenda de hoy' : 'Eventos de este día';
+        $('calendarAgendaCount').textContent = String(items.length);
+        $('calendarEventsList').innerHTML = items.length ? items.map(e => '<div class="activity calendar-event-item" role="button" tabindex="0" data-event-key="' + esc(evKey(e)) + '"><div class="activity-icon" style="color:' + esc(e._calendarColor) + ';background:' + esc(e._calendarColor) + '20"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M16 3v4M8 3v4M3 10h18"/></svg></div><div class="activity-info"><strong>' + esc(e.summary || 'Evento sin título') + '</strong><span>' + esc(eventDateLabel(e)) + '</span><span>' + esc(e._calendarName) + '</span>' + (e.location ? '<span>' + esc(e.location) + '</span>' : '') + '</div><i data-lucide="chevron-right" class="ev-chev"></i></div>').join('') : '<div class="empty">No hay eventos para este día.</div>';
+        icons();
+      };
+      const agenda = $('calendarEventsList');
+      const openFromAgenda = el => {
+        const e = allEvents().find(x => evKey(x) === el.dataset.eventKey); if (!e) return;
+        if (e._isCtrlTask) { openTaskModal(state.tasks.find(t => 'ctrl-task-' + t.id === e.id)); return; }
+        openEventDetail(e);
+      };
+      agenda.addEventListener('click', e => { const el = e.target.closest('[data-event-key]'); if (el) openFromAgenda(el); });
+      agenda.addEventListener('keydown', e => { if (e.key !== 'Enter' && e.key !== ' ') return; const el = e.target.closest('[data-event-key]'); if (el) { e.preventDefault(); openFromAgenda(el); } });
+
+      let detailEvent = null;
+      function openEventDetail(e) {
+        detailEvent = e;
+        $('calDetailTitle').textContent = e.summary || 'Evento sin título';
+        $('calDetailWhen').textContent = evRange(e);
+        const row = (ic, label, inner) => '<div class="cal-row"><i data-lucide="' + ic + '"></i><div><small>' + label + '</small><div>' + inner + '</div></div></div>';
+        let h = row('calendar', 'Calendario', '<i class="cal-dot" style="background:' + esc(e._calendarColor) + '"></i>' + esc(e._calendarName));
+        if (e.location) h += row('map-pin', 'Ubicación', /^https?:\/\//i.test(e.location) ? '<a href="' + esc(e.location) + '" target="_blank" rel="noopener noreferrer">' + esc(e.location) + '</a>' : esc(e.location));
+        const meet = e.hangoutLink || e.conferenceData?.entryPoints?.find(p => p.entryPointType === 'video')?.uri;
+        if (meet && /^https:\/\//i.test(meet)) h += row('video', 'Videollamada', '<a class="secondary" style="display:inline-block;text-decoration:none" href="' + esc(meet) + '" target="_blank" rel="noopener noreferrer">Unirse a la reunión</a>');
+        if (e.description) h += row('align-left', 'Descripción', /<[a-z][\s\S]*>/i.test(e.description) ? sanitizeHtml(e.description) : '<div style="white-space:pre-wrap">' + linkify(esc(e.description)) + '</div>');
+        if (e.attendees?.length) {
+          const st = { accepted: 'Aceptó', declined: 'Rechazó', tentative: 'Tal vez', needsAction: 'Sin responder' };
+          h += row('users', 'Invitados (' + e.attendees.length + ')', '<div class="cal-guests">' + e.attendees.map(a => '<div class="cal-guest"><span>' + esc(a.displayName || a.email) + (a.organizer ? ' · organizador' : '') + '</span><span>' + esc(st[a.responseStatus] || '') + '</span></div>').join('') + '</div>');
+        } else if (e.organizer && !e.organizer.self) h += row('user', 'Organizador', esc(e.organizer.displayName || e.organizer.email || ''));
+        if (e.attachments?.length) h += row('paperclip', 'Archivos', e.attachments.filter(a => /^https:\/\//i.test(a.fileUrl || '')).map(a => '<div><a href="' + esc(a.fileUrl) + '" target="_blank" rel="noopener noreferrer">' + esc(a.title || a.fileUrl) + '</a></div>').join(''));
+        if (e.recurringEventId) h += row('repeat', 'Repetición', 'Evento recurrente (los cambios afectan solo a esta ocurrencia)');
+        $('calDetailBody').innerHTML = h;
+        const w = evWritable(e);
+        $('calDetailEdit').hidden = !w; $('calDetailDelete').hidden = !w;
+        $('calendarDetailBackdrop').classList.add('open'); icons();
+      }
+      $('closeCalDetail').onclick = () => closeModal('calendarDetailBackdrop');
+      $('calendarDetailBackdrop').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal('calendarDetailBackdrop'); });
+
+      $('calDetailDelete').onclick = async () => {
+        const e = detailEvent; if (!e || !confirm('¿Eliminar “' + (e.summary || 'este evento') + '” de Google Calendar?')) return;
+        try {
+          const r = await fetch('https://www.googleapis.com/calendar/v3/calendars/' + encodeURIComponent(e._calendarId) + '/events/' + encodeURIComponent(e.id), { method: 'DELETE', headers: { Authorization: 'Bearer ' + googleAccessToken } });
+          if (!r.ok && r.status !== 410) { let d = 'Error ' + r.status; try { d = (await r.json()).error?.message || d; } catch { } throw new Error(d); }
+          closeModal('calendarDetailBackdrop'); await loadGoogleCalendarEvents(); toast('Evento eliminado');
+        } catch (err) { toast('No se pudo eliminar: ' + err.message); }
+      };
+
+      /* edición: reutiliza el formulario de "Nuevo evento" */
+      const lockFields = off => ['eventDate', 'eventAllDay', 'eventStart', 'eventEnd'].forEach(id => $(id).disabled = off);
+      function openEventEditor(e) {
+        const f = $('calendarEventForm'); updateEventCalendarOptions(); f.reset();
+        f.dataset.editId = e.id; f.dataset.editCal = e._calendarId; f.dataset.keepTime = evMulti(e) ? '1' : '';
+        $('eventSummary').value = e.summary || '';
+        $('eventCalendar').value = e._calendarId; $('eventCalendar').disabled = true;
+        const allDay = !!e.start?.date;
+        $('eventAllDay').checked = allDay;
+        const s = allDay ? parseCalendarDate(e.start.date) : new Date(e.start.dateTime), en = new Date(e.end?.dateTime || e.start.dateTime);
+        $('eventDate').value = dateKey(s);
+        $('eventStart').value = allDay ? '09:00' : s.toTimeString().slice(0, 5);
+        $('eventEnd').value = allDay ? '10:00' : en.toTimeString().slice(0, 5);
+        $('eventColor').value = e.colorId || '';
+        $('eventLocation').value = e.location || '';
+        const d = e.description || '';
+        $('eventDescription').value = /<[a-z][\s\S]*>/i.test(d) ? htmlToText(d) : d;
+        f.dataset.origDesc = $('eventDescription').value;
+        lockFields(false);
+        $('eventStart').disabled = $('eventEnd').disabled = allDay;
+        if (f.dataset.keepTime) lockFields(true);
+        $('calendarEventTitle').textContent = 'Editar evento';
+        $('saveCalendarEventBtn').textContent = 'Guardar cambios ›';
+        $('calendarEventBackdrop').classList.add('open');
+      }
+      $('calDetailEdit').onclick = () => { const e = detailEvent; closeModal('calendarDetailBackdrop'); if (e) openEventEditor(e); };
+      $('newCalendarEventBtn').addEventListener('click', () => {
+        const f = $('calendarEventForm'); f.dataset.editId = ''; f.dataset.editCal = ''; f.dataset.keepTime = '';
+        $('eventCalendar').disabled = false; lockFields(false);
+        $('calendarEventTitle').textContent = 'Nuevo evento'; $('saveCalendarEventBtn').textContent = 'Crear evento ›';
+      });
+
+      $('calendarEventForm').onsubmit = async ev => {
+        ev.preventDefault();
+        const f = ev.currentTarget, editId = f.dataset.editId, keep = f.dataset.keepTime === '1';
+        const calendarId = editId ? f.dataset.editCal : $('eventCalendar').value;
+        if (!googleAccessToken) { toast('Volvé a conectar Google Calendar.'); return; }
+        const title = $('eventSummary').value.trim(), date = $('eventDate').value, allDay = $('eventAllDay').checked, st = $('eventStart').value, et = $('eventEnd').value;
+        if (!calendarId || !title || (!keep && !date)) { toast('Completá el título, calendario y fecha.'); return; }
+        if (!keep && !allDay && (!st || !et || et <= st)) { toast('La hora de finalización debe ser posterior a la de inicio.'); return; }
+        const payload = { summary: title };
+        if (!keep) {
+          if (allDay) { const end = new Date(date + 'T12:00:00'); end.setDate(end.getDate() + 1); payload.start = { date }; payload.end = { date: dateKey(end) }; if (editId) { payload.start.dateTime = null; payload.end.dateTime = null; } }
+          else { payload.start = { dateTime: eventDateTime(date, st) }; payload.end = { dateTime: eventDateTime(date, et) }; if (editId) { payload.start.date = null; payload.end.date = null; } }
+        }
+        const location = $('eventLocation').value.trim(), description = $('eventDescription').value.trim(), colorId = $('eventColor').value;
+        if (editId) {
+          payload.location = location;
+          if (description !== (f.dataset.origDesc || '').trim()) payload.description = description;
+          payload.colorId = colorId || null;
+        } else {
+          if (location) payload.location = location; if (description) payload.description = description; if (colorId) payload.colorId = colorId;
+        }
+        const btn = $('saveCalendarEventBtn'), label = btn.textContent; btn.disabled = true; btn.textContent = 'Guardando…';
+        try {
+          const url = 'https://www.googleapis.com/calendar/v3/calendars/' + encodeURIComponent(calendarId) + '/events' + (editId ? '/' + encodeURIComponent(editId) : '');
+          const r = await fetch(url, { method: editId ? 'PATCH' : 'POST', headers: { Authorization: 'Bearer ' + googleAccessToken, 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+          if (!r.ok) { let d = 'Error ' + r.status; try { d = (await r.json()).error?.message || d; } catch { } throw new Error(d); }
+          await r.json(); closeModal('calendarEventBackdrop');
+          if (!keep && date) { calendarSelectedDate = date; calendarMonth = new Date(Number(date.slice(0, 4)), Number(date.slice(5, 7)) - 1, 1); }
+          saveCalendarPreferences(); await loadGoogleCalendarEvents(); renderCalendar();
+          toast(editId ? 'Evento actualizado' : 'Evento guardado en Google Calendar');
+        } catch (err) { console.error(err); toast('No se pudo guardar el evento: ' + err.message); }
+        finally { btn.disabled = false; btn.textContent = label; }
+      };
     })();
   </script>
 </body>
