@@ -3886,6 +3886,12 @@
       flex-direction: column
     }
 
+    /* Los estilos de display deben respetar el atributo hidden al alternar lista y lectura. */
+    .mail-list[hidden],
+    .mail-detail[hidden] {
+      display: none !important
+    }
+
     .mail-row {
       display: grid;
       grid-template-columns: 28px minmax(110px, 170px) minmax(0, 1fr) 72px;
