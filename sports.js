@@ -194,7 +194,12 @@
   const loadingHtml = t => '<div class="empty">' + esc(t) + '</div>';
   const emptyHtml = t => '<div class="empty">' + t + '</div>';
   function errorHtml(e, retry) {
-    const msg = e && e.status === 401 ? 'PitchAPI no aceptó la API key (401). Revisala en sports.js.' : esc(e && e.message || 'Error desconocido');
+    let msg;
+    if (e && e.status === 401) msg = 'PitchAPI rechazó la clave de acceso (401). Revisá PITCHAPI_API_KEY en las variables de entorno de Vercel.';
+    else if (e && e.status === 404 && e.code === 'RESOURCE_NOT_FOUND') msg = 'PitchAPI ya no encuentra este registro. Puede haber cambiado su ID; actualizá los datos o elegí otra competición.';
+    else if (e && e.status === 404) msg = 'PitchAPI devolvió 404: el recurso solicitado no está disponible para estos datos.';
+    else if (e && e.status === 503) msg = esc(e.message || 'El proxy de Deportes no está configurado. Revisá PITCHAPI_API_KEY en Vercel.');
+    else msg = esc(e && e.message || 'Error desconocido');
     return '<div class="empty">' + msg + '<br><button class="secondary" style="margin-top:12px" data-sp-retry="' + retry + '">Reintentar</button></div>';
   }
   function matchRow(m, showDate) {
