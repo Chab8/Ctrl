@@ -94,16 +94,29 @@
   }
 
   /* ---------------------------------------------------- ligas y escudos */
-  const L = { list: [], byId: new Map() };
-  function setLeagues(list) { L.list = list || []; L.byId = new Map(L.list.map(l => [l.id, l])); }
-  async function loadLeagues() {
-    if (L.list.length) return;
-    try { const c = JSON.parse(lsGet('ctrl.sports.leagues') || 'null'); if (c && Array.isArray(c.list) && c.list.length) setLeagues(c.list); if (c && Date.now() - c.t < 864e5 && L.list.length) return; } catch { }
+  const L = { list: [], byId: new Map(), loaded: false };
+  function setLeagues(list) {
+    L.list = Array.isArray(list) ? list.filter(l => l && l.id && l.name) : [];
+    L.byId = new Map(L.list.map(l => [String(l.id), l]));
+  }
+  async function loadLeagues(force) {
+    // PitchAPI puede cambiar IDs del catálogo. El caché se usa para pintar rápido,
+    // pero se refresca una vez por sesión para evitar búsquedas con IDs obsoletos (404).
+    if (L.loaded && !force) return;
     try {
-      const d = await api('/v1/leagues', null, { ttl: 864e5 });
-      setLeagues((d && d.leagues) || []);
+      const c = JSON.parse(lsGet('ctrl.sports.leagues') || 'null');
+      if (!L.list.length && c && Array.isArray(c.list) && c.list.length) setLeagues(c.list);
+    } catch { }
+    try {
+      const d = await api('/v1/leagues', null, { ttl: 0, force: true });
+      if (!d || !Array.isArray(d.leagues)) throw new Error('PitchAPI devolvió un catálogo de competiciones inválido.');
+      setLeagues(d.leagues);
       lsSet('ctrl.sports.leagues', JSON.stringify({ t: Date.now(), list: L.list.map(l => ({ id: l.id, name: l.name, country_code: l.country_code, image_url: l.image_url, seasons: l.seasons })) }));
-    } catch (e) { if (!L.list.length) throw e; }
+      L.loaded = true;
+    } catch (e) {
+      if (!L.list.length) throw e;
+      L.loaded = true; // El caché mantiene usable la sección si PitchAPI está temporalmente caída.
+    }
   }
   const leagueImg = id => (L.byId.get(id) || {}).image_url || '';
 
