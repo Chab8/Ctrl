@@ -8252,6 +8252,117 @@
       };
     })();
   </script>
+  <script>
+    /* ===== Sesión de Google persistente (Calendario + Gmail) ===== */
+    (function () {
+      const SCOPES = [
+        'https://www.googleapis.com/auth/calendar.readonly',
+        'https://www.googleapis.com/auth/calendar.events',
+        'https://www.googleapis.com/auth/gmail.modify',
+        'https://www.googleapis.com/auth/gmail.send'
+      ].join(' ');
+      const KEY = 'ctrl.google.auth.v1';
+      let client = null, timer = null, requesting = false, manual = false, needGesture = false, warned = false;
+
+      const read = () => { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch { return null; } };
+      const write = o => { try { localStorage.setItem(KEY, JSON.stringify(o)); } catch { } };
+      const ready = () => !!(window.google && google.accounts && google.accounts.oauth2);
+
+      function getClient() {
+        if (!client) client = google.accounts.oauth2.initTokenClient({
+          client_id: GOOGLE_CLIENT_ID,
+          scope: SCOPES,
+          callback: onToken,
+          error_callback: err => {
+            requesting = false;
+            // El navegador bloqueó el popup silencioso: reintentamos en el primer toque/click
+            if (err && err.type === 'popup_failed_to_open') needGesture = true;
+            manual = false;
+          }
+        });
+        return client;
+      }
+
+      function onToken(r) {
+        requesting = false;
+        if (r.error || !r.access_token) {
+          if (manual) toast('No se pudo autorizar Google: ' + (r.error || 'sin token'));
+          else if (!warned) { warned = true; toast('Tu sesión de Google venció. Conectá Google una vez para reactivarla.'); }
+          manual = false; return;
+        }
+        manual = false; warned = false;
+        const first = !googleAccessToken;
+        const expiresAt = Date.now() + Number(r.expires_in || 3600) * 1000;
+        const prev = read() || {};
+        write({ accessToken: r.access_token, expiresAt, hint: prev.hint || '' });
+        applyToken(r.access_token, expiresAt, first);
+        if (!prev.hint) gmailApi('profile').then(p => { const a = read(); if (a && p.emailAddress) { a.hint = p.emailAddress; write(a); } }).catch(() => { });
+      }
+
+      function applyToken(token, expiresAt, first) {
+        googleAccessToken = token; gmailAccessToken = token;
+        try { localStorage.setItem('ctrl_google_calendar_connected', '1'); } catch { }
+        $('calendarConnectCard').hidden = true; $('calendarMainCard').hidden = false; $('connectGoogleBtn').hidden = true;
+        $('mailConnectCard').hidden = true; $('mailWorkspace').hidden = false;
+        if (first) {
+          loadGoogleCalendarEvents();
+          if (!$('mailView').hidden) loadGmailMessages();
+        }
+        clearTimeout(timer);
+        timer = setTimeout(silent, Math.max(30000, expiresAt - Date.now() - 5 * 60000));
+      }
+
+      function silent() {
+        if (!ready() || requesting) return;
+        requesting = true;
+        const a = read();
+        getClient().requestAccessToken({ prompt: 'none', hint: a && a.hint ? a.hint : undefined });
+      }
+
+      function connectManual() {
+        if (!ready()) { toast('Google todavía está cargando. Probá de nuevo en unos segundos.'); return; }
+        manual = true; requesting = true;
+        const a = read();
+        getClient().requestAccessToken({ prompt: a && a.hint ? '' : 'consent', hint: a && a.hint ? a.hint : undefined });
+      }
+      // Los dos botones ("Conectar Google" y "Conectar con Google") usan el mismo login
+      window.connectGoogleCalendar = connectManual;
+      window.connectGmail = connectManual;
+      $('connectGoogleBtn').onclick = connectManual;
+      $('connectGmailBtn').onclick = connectManual;
+
+      // Desconectar en cualquiera de los dos borra la sesión guardada
+      const forget = () => { clearTimeout(timer); try { localStorage.removeItem(KEY); } catch { } };
+      $('disconnectGoogleBtn').addEventListener('click', forget);
+      $('disconnectGmailBtn').addEventListener('click', forget);
+
+      // Si el popup silencioso fue bloqueado, se reintenta con el primer gesto del usuario
+      ['click', 'keydown'].forEach(t => addEventListener(t, () => {
+        if (needGesture && !requesting) { needGesture = false; silent(); }
+      }, true));
+
+      // Al volver a la pestaña/app con el token vencido, renovar
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState !== 'visible') return;
+        const a = read();
+        if (a && a.accessToken && a.expiresAt < Date.now() + 60000) silent();
+      });
+
+      // Arranque
+      const a = read();
+      const wasConnected = !!a || localStorage.getItem('ctrl_google_calendar_connected') === '1';
+      if (wasConnected) {
+        if (a && a.accessToken && a.expiresAt > Date.now() + 60000) applyToken(a.accessToken, a.expiresAt, true);
+        else {
+          let tries = 0;
+          const wait = setInterval(() => {
+            if (ready()) { clearInterval(wait); silent(); }
+            else if (++tries > 50) clearInterval(wait);
+          }, 200);
+        }
+      }
+    })();
+  </script>
 </body>
 
 </html>
