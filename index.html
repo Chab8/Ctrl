@@ -8363,6 +8363,11 @@
       }
     })();
   </script>
+  <script>
+    // Bridge the existing page router for separately loaded modules.
+    window.setPage = setPage;
+  </script>
+  <script src="./sports.js"></script>
 </body>
 
 </html>
