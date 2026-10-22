@@ -390,7 +390,25 @@
       const list = [...m.values()].filter(t => !q || t.name.toLowerCase().includes(q)).sort((a, b) => a.name.localeCompare(b.name, 'es'));
       body.innerHTML = list.length ? list.map(t => '<div class="sp-mrow">' + crest(t) + '<span class="sp-name">' + esc(t.name) + '</span>' + followBtn(isTeamF(t.id), 'data-follow-team="' + esc(t.id) + '" data-name="' + esc(t.name) + '" data-league="' + esc(lid) + '"') + '</div>').join('') : emptyHtml('No encontré equipos' + (q ? ' con ese nombre.' : ' en esta competición.'));
       hydrate(body);
-    } catch (e) { if (ui.manageLeague === lid) body.innerHTML = errorHtml(e, 'manageTeams'); }
+    } catch (e) {
+      if (ui.manageLeague !== lid) return;
+      // Una competición puede haber cambiado de ID en PitchAPI. Actualizar catálogo
+      // y no dejar al usuario atrapado en una selección obsoleta.
+      if (e.status === 404) {
+        try {
+          await loadLeagues(true);
+          if (!L.byId.has(lid)) {
+            ui.manageLeague = '';
+            $('spManageLeague').innerHTML = '<option value="">Elegí una competición…</option>' + leagueOptions('');
+            $('spManageLeague').value = '';
+            return paintManage();
+          }
+          body.innerHTML = errorHtml(new Error('PitchAPI no encontró partidos para esta competición. Probá elegir otra temporada o competición.'), 'manageTeams');
+          return;
+        } catch { }
+      }
+      body.innerHTML = errorHtml(e, 'manageTeams');
+    }
   }
 
   /* -------------------------------------------------- detalle de partido */
