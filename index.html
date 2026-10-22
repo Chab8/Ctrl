@@ -5714,6 +5714,50 @@
     html[data-theme="dark"] .mc-sched {
       box-shadow: 0 14px 40px #000a
     }
+
+    /* Mail: lector que reemplaza la lista */
+    .mail-list[hidden],
+    .mail-detail[hidden] {
+      display: none !important
+    }
+
+    .mail-main:has(.mail-detail:not([hidden])) .mail-toolbar,
+    .mail-main:has(.mail-detail:not([hidden])) .mail-status {
+      display: none
+    }
+
+    .mail-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 10px;
+      margin-top: 14px
+    }
+
+    .mail-gal-item {
+      border: 1px solid var(--line);
+      background: var(--soft);
+      border-radius: 12px;
+      padding: 0;
+      overflow: hidden;
+      aspect-ratio: 4/3;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 10px
+    }
+
+    .mail-gal-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block
+    }
+
+    .mail-gal-ph {
+      padding: 8px;
+      overflow-wrap: anywhere
+    }
   </style>
 </head>
 
@@ -6714,8 +6758,89 @@
     function gmailBody(payload) { if (!payload) return ''; if (payload.mimeType === 'text/plain' && payload.body?.data) return gmailDecode(payload.body.data); if (payload.parts) { for (const p of payload.parts) { const found = gmailBody(p); if (found) return found } } if (payload.body?.data) return gmailDecode(payload.body.data); return '' }
     function gmailDate(ms) { const d = new Date(Number(ms)); if (Number.isNaN(d.getTime())) return ''; const now = new Date(); return d.toDateString() === now.toDateString() ? d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) : d.toLocaleDateString('es-AR', { day: '2-digit', month: 'short' }) }
     function gmailFromLabel(from) { const match = from.match(/^"?([^"<]+)"?\s*<[^>]+>$/); return (match ? match[1].trim() : from).replace(/^"|"$/g, '') || from }
-    async function loadGmailMessages(queryOverride) { if (!gmailAccessToken || gmailBusy) return; gmailBusy = true; $('mailConnectionStatus').textContent = 'Actualizando correos…'; $('mailList').innerHTML = '<div class="mail-empty">Cargando correos…</div>'; $('mailDetail').hidden = true; $('mailList').hidden = false; try { const query = queryOverride !== undefined ? queryOverride : $('mailSearchInput').value.trim(); const params = new URLSearchParams({ maxResults: '35' }); if (query) params.set('q', query); else if (gmailFolder === 'INBOX') params.set('labelIds', 'INBOX'); else if (gmailFolder === 'STARRED') params.set('labelIds', 'STARRED'); else if (gmailFolder === 'SENT') params.set('labelIds', 'SENT'); else if (gmailFolder === 'DRAFT') params.set('labelIds', 'DRAFT'); else if (gmailFolder === 'IMPORTANT') params.set('labelIds', 'IMPORTANT'); else if (gmailFolder === 'TRASH') params.set('labelIds', 'TRASH'); const list = await gmailApi('messages?' + params.toString()); const raw = list.messages || []; gmailMessages = await Promise.all(raw.map(async item => { try { return await gmailApi('messages/' + encodeURIComponent(item.id) + '?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date') } catch { return null } })); gmailMessages = gmailMessages.filter(Boolean); renderGmailMessages(); $('mailConnectionStatus').textContent = gmailMessages.length + ' correos' + (query ? ' · resultados de búsqueda' : ''); const unread = gmailMessages.filter(m => m.labelIds?.includes('UNREAD')).length; $('mailUnreadCount').textContent = unread ? String(unread) : '' } catch (error) { $('mailConnectionStatus').textContent = 'No se pudo cargar Gmail'; $('mailList').innerHTML = '<div class="mail-empty">' + esc(error.message) + '<br><br>Verificá que Gmail API esté habilitada en el proyecto de Google Cloud y que el acceso esté autorizado.</div>'; if (!gmailAccessToken) { $('mailConnectCard').hidden = false; $('mailWorkspace').hidden = true } } finally { gmailBusy = false } }
-    function renderGmailMessages() { if (!gmailMessages.length) { $('mailList').innerHTML = '<div class="mail-empty">No hay correos en esta carpeta.</div>'; return } $('mailList').innerHTML = gmailMessages.map(m => { const from = gmailHeader(m, 'From'), subject = gmailHeader(m, 'Subject') || '(Sin asunto)', snippet = m.snippet || '', unread = m.labelIds?.includes('UNREAD'), starred = m.labelIds?.includes('STARRED'); return '<div class="mail-row ' + (unread ? 'unread' : '') + '"><button class="mail-star ' + (starred ? 'starred' : '') + '" data-gmail-star="' + esc(m.id) + '" aria-label="' + (starred ? 'Quitar destacado' : 'Destacar') + '">' + (starred ? '★' : '☆') + '</button><button class="mail-sender" data-gmail-open="' + esc(m.id) + '" style="border:0;background:none;text-align:left;color:inherit;cursor:pointer;min-width:0">' + esc(gmailFromLabel(from)) + '</button><button data-gmail-open="' + esc(m.id) + '" style="border:0;background:none;text-align:left;color:inherit;cursor:pointer;min-width:0;overflow:hidden"><div class="mail-subject">' + esc(subject) + '</div><div class="mail-snippet">' + esc(snippet) + '</div></button><span class="mail-time">' + esc(gmailDate(m.internalDate)) + '</span></div>' }).join(''); $('mailList').querySelectorAll('[data-gmail-open]').forEach(b => b.onclick = () => openGmailMessage(b.dataset.gmailOpen)); $('mailList').querySelectorAll('[data-gmail-star]').forEach(b => b.onclick = async () => { const m = gmailMessages.find(x => x.id === b.dataset.gmailStar); if (!m) return; try { await gmailApi('messages/' + encodeURIComponent(m.id) + '/modify', { method: 'POST', body: JSON.stringify(m.labelIds?.includes('STARRED') ? { removeLabelIds: ['STARRED'] } : { addLabelIds: ['STARRED'] }) }); await loadGmailMessages() } catch (e) { toast('No se pudo actualizar el destacado: ' + e.message) } }); if (window.lucide) lucide.createIcons() }
+    let gmailReqId = 0;
+    const gmailMetaCache = new Map();   // id -> { m, t }
+    const gmailFolderCache = {};        // "carpeta|búsqueda" -> [ids]
+    const GMAIL_META_TTL = 120000;
+
+    async function loadGmailMessages(queryOverride, force) {
+      if (!gmailAccessToken) return;
+      const reqId = ++gmailReqId;
+      const query = queryOverride !== undefined ? queryOverride : $('mailSearchInput').value.trim();
+      const key = gmailFolder + '|' + query;
+      $('mailDetail').hidden = true; $('mailList').hidden = false;
+
+      // Mostrar al instante lo que ya conocemos mientras se actualiza
+      const cachedIds = gmailFolderCache[key];
+      if (cachedIds) {
+        gmailMessages = cachedIds.map(id => gmailMetaCache.get(id)?.m).filter(Boolean);
+        renderGmailMessages();
+        $('mailConnectionStatus').textContent = 'Actualizando…';
+      } else {
+        $('mailConnectionStatus').textContent = 'Cargando correos…';
+        $('mailList').innerHTML = '<div class="mail-empty">Cargando correos…</div>';
+      }
+
+      try {
+        const params = new URLSearchParams({ maxResults: '25' });
+        if (query) params.set('q', query);
+        else if (['INBOX', 'STARRED', 'SENT', 'DRAFT', 'IMPORTANT', 'TRASH'].includes(gmailFolder)) params.set('labelIds', gmailFolder);
+        const list = await gmailApi('messages?' + params.toString());
+        if (reqId !== gmailReqId) return;
+        const ids = (list.messages || []).map(x => x.id);
+        gmailFolderCache[key] = ids;
+
+        const now = Date.now();
+        const need = ids.filter(id => force || !gmailMetaCache.get(id) || now - gmailMetaCache.get(id).t > GMAIL_META_TTL);
+        const fetchOne = async id => {
+          try {
+            const m = await gmailApi('messages/' + encodeURIComponent(id) + '?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date');
+            gmailMetaCache.set(id, { m, t: Date.now() });
+          } catch { }
+        };
+        const build = () => { gmailMessages = ids.map(id => gmailMetaCache.get(id)?.m).filter(Boolean); };
+        const finish = () => {
+          renderGmailMessages();
+          $('mailConnectionStatus').textContent = gmailMessages.length + ' correos' + (query ? ' · resultados de búsqueda' : '');
+        };
+
+        if (need.length) {
+          // los 12 más nuevos primero, para que la lista aparezca enseguida
+          await Promise.all(need.slice(0, 12).map(fetchOne));
+          if (reqId !== gmailReqId) return;
+          build(); finish();
+          if (need.length > 12) {
+            await Promise.all(need.slice(12).map(fetchOne));
+            if (reqId !== gmailReqId) return;
+          }
+        }
+        build(); finish();
+      } catch (error) {
+        if (reqId !== gmailReqId) return;
+        $('mailConnectionStatus').textContent = 'No se pudo cargar Gmail';
+        if (!cachedIds) $('mailList').innerHTML = '<div class="mail-empty">' + esc(error.message) + '<br><br>Verificá que Gmail API esté habilitada en el proyecto de Google Cloud y que el acceso esté autorizado.</div>';
+        if (!gmailAccessToken) { $('mailConnectCard').hidden = false; $('mailWorkspace').hidden = true }
+      }
+    }
+
+    function renderGmailMessages() {
+      if (!gmailMessages.length) { $('mailList').innerHTML = '<div class="mail-empty">No hay correos en esta carpeta.</div>'; return }
+      $('mailList').innerHTML = gmailMessages.map(m => {
+        const from = gmailHeader(m, 'From'), subject = gmailHeader(m, 'Subject') || '(Sin asunto)', snippet = m.snippet || '', unread = m.labelIds?.includes('UNREAD'), starred = m.labelIds?.includes('STARRED');
+        return '<div class="mail-row ' + (unread ? 'unread' : '') + '"><button class="mail-star ' + (starred ? 'starred' : '') + '" data-gmail-star="' + esc(m.id) + '" aria-label="' + (starred ? 'Quitar destacado' : 'Destacar') + '">' + (starred ? '★' : '☆') + '</button><button class="mail-sender" data-gmail-open="' + esc(m.id) + '" style="border:0;background:none;text-align:left;color:inherit;cursor:pointer;min-width:0">' + esc(gmailFromLabel(from)) + '</button><button data-gmail-open="' + esc(m.id) + '" style="border:0;background:none;text-align:left;color:inherit;cursor:pointer;min-width:0;overflow:hidden"><div class="mail-subject">' + esc(subject) + '</div><div class="mail-snippet">' + esc(snippet) + '</div></button><span class="mail-time">' + esc(gmailDate(m.internalDate)) + '</span></div>';
+      }).join('');
+      $('mailList').querySelectorAll('[data-gmail-open]').forEach(b => b.onclick = () => openGmailMessage(b.dataset.gmailOpen));
+      $('mailList').querySelectorAll('[data-gmail-star]').forEach(b => b.onclick = async () => {
+        const m = gmailMessages.find(x => x.id === b.dataset.gmailStar); if (!m) return;
+        const was = !!m.labelIds?.includes('STARRED'), prev = m.labelIds || [];
+        m.labelIds = was ? prev.filter(l => l !== 'STARRED') : [...prev, 'STARRED'];
+        renderGmailMessages();
+        try { await gmailApi('messages/' + encodeURIComponent(m.id) + '/modify', { method: 'POST', body: JSON.stringify(was ? { removeLabelIds: ['STARRED'] } : { addLabelIds: ['STARRED'] }) }) }
+        catch (e) { m.labelIds = prev; renderGmailMessages(); toast('No se pudo actualizar el destacado: ' + e.message) }
+      });
+      if (gmailFolder === 'INBOX') { const unread = gmailMessages.filter(m => m.labelIds?.includes('UNREAD')).length; $('mailUnreadCount').textContent = unread ? String(unread) : '' }
+      if (window.lucide) lucide.createIcons();
+    }
     async function openGmailMessage(id) { try { const m = await gmailApi('messages/' + encodeURIComponent(id) + '?format=full'); gmailCurrentMessage = m; const headers = m.payload?.headers || [], from = gmailHeader(m, 'From'), to = gmailHeader(m, 'To'), subject = gmailHeader(m, 'Subject') || '(Sin asunto)', date = gmailHeader(m, 'Date'); const body = gmailBody(m.payload); $('mailList').hidden = true; $('mailDetail').hidden = false; $('mailDetail').innerHTML = '<div class="mail-detail-head"><button class="secondary" id="gmailBackBtn"><i data-lucide="arrow-left"></i> Volver</button><span style="flex:1"></span><button class="secondary" id="gmailArchiveBtn"><i data-lucide="archive"></i> Archivar</button><button class="secondary" id="gmailDeleteBtn"><i data-lucide="trash-2"></i></button></div><h2 class="mail-detail-title">' + esc(subject) + '</h2><div class="mail-detail-meta"><i data-lucide="circle-user-round"></i><div><strong>' + esc(gmailFromLabel(from)) + '</strong><div>' + esc(from) + '</div><div>Para: ' + esc(to || 'vos') + ' · ' + esc(date) + '</div></div></div><div class="mail-body">' + esc(body || 'No se encontró una versión de texto de este correo.') + '</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="primary" id="gmailReplyBtn"><i data-lucide="reply"></i> Responder</button><button class="secondary" id="gmailForwardBtn"><i data-lucide="forward"></i> Reenviar</button></div>'; if (window.lucide) lucide.createIcons(); $('gmailBackBtn').onclick = () => { $('mailDetail').hidden = true; $('mailList').hidden = false }; $('gmailReplyBtn').onclick = () => openGmailCompose({ to: from.replace(/^.*<([^>]+)>.*$/, '$1'), subject: /^re:/i.test(subject) ? subject : 'Re: ' + subject, body: '\n\n--- Mensaje original ---\n' + body, threadId: m.threadId, replyTo: gmailHeader(m, 'Message-ID') }); $('gmailForwardBtn').onclick = () => openGmailCompose({ subject: /^fwd?:/i.test(subject) ? subject : 'Fwd: ' + subject, body: '\n\n--- Mensaje reenviado ---\nDe: ' + from + '\nFecha: ' + date + '\nAsunto: ' + subject + '\n\n' + body }); $('gmailArchiveBtn').onclick = async () => { try { await gmailApi('messages/' + encodeURIComponent(id) + '/modify', { method: 'POST', body: JSON.stringify({ removeLabelIds: ['INBOX'] }) }); toast('Correo archivado'); await loadGmailMessages() } catch (e) { toast('No se pudo archivar: ' + e.message) } }; $('gmailDeleteBtn').onclick = async () => { try { await gmailApi('messages/' + encodeURIComponent(id) + '/trash', { method: 'POST' }); toast('Correo movido a la papelera'); await loadGmailMessages() } catch (e) { toast('No se pudo eliminar: ' + e.message) } }; if (m.labelIds?.includes('UNREAD')) await gmailApi('messages/' + encodeURIComponent(id) + '/modify', { method: 'POST', body: JSON.stringify({ removeLabelIds: ['UNREAD'] }) }) } catch (error) { toast('No se pudo abrir el correo: ' + error.message) } }
     function openGmailCompose(prefill = {}) { const backdrop = $('gmailComposeBackdrop'); backdrop.classList.add('open'); $('gmailTo').value = prefill.to || ''; $('gmailCc').value = prefill.cc || ''; $('gmailBcc').value = prefill.bcc || ''; $('gmailSubject').value = prefill.subject || ''; $('gmailBody').value = prefill.body || ''; $('gmailComposeForm').dataset.threadId = prefill.threadId || ''; $('gmailComposeForm').dataset.replyTo = prefill.replyTo || ''; setTimeout(() => $('gmailTo').focus(), 50) }
     async function sendGmailMessage(event) { event.preventDefault(); const to = $('gmailTo').value.trim(), cc = $('gmailCc').value.trim(), bcc = $('gmailBcc').value.trim(), subject = $('gmailSubject').value, body = $('gmailBody').value; if (!to) { toast('Ingresá al menos un destinatario.'); return } const headers = ['To: ' + to]; if (cc) headers.push('Cc: ' + cc); if (bcc) headers.push('Bcc: ' + bcc); headers.push('Subject: =?UTF-8?B?' + btoa(unescape(encodeURIComponent(subject))) + '?='); const replyTo = $('gmailComposeForm').dataset.replyTo; if (replyTo) { headers.push('In-Reply-To: ' + replyTo, 'References: ' + replyTo) } headers.push('MIME-Version: 1.0', 'Content-Type: text/plain; charset=UTF-8', 'Content-Transfer-Encoding: 8bit'); const raw = gmailEncode(headers.join('\r\n') + '\r\n\r\n' + body); const button = $('gmailSendBtn'); button.disabled = true; button.textContent = 'Enviando…'; try { const payload = { raw }; const threadId = $('gmailComposeForm').dataset.threadId; if (threadId) payload.threadId = threadId; await gmailApi('messages/send', { method: 'POST', body: JSON.stringify(payload) }); $('gmailComposeBackdrop').classList.remove('open'); toast('Correo enviado'); gmailFolder = 'SENT'; document.querySelectorAll('[data-mail-folder]').forEach(b => b.classList.toggle('active', b.dataset.mailFolder === gmailFolder)); await loadGmailMessages() } catch (error) { toast('No se pudo enviar el correo: ' + error.message) } finally { button.disabled = false; button.innerHTML = '<i data-lucide="send"></i> Enviar'; if (window.lucide) lucide.createIcons() } }
@@ -7021,7 +7146,7 @@
 
 
     $('connectGmailBtn').onclick = connectGmail;
-    $('mailRefreshBtn').onclick = () => loadGmailMessages();
+    $('mailRefreshBtn').onclick = () => loadGmailMessages(undefined, true);
     $('mailComposeBtn').onclick = () => gmailAccessToken ? openGmailCompose() : connectGmail();
     $('mailSearchBtn').onclick = () => loadGmailMessages($('mailSearchInput').value.trim());
     $('mailSearchInput').onkeydown = e => { if (e.key === 'Enter') loadGmailMessages($('mailSearchInput').value.trim()) };
@@ -7523,18 +7648,21 @@
          MAIL — lectura
          ===================================================================== */
       function gmailParts(payload) {
-        const out = { html: '', text: '', attachments: [], inline: {} };
+        const out = { html: '', text: '', attachments: [], images: [], inline: {}, pending: [] };
         (function walk(p) {
           if (!p) return;
-          const mime = p.mimeType || '';
+          const mime = (p.mimeType || '').toLowerCase(), body = p.body || {};
           const hdr = n => (p.headers || []).find(h => h.name.toLowerCase() === n)?.value || '';
-          const cid = hdr('content-id').replace(/[<>\s]/g, '');
-          if (p.body?.attachmentId) {
-            if (cid && mime.startsWith('image/')) out.inline[cid] = { id: p.body.attachmentId, mime };
-            else if (p.filename) out.attachments.push({ id: p.body.attachmentId, name: p.filename, mime, size: p.body.size || 0 });
-          } else if (!p.filename && p.body?.data) {
-            if (mime === 'text/html') out.html += gmailDecode(p.body.data);
-            else if (mime === 'text/plain') out.text += gmailDecode(p.body.data);
+          const cid = hdr('content-id').replace(/[<>\s]/g, '').toLowerCase();
+          if (mime.startsWith('image/') && (body.attachmentId || body.data)) {
+            const ref = { cid, id: body.attachmentId || '', data: body.data || '', mime, name: p.filename || 'imagen', size: body.size || 0 };
+            out.images.push(ref);
+            if (cid) out.inline[cid] = ref;
+          } else if (!p.filename && (mime === 'text/html' || mime === 'text/plain')) {
+            if (body.data) { const t = gmailDecode(body.data); if (mime === 'text/html') out.html += t; else out.text += t; }
+            else if (body.attachmentId) out.pending.push({ id: body.attachmentId, mime });
+          } else if (body.attachmentId && p.filename) {
+            out.attachments.push({ id: body.attachmentId, name: p.filename, mime, size: body.size || 0 });
           }
           (p.parts || []).forEach(walk);
         })(payload);
@@ -7548,67 +7676,137 @@
         const LT = '<', GT = '>';
         const tag = (name, attrs = '') => LT + name + (attrs ? ' ' + attrs : '') + GT;
         const close = name => LT + '/' + name + GT;
-
-        const csp = "default-src 'none'; img-src data:" + (allowImages ? ' https:' : '') + "; style-src 'unsafe-inline'; font-src data:";
+        const csp = "default-src 'none'; img-src data: blob:" + (allowImages ? ' https:' : '') + "; style-src 'unsafe-inline'; font-src data:";
         const clean = String(html || '')
           .replace(/<(meta|base|link)\b[^>]*>/gi, '')
           .replace(new RegExp(LT + 'scr' + 'ipt[\\s\\S]*?' + LT + '\\/scr' + 'ipt' + GT, 'gi'), '');
         const body = clean || (tag('div', 'style="white-space:pre-wrap"') + esc(text || '(Mensaje vacío)') + close('div'));
         const css = 'html,body{margin:0}body{font:14px/1.6 -apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#202124;background:#fff;padding:18px;overflow-wrap:anywhere;word-break:break-word}img{max-width:100%;height:auto}table{max-width:100%}blockquote{margin:8px 0 8px 4px;padding-left:12px;border-left:3px solid #dadce0;color:#5f6368}a{color:#1a73e8}';
-
         return LT + '!doctype html' + GT + tag('html') + tag('head')
           + tag('meta', 'charset="utf-8"')
+          + tag('meta', 'name="referrer" content="no-referrer"')
           + tag('meta', 'http-equiv="Content-Security-Policy" content="' + csp + '"')
           + tag('base', 'target="_blank"')
           + tag('style') + css + close('style')
           + close('head') + tag('body') + body + close('body') + close('html');
       }
 
+      let mailOpenToken = 0;
+      const fullCache = new Map();
+      function fetchFull(id) {
+        if (!fullCache.has(id)) {
+          if (fullCache.size > 25) fullCache.delete(fullCache.keys().next().value);
+          const p = gmailApi('messages/' + encodeURIComponent(id) + '?format=full');
+          p.catch(() => fullCache.delete(id));
+          fullCache.set(id, p);
+        }
+        return fullCache.get(id);
+      }
+      // Precarga el correo al pasar el mouse o tocar: al hacer click ya está listo
+      ['pointerover', 'pointerdown'].forEach(t => $('mailList').addEventListener(t, e => {
+        const b = e.target.closest('[data-gmail-open]');
+        if (b && gmailAccessToken) fetchFull(b.dataset.gmailOpen).catch(() => { });
+      }));
+      const imgB64 = async (m, ref) => ref.data ? ref.data.replace(/-/g, '+').replace(/_/g, '/') : gmailAttachmentB64(m.id, ref.id);
+
       window.openGmailMessage = async function (id) {
+        const token = ++mailOpenToken, d = $('mailDetail');
+        const headBar = '<div class="mail-detail-head"><button class="secondary" id="gmailBackBtn"><i data-lucide="arrow-left"></i> Volver</button></div>';
+        const goBack = () => { mailOpenToken++; d.hidden = true; $('mailList').hidden = false; renderGmailMessages(); icons(); };
+
+        // El lector reemplaza a la lista de inmediato
+        $('mailList').hidden = true; d.hidden = false;
+        d.innerHTML = headBar + '<div class="mail-empty">Abriendo correo…</div>';
+        $('gmailBackBtn').onclick = goBack; icons();
+
         try {
-          const m = await gmailApi('messages/' + encodeURIComponent(id) + '?format=full');
+          const m = await fetchFull(id);
+          if (token !== mailOpenToken) return;
           const from = gmailHeader(m, 'From'), to = gmailHeader(m, 'To'), cc = gmailHeader(m, 'Cc'), date = gmailHeader(m, 'Date');
           const subject = gmailHeader(m, 'Subject') || '(Sin asunto)', msgId = gmailHeader(m, 'Message-ID');
           const parts = gmailParts(m.payload);
+
+          // cuerpos grandes que Gmail entrega como adjunto
+          await Promise.all(parts.pending.map(async pnd => {
+            try { const t = gmailDecode(await gmailAttachmentB64(m.id, pnd.id)); if (pnd.mime === 'text/html') parts.html += t; else parts.text += t; } catch { }
+          }));
+
+          // imágenes incrustadas (cid:), todas y en paralelo
           let html = parts.html;
-          const cids = Object.keys(parts.inline);
-          if (html && cids.length) {
-            await Promise.all(cids.slice(0, 12).map(async cid => {
-              try { const b64 = await gmailAttachmentB64(m.id, parts.inline[cid].id); html = html.split('cid:' + cid).join('data:' + parts.inline[cid].mime + ';base64,' + b64); } catch { }
+          const used = new Set(), urls = {};
+          const normCid = c => { let k = c; try { k = decodeURIComponent(c); } catch { } return k.toLowerCase(); };
+          if (html) {
+            const wanted = new Set([...html.matchAll(/cid:([^"'\s)>]+)/gi)].map(x => normCid(x[1])));
+            await Promise.all([...wanted].map(async cid => {
+              const ref = parts.inline[cid]; if (!ref) return;
+              try { urls[cid] = 'data:' + ref.mime + ';base64,' + await imgB64(m, ref); used.add(cid); } catch { }
             }));
+            html = html.replace(/cid:([^"'\s)>]+)/gi, (all, c) => urls[normCid(c)] || all);
           }
+          if (token !== mailOpenToken) return;
+
+          // fotos adjuntas (no incrustadas) -> galería de miniaturas
+          const gallery = parts.images.filter(r => !(r.cid && used.has(r.cid)) && r.size <= 15 * 1024 * 1024);
+
+          let allow = true; try { allow = localStorage.getItem('ctrl.mail.blockImages') !== '1'; } catch { }
           const hasRemote = /<img[^>]+src=["']?https?:/i.test(html) || /url\(\s*["']?https?:/i.test(html);
+          const barHtml = () => allow
+            ? 'Mostrando imágenes remotas. <button type="button" class="text-action" id="mailToggleImgs">Bloquear</button>'
+            : 'Imágenes remotas bloqueadas para proteger tu privacidad. <button type="button" class="text-action" id="mailToggleImgs">Mostrar imágenes</button>';
+
           const atts = parts.attachments.length ? '<div class="mail-atts">' + parts.attachments.map((a, i) => '<button type="button" class="mail-att" data-att="' + i + '"><i data-lucide="paperclip"></i><span>' + esc(a.name) + '</span><small>' + fmtSize(a.size) + '</small></button>').join('') + '</div>' : '';
-          const imgBar = hasRemote ? '<div class="mail-img-bar">Se bloquearon las imágenes remotas para proteger tu privacidad. <button type="button" class="text-action" id="mailShowImgs">Mostrar imágenes</button></div>' : '';
-          const d = $('mailDetail');
-          $('mailList').hidden = true; d.hidden = false;
+          const galleryHtml = gallery.length ? '<div class="mail-gallery">' + gallery.map((r, i) => '<button type="button" class="mail-gal-item" data-gal="' + i + '" title="' + esc(r.name) + '"><span class="mail-gal-ph">' + esc(r.name) + '</span></button>').join('') + '</div>' : '';
+
           d.innerHTML = '<div class="mail-detail-head"><button class="secondary" id="gmailBackBtn"><i data-lucide="arrow-left"></i> Volver</button><span style="flex:1"></span><button class="secondary" id="gmailArchiveBtn"><i data-lucide="archive"></i> Archivar</button><button class="secondary" id="gmailDeleteBtn" aria-label="Eliminar"><i data-lucide="trash-2"></i></button></div>'
             + '<h2 class="mail-detail-title">' + esc(subject) + '</h2>'
             + '<div class="mail-detail-meta"><i data-lucide="circle-user-round"></i><div><strong>' + esc(gmailFromLabel(from)) + '</strong><div>' + esc(from) + '</div><div>Para: ' + esc(to || 'vos') + (cc ? ' · Cc: ' + esc(cc) : '') + '</div><div>' + esc(date) + '</div></div></div>'
-            + atts + imgBar
+            + atts
+            + (hasRemote ? '<div class="mail-img-bar" id="mailImgBar">' + barHtml() + '</div>' : '')
             + '<div class="mail-frame-wrap"><iframe class="mail-frame" title="Contenido del correo" sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe></div>'
+            + galleryHtml
             + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:18px"><button class="primary" id="gmailReplyBtn"><i data-lucide="reply"></i> Responder</button><button class="secondary" id="gmailForwardBtn"><i data-lucide="forward"></i> Reenviar</button></div>';
           icons();
+
           const frame = d.querySelector('.mail-frame');
           frame.addEventListener('load', () => {
             const doc = frame.contentDocument; if (!doc) return;
             const fit = () => { frame.style.height = Math.max(120, doc.documentElement.scrollHeight) + 'px'; };
-            fit(); if ('ResizeObserver' in window) new ResizeObserver(fit).observe(doc.body);
+            fit();
+            if ('ResizeObserver' in window) { const ro = new ResizeObserver(fit); ro.observe(doc.body); ro.observe(doc.documentElement); }
+            doc.querySelectorAll('img').forEach(im => im.addEventListener('load', fit));
           });
-          frame.srcdoc = mailFrameDoc(html, parts.text, false);
-          const showImgs = d.querySelector('#mailShowImgs');
-          if (showImgs) showImgs.onclick = () => { frame.srcdoc = mailFrameDoc(html, parts.text, true); d.querySelector('.mail-img-bar').remove(); };
+          frame.srcdoc = mailFrameDoc(html, parts.text, allow);
+
+          const bindBar = () => {
+            const t = d.querySelector('#mailToggleImgs'); if (!t) return;
+            t.onclick = () => {
+              allow = !allow; try { localStorage.setItem('ctrl.mail.blockImages', allow ? '0' : '1'); } catch { }
+              frame.srcdoc = mailFrameDoc(html, parts.text, allow);
+              d.querySelector('#mailImgBar').innerHTML = barHtml(); bindBar();
+            };
+          };
+          bindBar();
+
+          // miniaturas: se cargan de a una sin bloquear el correo
+          d.querySelectorAll('[data-gal]').forEach(async btn => {
+            const ref = gallery[+btn.dataset.gal];
+            try {
+              const url = URL.createObjectURL(b64ToBlob(await imgB64(m, ref), ref.mime));
+              btn.innerHTML = '<img alt="' + esc(ref.name) + '" src="' + url + '">';
+              btn.onclick = () => window.open(url, '_blank', 'noopener');
+            } catch { btn.querySelector('.mail-gal-ph').textContent = 'No se pudo cargar ' + ref.name; }
+          });
 
           d.querySelectorAll('[data-att]').forEach(b => b.onclick = async () => {
             const a = parts.attachments[+b.dataset.att]; b.disabled = true;
-            try { const b64 = await gmailAttachmentB64(m.id, a.id); downloadBlob(b64ToBlob(b64, a.mime), a.name); }
+            try { downloadBlob(b64ToBlob(await gmailAttachmentB64(m.id, a.id), a.mime), a.name); }
             catch (err) { toast('No se pudo descargar: ' + err.message); }
             b.disabled = false;
           });
 
           const quote = sanitizeHtml(html || ('<div style="white-space:pre-wrap">' + esc(parts.text) + '</div>'));
           const refs = (gmailHeader(m, 'References') + ' ' + msgId).trim();
-          $('gmailBackBtn').onclick = () => { d.hidden = true; $('mailList').hidden = false; renderGmailMessages(); icons(); };
+          $('gmailBackBtn').onclick = goBack;
           $('gmailReplyBtn').onclick = () => openGmailCompose({
             to: (gmailHeader(m, 'Reply-To') || from).replace(/^.*<([^>]+)>.*$/, '$1'),
             subject: /^re:/i.test(subject) ? subject : 'Re: ' + subject,
@@ -7617,9 +7815,10 @@
           });
           $('gmailForwardBtn').onclick = async () => {
             const files = [];
-            if (parts.attachments.length) {
+            if (parts.attachments.length || gallery.length) {
               toast('Adjuntando archivos…');
               for (const a of parts.attachments) { try { files.push({ name: a.name, type: a.mime, size: a.size, data: await gmailAttachmentB64(m.id, a.id) }); } catch { } }
+              for (const r of gallery) { try { files.push({ name: r.name, type: r.mime, size: r.size, data: await imgB64(m, r) }); } catch { } }
             }
             openGmailCompose({
               subject: /^fwd?:/i.test(subject) ? subject : 'Fwd: ' + subject,
@@ -7627,16 +7826,35 @@
               attachments: files
             });
           };
-          $('gmailArchiveBtn').onclick = async () => { try { await gmailApi('messages/' + encodeURIComponent(id) + '/modify', { method: 'POST', body: JSON.stringify({ removeLabelIds: ['INBOX'] }) }); toast('Correo archivado'); await loadGmailMessages(); } catch (e) { toast('No se pudo archivar: ' + e.message); } };
-          $('gmailDeleteBtn').onclick = async () => { try { await gmailApi('messages/' + encodeURIComponent(id) + '/trash', { method: 'POST' }); toast('Correo movido a la papelera'); await loadGmailMessages(); } catch (e) { toast('No se pudo eliminar: ' + e.message); } };
 
+          // Archivar / eliminar: se quita de la lista al instante y se confirma en segundo plano
+          const removeLocal = () => {
+            gmailMessages = gmailMessages.filter(x => x.id !== id);
+            Object.keys(gmailFolderCache).forEach(k => gmailFolderCache[k] = gmailFolderCache[k].filter(x => x !== id));
+            goBack();
+          };
+          $('gmailArchiveBtn').onclick = () => {
+            removeLocal(); toast('Correo archivado');
+            gmailApi('messages/' + encodeURIComponent(id) + '/modify', { method: 'POST', body: JSON.stringify({ removeLabelIds: ['INBOX'] }) })
+              .catch(e => { toast('No se pudo archivar: ' + e.message); loadGmailMessages(undefined, true); });
+          };
+          $('gmailDeleteBtn').onclick = () => {
+            removeLocal(); toast('Correo movido a la papelera');
+            gmailApi('messages/' + encodeURIComponent(id) + '/trash', { method: 'POST' })
+              .catch(e => { toast('No se pudo eliminar: ' + e.message); loadGmailMessages(undefined, true); });
+          };
+
+          // Marcar como leído sin bloquear la lectura
           if (m.labelIds?.includes('UNREAD')) {
-            try {
-              await gmailApi('messages/' + encodeURIComponent(id) + '/modify', { method: 'POST', body: JSON.stringify({ removeLabelIds: ['UNREAD'] }) });
-              const li = gmailMessages.find(x => x.id === id); if (li) li.labelIds = (li.labelIds || []).filter(l => l !== 'UNREAD');
-            } catch { }
+            const li = gmailMessages.find(x => x.id === id); if (li) li.labelIds = (li.labelIds || []).filter(l => l !== 'UNREAD');
+            gmailApi('messages/' + encodeURIComponent(id) + '/modify', { method: 'POST', body: JSON.stringify({ removeLabelIds: ['UNREAD'] }) }).catch(() => { });
           }
-        } catch (error) { toast('No se pudo abrir el correo: ' + error.message); }
+        } catch (error) {
+          if (token !== mailOpenToken) return;
+          d.innerHTML = headBar + '<div class="mail-empty">No se pudo abrir el correo: ' + esc(error.message) + '</div>';
+          $('gmailBackBtn').onclick = goBack; icons();
+          toast('No se pudo abrir el correo: ' + error.message);
+        }
       };
 
       /* =====================================================================
