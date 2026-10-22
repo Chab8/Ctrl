@@ -711,7 +711,8 @@ html[data-theme="dark"] .sp-table tr.f td{background:color-mix(in srgb,var(--acc
   /* ------------------------------------------------------------------ eventos */
   const retry = {
     day: () => renderDay(true), upcoming: () => renderUpcoming(true), table: () => renderTable(true),
-    manage: () => openManage(), manageTeams: () => paintManageTeams(), detail: () => det && openDetail(det.id, true)
+    manage: async () => { try { await loadLeagues(true); } catch { } openManage(); },
+    manageTeams: () => paintManageTeams(), detail: () => det && openDetail(det.id, true)
   };
   function bind() {
     const view = $('sportsView');
