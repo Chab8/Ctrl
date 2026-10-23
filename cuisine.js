@@ -59,6 +59,36 @@
     const list = Array.isArray(payload) ? payload : payload && Array.isArray(payload.recipes) ? payload.recipes : payload && Array.isArray(payload.results) ? payload.results : [];
     return list.map(recipe => ({ ...recipe, id: recipe.id || recipe.slug || recipe.recipeId || recipe.url }));
   }
+  async function searchMealDbFallback(query) {
+    const response = await fetch('https://www.themealdb.com/api/json/v1/1/search.php?s=' + encodeURIComponent(query), { headers: { Accept: 'application/json' } });
+    if (!response.ok) throw new Error('La búsqueda alternativa respondió con un error.');
+    const payload = await response.json();
+    return (Array.isArray(payload.meals) ? payload.meals : []).map(meal => {
+      const ingredients = [];
+      for (let i = 1; i <= 20; i++) {
+        const name = String(meal['strIngredient' + i] || '').trim();
+        if (!name) continue;
+        const measure = String(meal['strMeasure' + i] || '').trim();
+        ingredients.push({ display: [measure, name].filter(Boolean).join(' ') });
+      }
+      const instructions = String(meal.strInstructions || '').split(/\\r?\\n+/).map(step => step.trim()).filter(Boolean);
+      return {
+        id: 'mealdb-' + meal.idMeal,
+        title: meal.strMeal || 'Receta',
+        description: [meal.strArea, meal.strCategory].filter(Boolean).join(' · '),
+        image: meal.strMealThumb || '',
+        ingredients,
+        instructions,
+        servings: 'Consultar fuente original',
+        times: { total: { seconds: 0 } },
+        language: 'en',
+        url: meal.strSource || '',
+        categories: meal.strCategory ? [meal.strCategory] : [],
+        courses: [],
+        isFallback: true
+      };
+    });
+  }
   function recipeImage(recipe) {
     const media = Array.isArray(recipe.media) ? recipe.media : [];
     const image = media.find(item => item && item.type === 'image' && item.role === 'hero') || media.find(item => item && item.type === 'image');
@@ -295,6 +325,23 @@
       status(activeRecipes.length ? '' : 'No encontramos recetas. Probá otra búsqueda.');
     } catch (error) {
       if (token !== requestToken) return;
+      if (query) {
+        try {
+          const fallbackRecipes = await searchMealDbFallback(query);
+          if (token !== requestToken) return;
+          if (fallbackRecipes.length) {
+            activeRecipes = fallbackRecipes;
+            loaded = true;
+            showingFavorites = false;
+            $('cuisineFavoritesToggle').setAttribute('aria-pressed', 'false');
+            renderCards();
+            status('Tiny Plates no respondió. Mostramos resultados alternativos; abrí la fuente original para consultar todos los detalles.');
+            return;
+          }
+        } catch (_) {
+          // Preserve the original Tiny Plates error below if the fallback is unavailable.
+        }
+      }
       activeRecipes = [];
       renderCards();
       let message = error.message || 'No se pudieron cargar las recetas.';
