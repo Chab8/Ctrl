@@ -175,6 +175,40 @@
   const isDone = m => statusInfo(m).k === 'ft' && hasScore(m);
 
   /* ---------------------------------------------------------- datos de días */
+  // Respaldo: si el endpoint por fecha no devuelve partidos, reconstruimos
+  // el calendario a partir de los partidos de las temporadas de cada liga.
+  // Se comparte una única petición entre las fechas y el selector de equipos.
+  let leagueMatchesCache = null;
+  let leagueMatchesCacheAt = 0;
+  let leagueMatchesInFlight = null;
+  async function allLeagueMatches(force) {
+    if (!force && leagueMatchesCache && Date.now() - leagueMatchesCacheAt < 10 * 60 * 1000) return leagueMatchesCache;
+    if (!force && leagueMatchesInFlight) return leagueMatchesInFlight;
+    leagueMatchesInFlight = (async () => {
+      await loadLeagues();
+      const all = [];
+      await pool(L.list.map(league => async () => {
+        try {
+          const result = await api('/v1/leagues/' + encodeURIComponent(league.id) + '/matches', { status: 'all' }, { ttl: 600000, force });
+          const matches = matchesFrom(result);
+          matches.forEach(match => {
+            if (!match.league) match.league = result.league || league;
+            all.push(match);
+          });
+        } catch (error) {
+          // Una liga sin datos no debe impedir que las demás se muestren.
+          if (!error || (error.status !== 404 && error.status !== 400)) throw error;
+        }
+      }), 4);
+      const unique = new Map();
+      all.forEach(match => { if (match && match.id != null) unique.set(String(match.id), match); });
+      leagueMatchesCache = [...unique.values()];
+      leagueMatchesCacheAt = Date.now();
+      return leagueMatchesCache;
+    })();
+    try { return await leagueMatchesInFlight; }
+    finally { leagueMatchesInFlight = null; }
+  }
   const dayTtl = k => Math.abs((fromKey(k) - fromKey(today())) / 864e5) <= 1.5 ? 60000 : 900000;
   function matchesFrom(d) {
     // Accept both the documented { matches: [...] } payload and wrapped variants.
@@ -205,7 +239,10 @@
       }
     }
     if (lastError && lastError.status !== 404) throw lastError;
-    return [];
+    // The date endpoint can be empty even when league schedules are available.
+    // Rebuild this date from the season schedules before declaring it empty.
+    const fallback = await allLeagueMatches(force);
+    return fallback.filter(match => mKey(match) === k);
   }
   async function dayMatches(k, force) {
     // La API agrupa por fecha UTC: pedimos el día anterior y el siguiente y filtramos por hora local.
@@ -463,6 +500,16 @@
           if (t && t.id && t.name) { noteTeam(t); m.set(String(t.id), t); }
         });
       });
+      // If the selected league endpoint is empty, reuse the full season-schedule
+      // fallback so teams can still be followed from the available match data.
+      if (!m.size) {
+        const fallbackMatches = await allLeagueMatches(false);
+        fallbackMatches.filter(match => sameId(match.league && match.league.id, lid)).forEach(match => {
+          [match.home_team, match.away_team].forEach(team => {
+            if (team && team.id && team.name) { noteTeam(team); m.set(String(team.id), team); }
+          });
+        });
+      }
       const list = [...m.values()].filter(t => !q || t.name.toLowerCase().includes(q)).sort((a, b) => a.name.localeCompare(b.name, 'es'));
       body.innerHTML = list.length
         ? list.map(t => '<div class="sp-mrow">' + crest(t) + '<span class="sp-name">' + esc(t.name) + '</span>' + followBtn(isTeamF(t.id), 'data-follow-team="' + esc(t.id) + '" data-name="' + esc(t.name) + '" data-league="' + esc(lid) + '"') + '</div>').join('')
