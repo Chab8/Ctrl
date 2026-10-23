@@ -6308,20 +6308,56 @@
             <button id="cuisineFavoritesToggle" class="secondary cuisine-favorites-toggle" type="button" aria-pressed="false"><i data-lucide="heart"></i> Favoritas</button>
           </div>
         </div>
-        <form id="cuisinePersonalForm" class="card cuisine-personal-form" hidden>
-          <div class="card-head"><div><div class="card-title">Tu receta</div><div class="card-sub">Guardala para consultarla cuando quieras.</div></div></div>
-          <label>Nombre de la receta<input id="cuisinePersonalTitle" maxlength="160" required placeholder="Ej. Tarta de verduras"></label>
-          <label>Descripción (opcional)<textarea id="cuisinePersonalDescription" rows="2" maxlength="500" placeholder="Un comentario sobre la receta…"></textarea></label>
-          <div class="cuisine-personal-fields">
-            <label>Ingredientes <span class="cuisine-form-hint">Separá por línea o coma</span><textarea id="cuisinePersonalIngredients" rows="5" required placeholder="2 huevos&#10;200 g de harina&#10;1 taza de leche"></textarea></label>
-            <label>Preparación <span class="cuisine-form-hint">Un paso por línea</span><textarea id="cuisinePersonalSteps" rows="5" required placeholder="Mezclá los ingredientes…&#10;Cociná durante 20 minutos…"></textarea></label>
-          </div>
-          <div class="cuisine-personal-fields">
-            <label>Tiempo en minutos<input id="cuisinePersonalMinutes" type="number" min="0" max="1440" placeholder="30"></label>
-            <label>Raciones (opcional)<input id="cuisinePersonalServings" maxlength="80" placeholder="4 porciones"></label>
-          </div>
-          <div class="cuisine-personal-actions"><button class="primary" type="submit">Guardar receta</button><button class="secondary" id="cuisineCancelPersonalBtn" type="button">Cancelar</button></div>
-        </form>
+        <section id="cuisinePersonalPanel" class="cuisine-personal-panel" hidden aria-labelledby="cuisinePersonalHeading">
+          <form id="cuisinePersonalForm" class="cuisine-personal-form">
+            <div class="cuisine-personal-header">
+              <div class="cuisine-personal-heading-icon"><i data-lucide="notebook-pen"></i></div>
+              <div class="cuisine-personal-heading-copy">
+                <div class="eyebrow">TU RECETARIO</div>
+                <h2 id="cuisinePersonalHeading">Crear una receta</h2>
+                <p>Guardá esa receta que siempre querés tener a mano.</p>
+              </div>
+              <button class="cuisine-personal-close" id="cuisineCancelPersonalBtn" type="button" aria-label="Cerrar formulario"><i data-lucide="x"></i></button>
+            </div>
+            <div class="cuisine-personal-body">
+              <div class="cuisine-personal-field cuisine-personal-title-field">
+                <label for="cuisinePersonalTitle">Nombre de la receta <span>*</span></label>
+                <input id="cuisinePersonalTitle" name="title" maxlength="160" required placeholder="Ej. Tarta de verduras">
+              </div>
+              <div class="cuisine-personal-field">
+                <label for="cuisinePersonalDescription">Descripción <span class="optional">OPCIONAL</span></label>
+                <textarea id="cuisinePersonalDescription" name="description" rows="2" maxlength="500" placeholder="¿Qué la hace especial?"></textarea>
+              </div>
+              <div class="cuisine-personal-divider"><span>La receta</span></div>
+              <div class="cuisine-personal-fields">
+                <div class="cuisine-personal-field">
+                  <label for="cuisinePersonalIngredients">Ingredientes <span>*</span></label>
+                  <span class="cuisine-personal-help">Un ingrediente por línea.</span>
+                  <textarea id="cuisinePersonalIngredients" name="ingredients" rows="7" required placeholder="2 huevos&#10;200 g de harina&#10;1 taza de leche"></textarea>
+                </div>
+                <div class="cuisine-personal-field">
+                  <label for="cuisinePersonalSteps">Preparación <span>*</span></label>
+                  <span class="cuisine-personal-help">Escribí cada paso en una línea distinta.</span>
+                  <textarea id="cuisinePersonalSteps" name="steps" rows="7" required placeholder="Mezclá los ingredientes.&#10;Volcá la preparación en un molde.&#10;Horneá durante 20 minutos."></textarea>
+                </div>
+              </div>
+              <div class="cuisine-personal-fields cuisine-personal-meta-fields">
+                <div class="cuisine-personal-field">
+                  <label for="cuisinePersonalMinutes">Tiempo de preparación</label>
+                  <div class="cuisine-personal-input-with-suffix"><input id="cuisinePersonalMinutes" name="minutes" type="number" min="1" max="1440" inputmode="numeric" placeholder="30"><span>min</span></div>
+                </div>
+                <div class="cuisine-personal-field">
+                  <label for="cuisinePersonalServings">Porciones</label>
+                  <input id="cuisinePersonalServings" name="servings" maxlength="80" placeholder="Ej. 4 porciones">
+                </div>
+              </div>
+              <div class="cuisine-personal-footer">
+                <p><span>*</span> Campos obligatorios</p>
+                <div class="cuisine-personal-actions"><button class="secondary" id="cuisineDiscardPersonalBtn" type="button">Cancelar</button><button class="primary" type="submit"><i data-lucide="check"></i> Guardar receta</button></div>
+              </div>
+            </div>
+          </form>
+        </section>
         <div id="cuisineStatus" class="cuisine-status" role="status" aria-live="polite">Cargando recetas…</div>
         <div id="cuisineResultsMeta" class="cuisine-results-meta"></div>
         <div id="cuisineRecipeGrid" class="cuisine-grid"></div>
