@@ -15,8 +15,20 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  const parts = req.query.path;
-  const pathParts = Array.isArray(parts) ? parts : (parts ? [parts] : []);
+  // Vercel normalmente expone el catch-all como req.query.path, pero
+  // algunos entornos locales no lo rellenan. En ese caso, derivamos la ruta
+  // del pathname real para que /api/tinyplates/search funcione igualmente.
+  const incoming = new URL(req.url, 'https://ctrl.invalid');
+  const parts = req.query && req.query.path;
+  let pathParts = Array.isArray(parts) ? parts : (parts ? [parts] : []);
+  if (!pathParts.length) {
+    const pathname = incoming.pathname.replace(/^\\/api\\/tinyplates\\/?/, '');
+    try {
+      pathParts = pathname ? pathname.split('/').filter(Boolean).map(part => decodeURIComponent(part)) : [];
+    } catch (_) {
+      return res.status(400).json({ error: { message: 'Ruta de Tiny Plates no válida.' } });
+    }
+  }
   const validTopLevel = ['search', 'popular'];
   const isRecipeDetail = pathParts.length === 2 && pathParts[0] === 'recipes' && /^[a-zA-Z0-9_-]+$/.test(pathParts[1]);
   const isListEndpoint = pathParts.length === 1 && validTopLevel.includes(pathParts[0]);
@@ -24,7 +36,6 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: { message: 'Ruta de Tiny Plates no permitida.' } });
   }
 
-  const incoming = new URL(req.url, 'https://ctrl.invalid');
   const target = new URL('/' + pathParts.map(encodeURIComponent).join('/'), 'https://api.tinyplates.dev');
   target.search = incoming.search;
   target.searchParams.delete('path');
