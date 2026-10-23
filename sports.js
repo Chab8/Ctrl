@@ -173,7 +173,17 @@
 
   /* ---------------------------------------------------------- datos de días */
   const dayTtl = k => Math.abs((fromKey(k) - fromKey(today())) / 864e5) <= 1.5 ? 60000 : 900000;
-  async function fetchDate(k, force) { const d = await api('/v1/date/' + k, { status: 'all' }, { ttl: dayTtl(k), force }); return (d && d.matches) || []; }
+  async function fetchDate(k, force) {
+    try {
+      const d = await api('/v1/date/' + k, { status: 'all' }, { ttl: dayTtl(k), force });
+      return (d && Array.isArray(d.matches)) ? d.matches : [];
+    } catch (e) {
+      // PitchAPI can return 404 for dates outside its available fixture range.
+      // A date with no available listing should not break the whole date strip.
+      if (e && e.status === 404) return [];
+      throw e;
+    }
+  }
   async function dayMatches(k, force) {
     // La API agrupa por fecha UTC: pedimos el día anterior y el siguiente y filtramos por hora local.
     const keys = [-1, 0, 1].map(o => addDays(k, o));
@@ -402,16 +412,40 @@
     }
     body.innerHTML = loadingHtml('Cargando equipos…');
     try {
-      const d = await api('/v1/leagues/' + lid + '/matches', { status: 'all' }, { ttl: 600000 });
+      const league = L.byId.get(lid);
+      const seasons = Array.isArray(league && league.seasons) ? league.seasons : [];
+      const candidates = [{ status: 'all' }, ...seasons.map(season => ({ status: 'all', season }))];
+      let d = null, lastError = null;
+      // Some competitions need an explicit season. Try the API default first,
+      // then each season advertised by the current league catalogue.
+      for (const params of candidates) {
+        try {
+          const result = await api('/v1/leagues/' + lid + '/matches', params, { ttl: 600000 });
+          d = result;
+          const found = (result && Array.isArray(result.matches)) ? result.matches : [];
+          if (found.length) break;
+        } catch (err) {
+          lastError = err;
+          if (!err || (err.status !== 404 && err.status !== 400)) throw err;
+        }
+        if (ui.manageLeague !== lid || ui.manageTab !== 'teams') return;
+      }
       if (ui.manageLeague !== lid || ui.manageTab !== 'teams') return;
-      const m = new Map(); ((d && d.matches) || []).forEach(x => { [x.home_team, x.away_team].forEach(t => { if (t && t.id) { noteTeam(t); m.set(t.id, t); } }); });
+      if (!d && lastError) throw lastError;
+      const m = new Map();
+      ((d && d.matches) || []).forEach(x => {
+        [x.home_team, x.away_team].forEach(t => {
+          if (t && t.id && t.name) { noteTeam(t); m.set(String(t.id), t); }
+        });
+      });
       const list = [...m.values()].filter(t => !q || t.name.toLowerCase().includes(q)).sort((a, b) => a.name.localeCompare(b.name, 'es'));
-      body.innerHTML = list.length ? list.map(t => '<div class="sp-mrow">' + crest(t) + '<span class="sp-name">' + esc(t.name) + '</span>' + followBtn(isTeamF(t.id), 'data-follow-team="' + esc(t.id) + '" data-name="' + esc(t.name) + '" data-league="' + esc(lid) + '"') + '</div>').join('') : emptyHtml('No encontré equipos' + (q ? ' con ese nombre.' : ' en esta competición.'));
+      body.innerHTML = list.length
+        ? list.map(t => '<div class="sp-mrow">' + crest(t) + '<span class="sp-name">' + esc(t.name) + '</span>' + followBtn(isTeamF(t.id), 'data-follow-team="' + esc(t.id) + '" data-name="' + esc(t.name) + '" data-league="' + esc(lid) + '"') + '</div>').join('')
+        : emptyHtml('No encontré equipos en las temporadas disponibles de esta competición' + (q ? ' que coincidan con la búsqueda.' : '.'));
       hydrate(body);
     } catch (e) {
       if (ui.manageLeague !== lid) return;
-      // Una competición puede haber cambiado de ID en PitchAPI. Actualizar catálogo
-      // y no dejar al usuario atrapado en una selección obsoleta.
+      // If an ID became stale, refresh the catalogue and reset the selection.
       if (e.status === 404) {
         try {
           await loadLeagues(true);
@@ -421,8 +455,6 @@
             $('spManageLeague').value = '';
             return paintManage();
           }
-          body.innerHTML = errorHtml(new Error('PitchAPI no encontró partidos para esta competición. Probá elegir otra temporada o competición.'), 'manageTeams');
-          return;
         } catch { }
       }
       body.innerHTML = errorHtml(e, 'manageTeams');
