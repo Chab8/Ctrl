@@ -6736,12 +6736,17 @@
       if (page === 'mail' && gmailAccessToken && !gmailMessages.length) loadGmailMessages();
     }
 
-    // Mantener sincronizado el estado visual de la navegación al cambiar de sección.
+    // Sincronizar el resaltado una vez que termina la navegación de la sección.
     document.addEventListener('click', event => {
       const button = event.target.closest('.nav-item[data-page], .mobile-nav button[data-page]');
       if (!button) return;
-      setPage(button.dataset.page);
-    }, true);
+      const page = button.dataset.page;
+      requestAnimationFrame(() => {
+        document.querySelectorAll('.nav-item[data-page], .mobile-nav button[data-page]').forEach(item => {
+          item.classList.toggle('active', item.dataset.page === page);
+        });
+      });
+    });
 
 
     let currentProjectId=null,currentProjectTab='overview',projectSortAZ=true;
