@@ -25,7 +25,7 @@ module.exports = async function handler(req, res) {
     const prefix = '/api/tinyplates/';
     const pathname = incoming.pathname.startsWith(prefix)
       ? incoming.pathname.slice(prefix.length)
-      : incoming.pathname.replace('/api/tinyplates', '').replace(/^\\/+/, '');
+      : incoming.pathname.split('/').filter(Boolean).slice(2).join('/');
     try {
       pathParts = pathname ? pathname.split('/').filter(Boolean).map(part => decodeURIComponent(part)) : [];
     } catch (_) {
