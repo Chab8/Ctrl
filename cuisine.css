@@ -76,3 +76,62 @@ html[data-theme="dark"] .cuisine-card-image-placeholder{background:#30312b}
 html[data-theme="dark"] .cuisine-open-btn{background:#292a24}
 @media(max-width:1050px){.cuisine-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cuisine-filters label{min-width:145px}}
 @media(max-width:700px){.cuisine-page-head{align-items:flex-start;gap:12px}.cuisine-source-note{font-size:10px;max-width:none}.cuisine-toolbar{padding:12px}.cuisine-search{gap:8px}.cuisine-search .primary{padding:10px 12px}.cuisine-filters{gap:8px}.cuisine-filters label{min-width:calc(50% - 5px)}.cuisine-favorites-toggle{flex:1}.cuisine-grid{grid-template-columns:1fr}.cuisine-card{display:grid;grid-template-columns:112px minmax(0,1fr);grid-template-rows:auto 1fr}.cuisine-card-image,.cuisine-card-image-placeholder{grid-row:1/3;width:112px;height:100%;min-height:145px;aspect-ratio:auto}.cuisine-card-content{padding:12px 12px 6px;gap:7px}.cuisine-card h3{font-size:12px}.cuisine-card-description{font-size:10px}.cuisine-card-meta{gap:7px;font-size:9px}.cuisine-card-actions{padding:4px 12px 12px;grid-column:2}.cuisine-open-btn{padding:8px}.cuisine-favorite-btn{width:34px;height:34px}.cuisine-detail-hero,.cuisine-detail-columns{grid-template-columns:1fr;gap:20px}.cuisine-detail-image{max-height:270px}.cuisine-detail h2{font-size:27px}.cuisine-detail-columns{margin-top:20px;padding-top:20px}.cuisine-status{line-height:1.5}.mobile-nav{overflow-x:auto;justify-content:flex-start}.mobile-nav button{flex:0 0 auto;min-width:64px}}
+
+
+/* Personal recipe form — rebuilt layout */
+.cuisine-head-actions{display:flex;align-items:center;justify-content:flex-end;gap:18px;flex-wrap:wrap}
+.cuisine-head-actions>.primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap}
+.cuisine-head-actions>.primary svg{width:15px;height:15px}
+.cuisine-personal-panel{margin:0 0 22px;scroll-margin-top:24px}
+.cuisine-personal-panel[hidden]{display:none!important}
+.cuisine-personal-form{overflow:hidden;border:1px solid var(--line);border-radius:20px;background:var(--card);box-shadow:var(--shadow)}
+.cuisine-personal-header{display:flex;align-items:center;gap:15px;padding:23px 26px;border-bottom:1px solid var(--line);background:var(--soft)}
+.cuisine-personal-heading-icon{width:46px;height:46px;display:grid;place-items:center;flex:0 0 46px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink)}
+.cuisine-personal-heading-icon svg{width:21px;height:21px;stroke-width:1.6}
+.cuisine-personal-heading-copy{min-width:0;flex:1}
+.cuisine-personal-heading-copy .eyebrow{font-size:9px;letter-spacing:1.5px;color:var(--muted);margin-bottom:5px}
+.cuisine-personal-heading-copy h2{font-size:22px;line-height:1.2;letter-spacing:-.6px;margin:0;color:var(--ink)}
+.cuisine-personal-heading-copy p{font-size:12px;line-height:1.5;color:var(--muted);margin:6px 0 0}
+.cuisine-personal-close{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--muted);cursor:pointer}
+.cuisine-personal-close svg{width:16px;height:16px}
+.cuisine-personal-body{padding:25px 26px 20px;display:grid;gap:22px}
+.cuisine-personal-field{display:flex;flex-direction:column;gap:8px;min-width:0}
+.cuisine-personal-field>label{display:flex;align-items:center;gap:5px;flex-wrap:wrap;color:var(--ink);font-size:12px;font-weight:600;line-height:1.4}
+.cuisine-personal-field>label>span:not(.optional){color:var(--red)}
+.cuisine-personal-field>label>.optional{font-size:8px;font-weight:600;letter-spacing:.7px;color:var(--muted);margin-left:4px}
+.cuisine-personal-field input,.cuisine-personal-field textarea{display:block;width:100%;min-width:0;max-width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:11px;background:var(--paper);color:var(--ink);padding:12px 13px;font:inherit;font-size:12px;line-height:1.6;outline:none;transition:border-color .15s,box-shadow .15s}
+.cuisine-personal-field input{min-height:43px}
+.cuisine-personal-field textarea{resize:vertical;min-height:86px}
+.cuisine-personal-field input:focus,.cuisine-personal-field textarea:focus{border-color:var(--ink);box-shadow:0 0 0 3px var(--line)}
+.cuisine-personal-field input::placeholder,.cuisine-personal-field textarea::placeholder{color:var(--muted);opacity:.75}
+.cuisine-personal-title-field input{font-size:14px;min-height:49px}
+.cuisine-personal-help{color:var(--muted);font-size:10px;line-height:1.45;margin-top:-3px}
+.cuisine-personal-divider{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.cuisine-personal-divider:after{content:"";height:1px;flex:1;background:var(--line)}
+.cuisine-personal-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.cuisine-personal-meta-fields{grid-template-columns:repeat(2,minmax(0,1fr));max-width:620px}
+.cuisine-personal-input-with-suffix{position:relative}
+.cuisine-personal-input-with-suffix input{padding-right:48px}
+.cuisine-personal-input-with-suffix>span{position:absolute;right:13px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:11px;pointer-events:none}
+.cuisine-personal-footer{display:flex;align-items:center;justify-content:space-between;gap:15px;padding-top:18px;border-top:1px solid var(--line)}
+.cuisine-personal-footer>p{margin:0;color:var(--muted);font-size:10px}
+.cuisine-personal-footer>p span{color:var(--red)}
+.cuisine-personal-actions{display:flex;align-items:center;justify-content:flex-end;gap:9px;flex-wrap:wrap}
+.cuisine-personal-actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:10px 15px;font-size:11px}
+.cuisine-personal-actions button svg{width:14px;height:14px}
+html[data-theme="dark"] .cuisine-personal-heading-icon{background:var(--paper)}
+html[data-theme="dark"] .cuisine-personal-field input,html[data-theme="dark"] .cuisine-personal-field textarea{background:var(--paper)}
+@media(max-width:700px){
+ .cuisine-head-actions{justify-content:flex-start;align-items:flex-start;gap:12px}
+ .cuisine-head-actions>.primary{padding:10px 12px}
+ .cuisine-personal-header{padding:17px;gap:11px}
+ .cuisine-personal-heading-icon{width:39px;height:39px;flex-basis:39px;border-radius:12px}
+ .cuisine-personal-heading-copy h2{font-size:19px}
+ .cuisine-personal-heading-copy p{font-size:11px}
+ .cuisine-personal-body{padding:18px 16px;gap:19px}
+ .cuisine-personal-fields,.cuisine-personal-meta-fields{grid-template-columns:minmax(0,1fr);gap:18px;max-width:none}
+ .cuisine-personal-field textarea{min-height:100px}
+ .cuisine-personal-footer{align-items:stretch;flex-direction:column;gap:12px}
+ .cuisine-personal-actions{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)}
+ .cuisine-personal-actions button{padding:10px 8px}
+}
