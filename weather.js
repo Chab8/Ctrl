@@ -146,7 +146,7 @@
     }
     const host = $('homeWeatherSummary');
     if (!host) return;
-    if (!state.forecast?.current) {
+    if (!homeForecast?.current) {
       host.innerHTML = '<div class="home-weather-loading"><span>☁️</span><div><strong>Clima de ' + esc(state.defaultLocation.name) + '</strong><small>Consultando el pronóstico…</small></div><button type="button" data-open-weather>Ver clima ↗</button></div>';
       return;
     }
