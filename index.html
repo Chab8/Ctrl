@@ -6736,6 +6736,13 @@
       if (page === 'mail' && gmailAccessToken && !gmailMessages.length) loadGmailMessages();
     }
 
+    // Mantener sincronizado el estado visual de la navegación al cambiar de sección.
+    document.addEventListener('click', event => {
+      const button = event.target.closest('.nav-item[data-page], .mobile-nav button[data-page]');
+      if (!button) return;
+      setPage(button.dataset.page);
+    }, true);
+
 
     let currentProjectId=null,currentProjectTab='overview',projectSortAZ=true;
     const currentProject=()=>state.projects.find(p=>p.id===currentProjectId)||null;
