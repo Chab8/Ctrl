@@ -188,6 +188,9 @@
     $('cuisineRecipeGrid').hidden = false;
     const list = filteredRecipes();
     $('cuisineRecipeGrid').innerHTML = list.map(cardMarkup).join('');
+    $('cuisineRecipeGrid').querySelectorAll('[data-cuisine-open]').forEach(button => {
+      button.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); openRecipe(button.dataset.cuisineOpen); });
+    });
     $('cuisineEmpty').hidden = list.length > 0;
     $('cuisineResultsMeta').hidden = list.length === 0;
     $('cuisineResultsMeta').textContent = showingFavorites
@@ -350,8 +353,6 @@
         if (recipe) toggleFavorite(recipe);
         return;
       }
-      const open = event.target.closest('[data-cuisine-open]');
-      if (open) { event.preventDefault(); openRecipe(open.dataset.cuisineOpen); }
     });
   }
   window.CtrlCuisine = { load: () => { if (!loaded) load(); else if (showingFavorites) renderCards(); }, reload: () => load(true) };
