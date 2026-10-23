@@ -56,10 +56,8 @@
     el.classList.toggle('is-error', !!isError);
   }
   function recipeList(payload) {
-    if (Array.isArray(payload)) return payload;
-    if (payload && Array.isArray(payload.recipes)) return payload.recipes;
-    if (payload && Array.isArray(payload.results)) return payload.results;
-    return [];
+    const list = Array.isArray(payload) ? payload : payload && Array.isArray(payload.recipes) ? payload.recipes : payload && Array.isArray(payload.results) ? payload.results : [];
+    return list.map(recipe => ({ ...recipe, id: recipe.id || recipe.slug || recipe.recipeId || recipe.url }));
   }
   function recipeImage(recipe) {
     const media = Array.isArray(recipe.media) ? recipe.media : [];
@@ -127,7 +125,8 @@
   function isFavorite(id) { return favoriteIds().has(String(id)); }
   function favoriteMeta(recipe) {
     return {
-      id: String(recipe.id), title: recipe.title || 'Receta sin título', url: safeHttpUrl(recipe.url),
+      id: String(recipe.id), title: recipe.title || 'Receta sin título', url: safeHttpUrl(recipe.url), isPersonal: !!recipe.isPersonal,
+      ingredients: recipe.isPersonal ? (recipe.ingredients || []) : undefined, instructions: recipe.isPersonal ? (recipe.instructions || []) : undefined, servings: recipe.isPersonal ? recipe.servings : undefined,
       image: recipeImage(recipe), language: recipe.language || activeLanguage,
       description: recipe.description || '', times: recipe.times || {},
       courses: recipe.courses || [], categories: recipe.categories || [], tags: recipe.tags || [],
