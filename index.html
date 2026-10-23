@@ -7,6 +7,7 @@
   <meta name="theme-color" content="#ebe8e1">
   <meta name="description" content="Ctrl — tu centro de control personal">
   <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="./cuisine.css">
   <title>Ctrl</title>
   <script>
     try {
@@ -5820,6 +5821,7 @@
         <button class="nav-item" data-page="projects"><svg viewBox="0 0 24 24">
             <path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H10l2 2h7.5A1.5 1.5 0 0 1 21 8.5v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z" />
           </svg>Proyectos</button>
+        <button class="nav-item" data-page="cuisine"><svg viewBox="0 0 24 24"><path d="M4 10h16l-1.2 10H5.2L4 10Z"/><path d="M8 10V6a4 4 0 0 1 8 0v4M12 2v2"/></svg>Cocina</button>
       </nav>
       <div class="sidebar-bottom">
         <button class="nav-item" id="sidebarToggle" type="button" aria-label="Contraer barra lateral"
@@ -6286,6 +6288,33 @@
         <div id="projectsGrid" class="projects-grid"></div><div id="projectsEmpty" class="project-empty" hidden><strong>Todavía no hay proyectos.</strong><br>Creá uno para reunir sus tareas, claves, archivos, links y workflows.</div></div>
         <div id="projectDetail" hidden><div class="project-detail-head"><div class="project-detail-title"><button class="icon-btn" id="backToProjects" aria-label="Volver"><i data-lucide="arrow-left"></i></button><div><div class="eyebrow" id="projectDetailEyebrow">PROYECTO</div><h1 id="projectDetailTitle">Proyecto</h1><p id="projectDetailDescription"></p></div></div><div class="project-link-actions"><button class="secondary" id="editProjectBtn">Editar</button><button class="secondary" id="openProjectLinkBtn" hidden>Abrir proyecto ↗</button><button class="secondary project-danger" id="deleteProjectBtn" aria-label="Eliminar proyecto">Eliminar</button></div></div>
         <div class="project-tabs" id="projectTabs"><button class="project-tab active" data-project-tab="overview">Resumen</button><button class="project-tab" data-project-tab="tasks">Tareas</button><button class="project-tab" data-project-tab="secrets">Claves</button><button class="project-tab" data-project-tab="workflows">Workflows</button><button class="project-tab" data-project-tab="resources">Archivos y links</button><button class="project-tab" data-project-tab="notes">Notas</button></div><div id="projectTabContent"></div></div>
+      <section id="cuisineView" class="view" hidden>
+        <div class="page-head cuisine-page-head">
+          <div><div class="eyebrow">IDEAS PARA TODOS LOS DÍAS</div><h1>Cocina<span>.</span></h1><p>Descubrí recetas, guardá tus favoritas y encontrá algo rico para preparar.</p></div>
+          <div class="cuisine-source-note"><i data-lucide="chef-hat"></i><span>Recetas de Tiny Plates y sus fuentes originales</span></div>
+        </div>
+        <div class="cuisine-toolbar card">
+          <form id="cuisineSearchForm" class="cuisine-search">
+            <label class="sr-only" for="cuisineSearchInput">Buscar recetas</label>
+            <i data-lucide="search"></i>
+            <input id="cuisineSearchInput" type="search" placeholder="Buscá un plato o ingrediente…" maxlength="160" autocomplete="off">
+            <button class="primary" type="submit">Buscar</button>
+          </form>
+          <div class="cuisine-filters">
+            <label><span>Idioma</span><select id="cuisineLanguage" class="filter-select"><option value="es">Español</option><option value="en">English</option></select></label>
+            <label><span>Tipo de comida</span><select id="cuisineType" class="filter-select"><option value="all">Todos los tipos</option><option value="breakfast">Desayuno</option><option value="main">Plato principal</option><option value="side">Guarnición</option><option value="soup">Sopa</option><option value="salad">Ensalada</option><option value="dessert">Postre</option><option value="snack">Snack</option></select></label>
+            <label><span>Tiempo máximo</span><select id="cuisineMaxTime" class="filter-select"><option value="all">Cualquier duración</option><option value="15">15 minutos</option><option value="30">30 minutos</option><option value="45">45 minutos</option><option value="60">60 minutos</option></select></label>
+            <label><span>Dificultad estimada</span><select id="cuisineDifficulty" class="filter-select"><option value="all">Cualquiera</option><option value="easy">Fácil</option><option value="medium">Intermedia</option><option value="hard">Avanzada</option></select></label>
+            <button id="cuisineFavoritesToggle" class="secondary cuisine-favorites-toggle" type="button" aria-pressed="false"><i data-lucide="heart"></i> Favoritas</button>
+          </div>
+        </div>
+        <div id="cuisineStatus" class="cuisine-status" role="status" aria-live="polite">Cargando recetas…</div>
+        <div id="cuisineResultsMeta" class="cuisine-results-meta"></div>
+        <div id="cuisineRecipeGrid" class="cuisine-grid"></div>
+        <div id="cuisineEmpty" class="cuisine-empty" hidden><i data-lucide="cooking-pot"></i><strong>No encontramos recetas con esos filtros.</strong><span>Probá cambiar la búsqueda o ampliar los filtros.</span></div>
+        <section id="cuisineDetail" class="cuisine-detail card" hidden aria-live="polite"></section>
+        <div class="footer-note cuisine-footer">Cada receta incluye un enlace a su fuente original. Los tiempos y la dificultad son orientativos cuando la fuente no publica todos los datos.</div>
+      </section>
       </section>
     </main>
   </div>
@@ -6306,7 +6335,7 @@
       </svg>Tareas</button><button data-page="shop"><svg viewBox="0 0 24 24">
         <path d="M6 7h12l1 13H5z" />
         <path d="M9 7a3 3 0 0 1 6 0" />
-      </svg>Compras</button><button data-page="projects"><i data-lucide="folder"></i>Proyectos</button></nav>
+      </svg>Compras</button><button data-page="projects"><i data-lucide="folder"></i>Proyectos</button><button data-page="cuisine"><i data-lucide="cooking-pot"></i>Cocina</button></nav>
   <div class="modal-backdrop" id="taskModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="taskModalTitle">
     <div class="modal task-modal">
       <div class="modal-head">
@@ -6703,7 +6732,7 @@
     function svgIcon(type) { const names = { expense: 'arrow-down-left', income: 'arrow-up-right', investment: 'chart-no-axes-combined' }; if (window.lucide) return '<i data-lucide="' + (names[type] || 'circle-dollar-sign') + '"></i>'; const paths = { expense: '<path d="M12 5v14m-6-6 6 6 6-6"/>', income: '<path d="M12 19V5m-6 6 6-6 6 6"/>', investment: '<path d="m3 17 6-6 4 4 8-9"/><path d="M15 6h6v6"/>' }; return '<svg viewBox="0 0 24 24">' + (paths[type] || paths.expense) + '</svg>' }
     function refreshLucideIcons() {
       if (!window.lucide || !window.lucide.createIcons) return;
-      const icons = { home: 'layout-dashboard', finance: 'wallet', tasks: 'check-square', calendar: 'calendar-days', weather: 'cloud-sun', inbox: 'inbox', projects: 'folder', shop: 'shopping-bag' };
+      const icons = { home: 'layout-dashboard', finance: 'wallet', tasks: 'check-square', calendar: 'calendar-days', weather: 'cloud-sun', inbox: 'inbox', projects: 'folder', shop: 'shopping-bag', cuisine: 'cooking-pot' };
       document.querySelectorAll('.nav-item[data-page],.mobile-nav button[data-page]').forEach(b => { const n = icons[b.dataset.page], s = b.querySelector('svg'); if (n && s) { const i = document.createElement('i'); i.setAttribute('data-lucide', n); s.replaceWith(i) } });
       const buttons = { searchBtn: 'search', notificationBtn: 'bell', menuBtn: 'menu', quickAddBtn: 'plus', newTransactionBtn: 'plus', exportCsvBtn: 'file-spreadsheet', exportBtn: 'download', importBtn: 'upload', addBudgetBtn: 'sliders-horizontal', addInvestmentBtn: 'chart-no-axes-combined', runSearch: 'search' };
       Object.entries(buttons).forEach(([id, n]) => { const b = document.getElementById(id), s = b && b.querySelector('svg'); if (s) { const i = document.createElement('i'); i.setAttribute('data-lucide', n); s.replaceWith(i) } });
@@ -6713,8 +6742,8 @@
     }
     function totals(items) { return { income: sum(items, 'income'), expense: sum(items, 'expense'), investment: sum(items, 'investment') } }
     function moneyTotal(t) { return fmt(t.amount, t.currency || 'ARS') }
-    const PAGE_VIEWS = { home: 'homeView', finance: 'financeView', tasks: 'tasksView', calendar: 'calendarView', weather: 'weatherView', mail: 'mailView', shop: 'shopView', projects: 'projectsView' };
-    const PAGE_NAMES = { home: 'Home', finance: 'Finanzas', tasks: 'Tareas', calendar: 'Calendario', weather: 'Clima', mail: 'Mail', shop: 'Compras', inbox: 'Inbox', projects: 'Proyectos' };
+    const PAGE_VIEWS = { home: 'homeView', finance: 'financeView', tasks: 'tasksView', calendar: 'calendarView', weather: 'weatherView', mail: 'mailView', shop: 'shopView', projects: 'projectsView', cuisine: 'cuisineView' };
+    const PAGE_NAMES = { home: 'Home', finance: 'Finanzas', tasks: 'Tareas', calendar: 'Calendario', weather: 'Clima', mail: 'Mail', shop: 'Compras', inbox: 'Inbox', projects: 'Proyectos', cuisine: 'Cocina' };
     function setPage(page) {
       Object.entries(PAGE_VIEWS).forEach(([k, id]) => $(id).hidden = k !== page);
       $('placeholderView').hidden = !!PAGE_VIEWS[page];
@@ -6732,6 +6761,7 @@
         });
       }
       if (page === 'weather' && window.CtrlWeather) window.CtrlWeather.refresh();
+      if (page === 'cuisine' && window.CtrlCuisine) window.CtrlCuisine.load();
       if (page === 'mail' && gmailAccessToken && !gmailMessages.length) loadGmailMessages();
     }
 
@@ -8487,6 +8517,7 @@
   </script>
   <script src="./weather.js"></script>
   <script src="./sports.js"></script>
+  <script src="./cuisine.js"></script>
 </body>
 
 </html>
