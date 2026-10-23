@@ -305,8 +305,8 @@
     $('cuisineRecipeGrid').innerHTML = '';
     try {
       let payload = query
-        ? await cachedRequest('search', { query: query, limit: '40' })
-        : await cachedRequest('popular', { limit: '40', offset: '0' });
+        ? await cachedRequest('search', { query: query, limit: '20' })
+        : await cachedRequest('popular', { limit: '24', offset: '0' });
       if (token !== requestToken) return;
       activeRecipes = recipeList(payload);
       // Priorizar español e inglés sin excluir otros idiomas.
