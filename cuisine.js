@@ -84,6 +84,7 @@
     return minutes + ' min';
   }
   function difficulty(recipe) {
+    if (['easy', 'medium', 'hard'].includes(recipe && recipe.difficulty)) return recipe.difficulty;
     const ingredients = Array.isArray(recipe.ingredients) ? recipe.ingredients.length : Number(recipe.ingredientCount || 0);
     const steps = Array.isArray(recipe.instructions) ? recipe.instructions.length : Number(recipe.stepCount || 0);
     if (ingredients && steps && ingredients <= 6 && steps <= 5) return 'easy';
@@ -127,7 +128,7 @@
     return {
       id: String(recipe.id), title: recipe.title || 'Receta sin título', url: safeHttpUrl(recipe.url), isPersonal: !!recipe.isPersonal,
       ingredients: recipe.isPersonal ? (recipe.ingredients || []) : undefined, instructions: recipe.isPersonal ? (recipe.instructions || []) : undefined, servings: recipe.isPersonal ? recipe.servings : undefined,
-      image: recipeImage(recipe), language: recipe.language || activeLanguage,
+      image: safeHttpUrl(recipe.image) || recipeImage(recipe), language: recipe.language || activeLanguage,
       description: recipe.description || '', times: recipe.times || {},
       courses: recipe.courses || [], categories: recipe.categories || [], tags: recipe.tags || [],
       ingredientCount: Array.isArray(recipe.ingredients) ? recipe.ingredients.length : Number(recipe.ingredientCount || 0),
@@ -211,7 +212,7 @@
       nutrition.carbohydrates && nutrition.carbohydrates.value != null ? '<span><strong>' + esc(Math.round(nutrition.carbohydrates.value * 10) / 10) + ' g</strong>carbohidratos</span>' : ''
     ].filter(Boolean).join('');
     const source = safeHttpUrl(recipe.url);
-    const ingredientRows = ingredients.map((item, index) => '<li><input type="checkbox" id="cuisine-ingredient-' + index + '"><span>' + esc(item.display || item.original || item.name || 'Ingrediente') + (item.optional ? ' <small>(opcional)</small>' : '') + '</span></li>').join('');
+    const ingredientRows = ingredients.map(item => '<li><span>' + esc(item.display || item.original || item.name || 'Ingrediente') + (item.optional ? ' <small>(opcional)</small>' : '') + '</span></li>').join('');
     const stepRows = steps.map((step, index) => '<li><span class="cuisine-step-number">' + esc(step.step || index + 1) + '</span><p>' + esc(typeof step === 'string' ? step : step.text || '') + '</p></li>').join('');
     const description = recipe.description ? '<p class="cuisine-detail-description">' + esc(recipe.description) + '</p>' : '';
     $('cuisineRecipeGrid').hidden = true;
@@ -220,7 +221,7 @@
     $('cuisineDetail').hidden = false;
     $('cuisineDetail').innerHTML = '<button type="button" class="cuisine-detail-back" id="cuisineBackBtn"><i data-lucide="arrow-left"></i> Volver a recetas</button>'
       + '<div class="cuisine-detail-hero"><div><div class="cuisine-detail-eyebrow">' + esc(typeText(recipe)) + ' · ' + esc(recipe.language === 'en' ? 'English' : 'Español') + '</div><h2>' + esc(recipe.title || 'Receta') + '</h2>' + description
-      + '<div class="cuisine-detail-meta"><span><i data-lucide="clock-3"></i> ' + esc(timeText(recipe)) + '</span><span>' + esc(difficultyLabel(difficulty(recipe))) + ' · estimada</span><span>' + esc(servings) + '</span></div>'
+      + '<div class="cuisine-detail-meta"><span><i data-lucide="clock-3"></i> ' + esc(timeText(recipe)) + '</span><span>' + esc(difficultyLabel(difficulty(recipe))) + (recipe.isPersonal ? '' : ' · estimada') + '</span><span>' + esc(servings) + '</span></div>'
       + '<div class="cuisine-detail-actions"><button class="secondary" type="button" id="cuisineDetailFavorite" aria-pressed="' + isFavorite(recipe.id) + '"><i data-lucide="heart"></i>' + (isFavorite(recipe.id) ? ' Quitar de favoritas' : ' Guardar favorita') + '</button>'
       + (source ? '<a class="primary" href="' + esc(source) + '" target="_blank" rel="noopener noreferrer"><i data-lucide="external-link"></i> Fuente original</a>' : '') + '</div>'
       + (source ? '<div class="cuisine-detail-source">Receta de <a href="' + esc(source) + '" target="_blank" rel="noopener noreferrer">' + esc(sourceName(recipe)) + '</a>. Consultá la publicación original para más contexto.</div>' : '')
@@ -292,6 +293,7 @@
       activeRecipes = [];
       renderCards();
       let message = error.message || 'No se pudieron cargar las recetas.';
+      if (/^Something went wrong\\. Please try again\\.?$/i.test(message)) message = 'Tiny Plates respondió con un error interno. La búsqueda no llegó a completarse; volvé a intentar en unos minutos. Si persiste, hay que revisar el estado del servicio o la clave de API en Vercel.';
       if (error.status === 503) message = 'Falta configurar TINYPLATES_API_KEY en Vercel. Seguí los pasos de conexión que te indico debajo.';
       else if (error.status === 401) message = 'Tiny Plates rechazó la clave. Revisá TINYPLATES_API_KEY en las variables de entorno de Vercel.';
       else if (error.status === 429) message = 'Se alcanzó el límite de Tiny Plates: 50 solicitudes al día y 300 por semana por cuenta. Las búsquedas en caché no consumen otra llamada.';
@@ -318,14 +320,72 @@
     $('cuisineFavoritesToggle').addEventListener('click', toggleFavoritesView);
     const personalPanel = $('cuisinePersonalPanel');
     const personalForm = $('cuisinePersonalForm');
+    let personalImageData = '';
     const closePersonalForm = reset => {
-      if (reset && personalForm) personalForm.reset();
+      if (reset && personalForm) {
+        personalForm.reset();
+        personalImageData = '';
+        const previewImage = $('cuisinePersonalPreviewImage');
+        const previewPlaceholder = $('cuisinePersonalPreviewPlaceholder');
+        if (previewImage) { previewImage.src = ''; previewImage.hidden = true; }
+        if (previewPlaceholder) previewPlaceholder.hidden = false;
+        refreshPersonalPreview();
+      }
       if (personalPanel) personalPanel.hidden = true;
     };
+    const refreshPersonalPreview = () => {
+      const title = $('cuisinePersonalTitle')?.value.trim();
+      const description = $('cuisinePersonalDescription')?.value.trim();
+      const ingredients = ($('cuisinePersonalIngredients')?.value || '').split(/\\n|,/).map(s => s.trim()).filter(Boolean);
+      const steps = ($('cuisinePersonalSteps')?.value || '').split(/\\n/).map(s => s.trim()).filter(Boolean);
+      const minutes = Number($('cuisinePersonalMinutes')?.value) || 0;
+      const servings = $('cuisinePersonalServings')?.value.trim();
+      const difficultyValue = $('cuisinePersonalDifficulty')?.value || 'medium';
+      $('cuisinePersonalPreviewTitle').textContent = title || 'Nombre de tu receta';
+      $('cuisinePersonalPreviewDescription').textContent = description || 'La descripción va a aparecer acá.';
+      $('cuisinePersonalPreviewDifficulty').textContent = difficultyLabel(difficultyValue);
+      $('cuisinePersonalPreviewTime').textContent = minutes > 0 ? minutes + ' min' : 'Tiempo no indicado';
+      $('cuisinePersonalPreviewIngredients').textContent = ingredients.length + (ingredients.length === 1 ? ' ingrediente' : ' ingredientes');
+      $('cuisinePersonalPreviewSteps').textContent = steps.length + (steps.length === 1 ? ' paso' : ' pasos');
+      $('cuisinePersonalPreviewServings').textContent = servings || 'Porciones no indicadas';
+    };
+    const setPersonalPreviewImage = imageData => {
+      const previewImage = $('cuisinePersonalPreviewImage');
+      const previewPlaceholder = $('cuisinePersonalPreviewPlaceholder');
+      if (!previewImage || !previewPlaceholder) return;
+      previewImage.src = imageData || '';
+      previewImage.hidden = !imageData;
+      previewPlaceholder.hidden = !!imageData;
+    };
+    const processRecipeImage = file => new Promise((resolve, reject) => {
+      if (!file) return resolve('');
+      if (!/^image\\/(jpeg|png|webp)$/.test(file.type)) return reject(new Error('Elegí una imagen JPG, PNG o WebP.'));
+      if (file.size > 5 * 1024 * 1024) return reject(new Error('La imagen supera los 5 MB.'));
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('No se pudo leer la imagen.'));
+      reader.onload = () => {
+        const image = new Image();
+        image.onerror = () => reject(new Error('El archivo no parece ser una imagen válida.'));
+        image.onload = () => {
+          const maxSide = 1200;
+          const scale = Math.min(1, maxSide / Math.max(image.naturalWidth, image.naturalHeight));
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+          canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+          const context = canvas.getContext('2d');
+          if (!context) return reject(new Error('No se pudo procesar la imagen.'));
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/jpeg', 0.82));
+        };
+        image.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
     if ($('cuisineAddRecipeBtn')) $('cuisineAddRecipeBtn').addEventListener('click', () => {
       if (!personalPanel) return;
       personalPanel.hidden = !personalPanel.hidden;
       if (!personalPanel.hidden) {
+        refreshPersonalPreview();
         personalPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
         $('cuisinePersonalTitle').focus({ preventScroll: true });
       }
@@ -333,6 +393,26 @@
     if (personalForm) {
       $('cuisineCancelPersonalBtn').addEventListener('click', () => closePersonalForm(true));
       $('cuisineDiscardPersonalBtn').addEventListener('click', () => closePersonalForm(true));
+      ['cuisinePersonalTitle','cuisinePersonalDescription','cuisinePersonalIngredients','cuisinePersonalSteps','cuisinePersonalMinutes','cuisinePersonalServings','cuisinePersonalDifficulty'].forEach(id => {
+        const input = $(id);
+        if (input) input.addEventListener('input', refreshPersonalPreview);
+        if (input && input.tagName === 'SELECT') input.addEventListener('change', refreshPersonalPreview);
+      });
+      $('cuisinePersonalImage').addEventListener('change', async event => {
+        const file = event.target.files && event.target.files[0];
+        if (!file) { personalImageData = ''; setPersonalPreviewImage(''); return; }
+        status('Procesando foto…');
+        try {
+          personalImageData = await processRecipeImage(file);
+          setPersonalPreviewImage(personalImageData);
+          status('');
+        } catch (error) {
+          personalImageData = '';
+          event.target.value = '';
+          setPersonalPreviewImage('');
+          status(error.message, true);
+        }
+      });
       personalForm.addEventListener('submit', event => {
         event.preventDefault();
         const title = $('cuisinePersonalTitle').value.trim();
@@ -342,17 +422,22 @@
         const recipe = {
           id: 'personal-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7),
           title, description: $('cuisinePersonalDescription').value.trim(),
-          ingredients: ingredientText.split(/\n|,/).map(s => s.trim()).filter(Boolean).map(display => ({display})),
-          instructions: stepText.split(/\n/).map(s => s.trim()).filter(Boolean),
+          image: personalImageData,
+          difficulty: $('cuisinePersonalDifficulty').value || 'medium',
+          ingredients: ingredientText.split(/\\n|,/).map(s => s.trim()).filter(Boolean).map(display => ({display})),
+          instructions: stepText.split(/\\n/).map(s => s.trim()).filter(Boolean),
           servings: $('cuisinePersonalServings').value.trim() || 'A gusto',
           times: { total: { seconds: Math.max(0, Number($('cuisinePersonalMinutes').value) || 0) * 60 } },
           language: 'es', isPersonal: true, url: '', categories: ['personal'], courses: []
         };
         personalRecipes.unshift(recipe);
         if (writeStorage(PERSONAL_KEY, personalRecipes)) {
-          personalForm.reset(); if (personalPanel) personalPanel.hidden = true; showingFavorites = false;
+          closePersonalForm(true);
+          showingFavorites = false;
           $('cuisineFavoritesToggle').setAttribute('aria-pressed', 'false');
           currentRecipe = null; renderCards(); status('Tu receta se guardó en este dispositivo.');
+        } else {
+          personalRecipes = personalRecipes.filter(item => item.id !== recipe.id);
         }
       });
     }
