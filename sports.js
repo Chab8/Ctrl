@@ -81,7 +81,7 @@
     const p = (async () => {
       let res;
       for (let attempt = 0; attempt < 2; attempt++) {
-        try { res = await fetch(url, { headers: { 'X-API-KEY': CFG.key, Accept: 'application/json' } }); }
+        try { res = await fetch(url, { cache: 'no-store', headers: { 'X-API-KEY': CFG.key, Accept: 'application/json' } }); }
         catch (e) { const err = new Error('No se pudo conectar con PitchAPI. Revisá tu conexión (o si el navegador bloquea la API por CORS).'); err.network = true; throw err; }
         if (res.status === 429 && attempt === 0) { await sleep(Math.min(5, Number(res.headers.get('Retry-After')) || 2) * 1000); continue; }
         break;
@@ -96,6 +96,14 @@
         err.code = (apiError && typeof apiError === 'object' && apiError.code) || (body && body.code) || '';
         err.endpoint = path + qs;
         err.upstreamMessage = apiMessage;
+        // Sin JSON de PitchAPI: la respuesta vino del hosting/proxy (ruta inexistente), no de la API.
+        err.noEnvelope = !body || typeof body !== 'object';
+        throw err;
+      }
+      if (!body || typeof body !== 'object') {
+        // 200 pero sin JSON (p. ej. una página HTML): nunca debe interpretarse como "sin datos".
+        const err = new Error('El servidor respondió con algo que no es JSON. Probablemente el proxy /api/pitchapi no está funcionando.');
+        err.status = 502; err.code = 'BAD_RESPONSE'; err.endpoint = path + qs; err.noEnvelope = true;
         throw err;
       }
       const data = body && typeof body === 'object' && 'data' in body ? body.data : body;
@@ -126,10 +134,44 @@
       setLeagues(d.leagues);
       lsSet('ctrl.sports.leagues', JSON.stringify({ t: Date.now(), list: L.list.map(l => ({ id: l.id, name: l.name, country_code: l.country_code, image_url: l.image_url, seasons: l.seasons })) }));
       L.loaded = true;
+      reconcileLeagues();
     } catch (e) {
-      if (!L.list.length) throw e;
-      L.loaded = true; // El caché mantiene usable la sección si PitchAPI está temporalmente caída.
+      // Solo una caída transitoria (red, 429, 5xx) justifica usar el catálogo guardado.
+      // Un 404/401 o una respuesta que no es JSON significa que el proxy está mal: hay que mostrarlo.
+      const transient = e && (e.network || e.status === 429 || (e.status >= 500 && e.status !== 502) || (e.status === 502 && !e.noEnvelope));
+      if (!L.list.length || !transient) throw e;
+      L.loaded = true;
     }
+  }
+  // Equipos seguidos con ID obsoleto: se comprueba que PitchAPI ya no los conoce (404 JSON)
+  // y recién entonces se re-vinculan por nombre exacto con un equipo visto en los partidos.
+  const teamChecked = new Set();
+  async function reconcileTeams(ms) {
+    const s = store(); if (!s.teams.length || !Array.isArray(ms)) return;
+    const byName = new Map(), seen = new Set();
+    ms.forEach(m => [m.home_team, m.away_team].forEach(t => { if (t && t.id && t.name) { seen.add(String(t.id)); byName.set(t.name, t); } }));
+    let changed = false;
+    for (const f of s.teams.slice()) {
+      const cand = byName.get(f.name);
+      if (!cand || seen.has(String(f.id)) || sameId(cand.id, f.id) || teamChecked.has(f.id)) continue;
+      teamChecked.add(f.id);
+      try { await api('/v1/teams/' + encodeURIComponent(f.id), null, { ttl: 864e5 }); }
+      catch (e) {
+        if (e && e.status === 404 && !e.noEnvelope && !s.teams.some(x => sameId(x.id, cand.id))) { f.id = String(cand.id); changed = true; }
+      }
+    }
+    if (changed) { persist(); paintFollowing(); paintDay(); }
+  }
+  // Si PitchAPI cambió los IDs del catálogo, las ligas seguidas quedan con IDs viejos y nunca
+  // coinciden con los partidos. Las re-vinculamos por nombre y país.
+  function reconcileLeagues() {
+    const s = store(); let changed = false;
+    s.leagues.forEach(f => {
+      if (L.byId.has(String(f.id))) return;
+      const match = L.list.find(l => l.name === f.name && (!f.country || l.country_code === f.country)) || L.list.find(l => l.name === f.name);
+      if (match) { f.id = String(match.id); f.country = match.country_code || f.country; changed = true; }
+    });
+    if (changed) persist();
   }
   const leagueImg = id => (L.byId.get(id) || {}).image_url || '';
 
@@ -207,7 +249,7 @@
           });
         } catch (error) {
           // Una liga sin datos no debe impedir que las demás se muestren.
-          if (!error || (error.status !== 404 && error.status !== 400)) throw error;
+          if (!error || error.noEnvelope || (error.status !== 404 && error.status !== 400)) throw error;
         }
       }), 4);
       const unique = new Map();
@@ -244,8 +286,9 @@
         if (matches.length) return matches;
       } catch (e) {
         lastError = e;
-        // A 404 for a date with no coverage is treated as an empty day.
-        if (!e || e.status !== 404) throw e;
+        // Un 404 JSON de PitchAPI para una fecha sin cobertura es un día vacío;
+        // un 404 sin JSON es del hosting/proxy y debe mostrarse como error.
+        if (!e || e.status !== 404 || e.noEnvelope) throw e;
       }
     }
     if (lastError && lastError.status !== 404) throw lastError;
@@ -275,7 +318,8 @@
   const emptyHtml = t => '<div class="empty">' + t + '</div>';
   function errorHtml(e, retry) {
     let msg;
-    if (e && e.status === 401) msg = 'PitchAPI rechazó la clave de acceso (401). Revisá PITCHAPI_API_KEY en las variables de entorno de Vercel.';
+    if (e && (e.noEnvelope || e.code === 'BAD_RESPONSE')) msg = 'La app no está llegando a PitchAPI: la ruta /api/pitchapi no respondió JSON (' + esc(String(e.status || '')) + '). Verificá que el deploy en Vercel incluya la carpeta api/ y la variable PITCHAPI_API_KEY (no funciona en GitHub Pages).' + (e.endpoint ? '<br><small style="display:inline-block;margin-top:8px;opacity:.8">Consulta: ' + esc(e.endpoint) + '</small>' : '');
+    else if (e && e.status === 401) msg = 'PitchAPI rechazó la clave de acceso (401). Revisá PITCHAPI_API_KEY en las variables de entorno de Vercel.';
     else if (e && e.status === 404 && e.code === 'RESOURCE_NOT_FOUND') msg = 'PitchAPI ya no encuentra este registro. Puede haber cambiado su ID; actualizá los datos o elegí otra competición.';
     else if (e && e.status === 404) {
       msg = 'PitchAPI devolvió 404: el recurso solicitado no está disponible para estos datos.';
@@ -327,6 +371,7 @@
       const all = await dayMatches(ui.day, force);
       if (token !== dayToken) return;
       dayCache = all; lastDayLoad = Date.now(); paintDay();
+      reconcileTeams(all).catch(() => { });
     } catch (e) { if (token !== dayToken || silent) return; box.innerHTML = errorHtml(e, 'day'); }
   }
   function paintDay() {
@@ -503,7 +548,7 @@
           if (found.length) break;
         } catch (err) {
           lastError = err;
-          if (!err || (err.status !== 404 && err.status !== 400)) throw err;
+          if (!err || err.noEnvelope || (err.status !== 404 && err.status !== 400)) throw err;
         }
         if (ui.manageLeague !== lid || ui.manageTab !== 'teams') return;
       }
