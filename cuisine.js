@@ -293,7 +293,7 @@
       activeRecipes = [];
       renderCards();
       let message = error.message || 'No se pudieron cargar las recetas.';
-      if (/^Something went wrong\\. Please try again\\.?$/i.test(message)) message = 'Tiny Plates respondió con un error interno. La búsqueda no llegó a completarse; volvé a intentar en unos minutos. Si persiste, hay que revisar el estado del servicio o la clave de API en Vercel.';
+      if (/^Something went wrong\. Please try again\.?$/i.test(message)) message = 'Tiny Plates respondió con un error interno. La búsqueda no llegó a completarse; volvé a intentar en unos minutos. Si persiste, hay que revisar el estado del servicio o la clave de API en Vercel.';
       if (error.status === 503) message = 'Falta configurar TINYPLATES_API_KEY en Vercel. Seguí los pasos de conexión que te indico debajo.';
       else if (error.status === 401) message = 'Tiny Plates rechazó la clave. Revisá TINYPLATES_API_KEY en las variables de entorno de Vercel.';
       else if (error.status === 429) message = 'Se alcanzó el límite de Tiny Plates: 50 solicitudes al día y 300 por semana por cuenta. Las búsquedas en caché no consumen otra llamada.';
@@ -336,8 +336,8 @@
     const refreshPersonalPreview = () => {
       const title = $('cuisinePersonalTitle')?.value.trim();
       const description = $('cuisinePersonalDescription')?.value.trim();
-      const ingredients = ($('cuisinePersonalIngredients')?.value || '').split(/\\n|,/).map(s => s.trim()).filter(Boolean);
-      const steps = ($('cuisinePersonalSteps')?.value || '').split(/\\n/).map(s => s.trim()).filter(Boolean);
+      const ingredients = ($('cuisinePersonalIngredients')?.value || '').split(/\n|,/).map(s => s.trim()).filter(Boolean);
+      const steps = ($('cuisinePersonalSteps')?.value || '').split(/\n/).map(s => s.trim()).filter(Boolean);
       const minutes = Number($('cuisinePersonalMinutes')?.value) || 0;
       const servings = $('cuisinePersonalServings')?.value.trim();
       const difficultyValue = $('cuisinePersonalDifficulty')?.value || 'medium';
@@ -359,7 +359,7 @@
     };
     const processRecipeImage = file => new Promise((resolve, reject) => {
       if (!file) return resolve('');
-      if (!/^image\\/(jpeg|png|webp)$/.test(file.type)) return reject(new Error('Elegí una imagen JPG, PNG o WebP.'));
+      if (!/^image\/(jpeg|png|webp)$/.test(file.type)) return reject(new Error('Elegí una imagen JPG, PNG o WebP.'));
       if (file.size > 5 * 1024 * 1024) return reject(new Error('La imagen supera los 5 MB.'));
       const reader = new FileReader();
       reader.onerror = () => reject(new Error('No se pudo leer la imagen.'));
@@ -424,8 +424,8 @@
           title, description: $('cuisinePersonalDescription').value.trim(),
           image: personalImageData,
           difficulty: $('cuisinePersonalDifficulty').value || 'medium',
-          ingredients: ingredientText.split(/\\n|,/).map(s => s.trim()).filter(Boolean).map(display => ({display})),
-          instructions: stepText.split(/\\n/).map(s => s.trim()).filter(Boolean),
+          ingredients: ingredientText.split(/\n|,/).map(s => s.trim()).filter(Boolean).map(display => ({display})),
+          instructions: stepText.split(/\n/).map(s => s.trim()).filter(Boolean),
           servings: $('cuisinePersonalServings').value.trim() || 'A gusto',
           times: { total: { seconds: Math.max(0, Number($('cuisinePersonalMinutes').value) || 0) * 60 } },
           language: 'es', isPersonal: true, url: '', categories: ['personal'], courses: []
