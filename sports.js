@@ -394,7 +394,7 @@
     const chip = (kind, o) => '<span class="sp-chip">' + (kind === 'team' ? crest(o) : (leagueImg(o.id) ? '<img class="sp-crest sm" src="' + esc(leagueImg(o.id)) + '" alt="">' : '')) + '<span>' + esc(o.name) + '</span><button type="button" data-unfollow-' + kind + '="' + esc(o.id) + '" aria-label="Dejar de seguir ' + esc(o.name) + '">×</button></span>';
     $('spFollowing').innerHTML = (s.teams.length || s.leagues.length)
       ? (s.teams.length ? '<div class="sp-sub">Equipos y selecciones</div><div class="sp-chips">' + s.teams.map(t => chip('team', t)).join('') + '</div>' : '')
-        + (s.leagues.length ? '<div class="sp-sub">Competiciones</div><div class="sp-chips">' + s.leagues.map(l => chip('league', l)).join('') + '</div>' : '')
+      + (s.leagues.length ? '<div class="sp-sub">Competiciones</div><div class="sp-chips">' + s.leagues.map(l => chip('league', l)).join('') + '</div>' : '')
       : emptyHtml('Nada por acá todavía. Seguí equipos, selecciones o competiciones para armar tu agenda.');
     hydrate($('spFollowing'));
     $('spStatTeams').textContent = s.teams.length; $('spStatLeagues').textContent = s.leagues.length + (s.leagues.length === 1 ? ' competición' : ' competiciones');
@@ -443,8 +443,10 @@
   function tableHtml(rows, leagueId) {
     const F = { w: 'G', d: 'E', l: 'P' };
     return '<div class="sp-scroll"><table class="sp-table"><thead><tr><th>#</th><th>Equipo</th><th title="Partidos jugados">PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th><th>Pts</th><th class="sp-hide-sm">Forma</th></tr></thead><tbody>'
-      + rows.map((r, i) => { const dg = r.gf - r.ga, f = isTeamF(r.team.id); noteTeam(r.team);
-        return '<tr class="' + (f ? 'f' : '') + '"><td>' + (i + 1) + '</td><td><div class="sp-team-cell">' + crest(r.team) + '<span class="sp-name">' + esc(r.team.name) + '</span><button type="button" class="sp-star' + (f ? ' on' : '') + '" data-follow-team="' + esc(r.team.id) + '" data-name="' + esc(r.team.name) + '" data-league="' + esc(leagueId) + '" title="' + (f ? 'Dejar de seguir' : 'Seguir equipo') + '">' + (f ? '★' : '☆') + '</button></div></td><td>' + r.p + '</td><td>' + r.w + '</td><td>' + r.d + '</td><td>' + r.l + '</td><td>' + r.gf + '</td><td>' + r.ga + '</td><td>' + (dg > 0 ? '+' : '') + dg + '</td><td class="pts">' + r.pts + '</td><td class="sp-hide-sm"><span class="sp-form">' + r.form.slice(-5).map(x => '<i class="' + x + '">' + F[x] + '</i>').join('') + '</span></td></tr>'; }).join('')
+      + rows.map((r, i) => {
+        const dg = r.gf - r.ga, f = isTeamF(r.team.id); noteTeam(r.team);
+        return '<tr class="' + (f ? 'f' : '') + '"><td>' + (i + 1) + '</td><td><div class="sp-team-cell">' + crest(r.team) + '<span class="sp-name">' + esc(r.team.name) + '</span><button type="button" class="sp-star' + (f ? ' on' : '') + '" data-follow-team="' + esc(r.team.id) + '" data-name="' + esc(r.team.name) + '" data-league="' + esc(leagueId) + '" title="' + (f ? 'Dejar de seguir' : 'Seguir equipo') + '">' + (f ? '★' : '☆') + '</button></div></td><td>' + r.p + '</td><td>' + r.w + '</td><td>' + r.d + '</td><td>' + r.l + '</td><td>' + r.gf + '</td><td>' + r.ga + '</td><td>' + (dg > 0 ? '+' : '') + dg + '</td><td class="pts">' + r.pts + '</td><td class="sp-hide-sm"><span class="sp-form">' + r.form.slice(-5).map(x => '<i class="' + x + '">' + F[x] + '</i>').join('') + '</span></td></tr>';
+      }).join('')
       + '</tbody></table></div>';
   }
   async function renderTable(force) {
@@ -821,8 +823,7 @@ html[data-theme="dark"] .sp-table tr.f td{background:color-mix(in srgb,var(--acc
 <div class="card"><div class="card-head"><div><div class="card-title">Siguiendo</div><div class="card-sub">Equipos, selecciones y competiciones</div></div><button class="text-action" type="button" data-sp-open="manage">Gestionar</button></div><div id="spFollowing"></div></div>
 <div class="card"><div class="card-head"><div><div class="card-title">Próximos partidos</div><div class="card-sub">Lo que viene de lo que seguís</div></div><button class="text-action" type="button" data-sp-retry="upcoming" title="Actualizar">↻</button></div><div id="spUpcoming"></div></div>
 </div></div></div>
-<div id="spTabTables" hidden><div class="card"><div class="sp-controls"><select class="filter-select" id="spTableLeague" aria-label="Competición"></select><select class="filter-select" id="spTableSeason" aria-label="Temporada" style="max-width:130px"></select><button type="button" class="secondary" id="spTableFollow">☆ Seguir competición</button></div><div id="spTableBody"></div></div></div>
-<div class="footer-note">Datos de PitchAPI · Los horarios se muestran en tu hora local.</div>`;
+<div id="spTabTables" hidden><div class="card"><div class="sp-controls"><select class="filter-select" id="spTableLeague" aria-label="Competición"></select><select class="filter-select" id="spTableSeason" aria-label="Temporada" style="max-width:130px"></select><button type="button" class="secondary" id="spTableFollow">☆ Seguir competición</button></div><div id="spTableBody"></div></div></div>`;
 
   const MODALS = `
 <div class="modal-backdrop" id="spDetailBackdrop" role="dialog" aria-modal="true" aria-label="Detalle del partido"><div class="modal sp-modal"><div class="modal-head"><div><h2>Partido</h2><p>Resumen, estadísticas, alineaciones y cara a cara.</p></div><div style="display:flex;gap:6px"><button class="close-btn" type="button" data-sp-retry="detail" aria-label="Actualizar" title="Actualizar" style="font-size:16px">↻</button><button class="close-btn" type="button" data-sp-close aria-label="Cerrar">×</button></div></div><div id="spDetailBody"></div></div></div>
