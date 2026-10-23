@@ -3,10 +3,13 @@
   const API = '/api/tinyplates';
   const CACHE_KEY = 'ctrl.cuisine.api-cache.v1';
   const FAVORITES_KEY = 'ctrl.cuisine.favorites.v1';
+  const PERSONAL_KEY = 'ctrl.cuisine.personal.v1';
   const CACHE_TTL = 6 * 60 * 60 * 1000;
   const $ = id => document.getElementById(id);
   const esc = value => String(value == null ? '' : value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   let loaded = false, loading = false, activeLanguage = 'es', activeRecipes = [], activeQuery = '', showingFavorites = false, currentRecipe = null, requestToken = 0;
+  let personalRecipes = readStorage(PERSONAL_KEY, []);
+  if (!Array.isArray(personalRecipes)) personalRecipes = [];
   let favorites = readStorage(FAVORITES_KEY, []);
   if (!Array.isArray(favorites)) favorites = [];
 
@@ -168,7 +171,7 @@
     const type = $('cuisineType').value;
     const maxTime = $('cuisineMaxTime').value;
     const difficultyFilter = $('cuisineDifficulty').value;
-    let list = showingFavorites ? favorites.slice() : activeRecipes.slice();
+    let list = showingFavorites ? favorites.slice() : [...personalRecipes, ...activeRecipes];
     const q = ($('cuisineSearchInput').value || '').trim().toLowerCase();
     list = list.filter(recipe => {
       const haystack = [recipe.title, recipe.description, (recipe.tags || []).join(' '), (recipe.categories || []).join(' '), (recipe.courses || []).join(' ')].join(' ').toLowerCase();
@@ -195,11 +198,10 @@
   }
   function renderDetail(recipe) {
     currentRecipe = recipe;
-    const ingredients = Array.isArray(recipe.ingredients) ? recipe.ingredients : [];
+    const ingredients = Array.isArray(recipe.ingredients) ? recipe.ingredients.map(item => typeof item === 'string' ? { display: item } : item) : [];
     const steps = Array.isArray(recipe.instructions) ? recipe.instructions : [];
-    const image = safeHttpUrl(recipeImage(recipe));
-    const servings = recipe.servings && (recipe.servings.original || recipe.servings.quantity)
-      ? (recipe.servings.original || 'Rinde ' + recipe.servings.quantity) : 'Raciones no indicadas';
+    const image = safeHttpUrl(recipe.image || recipeImage(recipe));
+    const servings = typeof recipe.servings === 'string' ? recipe.servings : recipe.servings && (recipe.servings.original || recipe.servings.quantity) ? (recipe.servings.original || 'Rinde ' + recipe.servings.quantity) : 'Raciones no indicadas';
     const nutrition = recipe.nutrition || {};
     const nutritionBits = [
       nutrition.calories && nutrition.calories.value != null ? '<span><strong>' + esc(Math.round(nutrition.calories.value)) + ' kcal</strong>por porción / según fuente</span>' : '',
@@ -236,10 +238,11 @@
     renderCards();
   }
   async function openRecipe(id) {
-    const fromList = activeRecipes.find(item => String(item.id) === String(id));
+    const fromList = [...personalRecipes, ...activeRecipes].find(item => String(item.id) === String(id));
     const fromFav = favorites.find(item => String(item.id) === String(id));
     let recipe = fromList || fromFav;
-    if (recipe && Array.isArray(recipe.ingredients) && Array.isArray(recipe.instructions)) { renderDetail(recipe); window.scrollTo({top:0,behavior:'smooth'}); return; }
+    if (recipe && (recipe.isPersonal || (Array.isArray(recipe.ingredients) && Array.isArray(recipe.instructions)))) { renderDetail(recipe); window.scrollTo({top:0,behavior:'smooth'}); return; }
+    if (!recipe) { status('No se encontró esta receta. Volvé a buscarla e intentá de nuevo.', true); return; }
     status('Cargando la receta completa…');
     try {
       const payload = await cachedRequest('recipes/' + encodeURIComponent(id), { units: 'metric' });
@@ -255,7 +258,7 @@
   }
   async function load(force) {
     if (loading && !force) return;
-    activeLanguage = $('cuisineLanguage').value || 'es';
+    activeLanguage = 'all';
     const query = ($('cuisineSearchInput').value || '').trim();
     activeQuery = query;
     const token = ++requestToken;
@@ -264,31 +267,24 @@
     $('cuisineRecipeGrid').innerHTML = '';
     try {
       let payload = query
-        ? await cachedRequest('search', { query: query, language: activeLanguage, limit: '20' })
-        : await cachedRequest('popular', { language: activeLanguage, limit: '24', offset: '0' });
+        ? await cachedRequest('search', { query: query, limit: '40' })
+        : await cachedRequest('popular', { limit: '40', offset: '0' });
       if (token !== requestToken) return;
       activeRecipes = recipeList(payload);
-      let usedFallbackLanguage = false;
-
-      // Tiny Plates puede tener pocas recetas publicadas en español.
-      // Si una búsqueda en español no devuelve resultados, probar en inglés
-      // para evitar confundir una limitación del catálogo con un fallo de búsqueda.
-      if (activeRecipes.length === 0 && activeLanguage === 'es') {
-        payload = query
-          ? await cachedRequest('search', { query: query, language: 'en', limit: '20' })
-          : await cachedRequest('popular', { language: 'en', limit: '24', offset: '0' });
-        if (token !== requestToken) return;
-        activeRecipes = recipeList(payload);
-        usedFallbackLanguage = activeRecipes.length > 0;
-      }
+      // Priorizar español e inglés sin excluir otros idiomas.
+      const languageRank = recipe => {
+        const lang = String(recipe.language || recipe.locale || '').toLowerCase();
+        if (lang === 'es' || lang.startsWith('es-') || lang.includes('spanish')) return 0;
+        if (lang === 'en' || lang.startsWith('en-') || lang.includes('english')) return 1;
+        return 2;
+      };
+      activeRecipes.sort((a, b) => languageRank(a) - languageRank(b));
 
       loaded = true;
       showingFavorites = false;
       $('cuisineFavoritesToggle').setAttribute('aria-pressed', 'false');
       renderCards();
-      status(activeRecipes.length
-        ? (usedFallbackLanguage ? 'No había resultados en español; mostramos recetas disponibles en inglés.' : '')
-        : 'No encontramos recetas. Probá otra búsqueda o cambiá el idioma.');
+      status(activeRecipes.length ? '' : 'No encontramos recetas. Probá otra búsqueda.');
     } catch (error) {
       if (token !== requestToken) return;
       activeRecipes = [];
@@ -316,9 +312,38 @@
   }
   function bind() {
     $('cuisineSearchForm').addEventListener('submit', event => { event.preventDefault(); currentRecipe = null; load(true); });
-    $('cuisineLanguage').addEventListener('change', () => { currentRecipe = null; load(true); });
     ['cuisineType','cuisineMaxTime','cuisineDifficulty'].forEach(id => $(id).addEventListener('change', renderCards));
     $('cuisineFavoritesToggle').addEventListener('click', toggleFavoritesView);
+    if ($('cuisineAddRecipeBtn')) $('cuisineAddRecipeBtn').addEventListener('click', () => {
+      const form = $('cuisinePersonalForm'); form.hidden = !form.hidden;
+      if (!form.hidden) $('cuisinePersonalTitle').focus();
+    });
+    const personalForm = $('cuisinePersonalForm');
+    if (personalForm) {
+      $('cuisineCancelPersonalBtn').addEventListener('click', () => { personalForm.reset(); personalForm.hidden = true; });
+      personalForm.addEventListener('submit', event => {
+        event.preventDefault();
+        const title = $('cuisinePersonalTitle').value.trim();
+        const ingredientText = $('cuisinePersonalIngredients').value.trim();
+        const stepText = $('cuisinePersonalSteps').value.trim();
+        if (!title || !ingredientText || !stepText) { status('Completá el nombre, los ingredientes y la preparación.', true); return; }
+        const recipe = {
+          id: 'personal-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7),
+          title, description: $('cuisinePersonalDescription').value.trim(),
+          ingredients: ingredientText.split(/\n|,/).map(s => s.trim()).filter(Boolean).map(display => ({display})),
+          instructions: stepText.split(/\n/).map(s => s.trim()).filter(Boolean),
+          servings: $('cuisinePersonalServings').value.trim() || 'A gusto',
+          times: { total: { seconds: Math.max(0, Number($('cuisinePersonalMinutes').value) || 0) * 60 } },
+          language: 'es', isPersonal: true, url: '', categories: ['personal'], courses: []
+        };
+        personalRecipes.unshift(recipe);
+        if (writeStorage(PERSONAL_KEY, personalRecipes)) {
+          personalForm.reset(); personalForm.hidden = true; showingFavorites = false;
+          $('cuisineFavoritesToggle').setAttribute('aria-pressed', 'false');
+          currentRecipe = null; renderCards(); status('Tu receta se guardó en este dispositivo.');
+        }
+      });
+    }
     $('cuisineRecipeGrid').addEventListener('click', event => {
       const fav = event.target.closest('[data-cuisine-favorite]');
       if (fav) {
@@ -327,7 +352,7 @@
         return;
       }
       const open = event.target.closest('[data-cuisine-open]');
-      if (open) openRecipe(open.dataset.cuisineOpen);
+      if (open) { event.preventDefault(); openRecipe(open.dataset.cuisineOpen); }
     });
   }
   window.CtrlCuisine = { load: () => { if (!loaded) load(); else if (showingFavorites) renderCards(); }, reload: () => load(true) };
