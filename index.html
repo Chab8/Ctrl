@@ -6315,7 +6315,7 @@
               <div class="cuisine-personal-heading-copy">
                 <div class="eyebrow">TU RECETARIO</div>
                 <h2 id="cuisinePersonalHeading">Crear una receta</h2>
-                <p>Guardá esa receta que siempre querés tener a mano.</p>
+                <p>Completá los datos y mirá cómo va a quedar antes de guardarla.</p>
               </div>
               <button class="cuisine-personal-close" id="cuisineCancelPersonalBtn" type="button" aria-label="Cerrar formulario"><i data-lucide="x"></i></button>
             </div>
@@ -6326,7 +6326,22 @@
               </div>
               <div class="cuisine-personal-field">
                 <label for="cuisinePersonalDescription">Descripción <span class="optional">OPCIONAL</span></label>
-                <textarea id="cuisinePersonalDescription" name="description" rows="2" maxlength="500" placeholder="¿Qué la hace especial?"></textarea>
+                <textarea id="cuisinePersonalDescription" name="description" rows="2" maxlength="500" placeholder="Contá brevemente qué la hace especial."></textarea>
+              </div>
+              <div class="cuisine-personal-fields cuisine-personal-media-fields">
+                <div class="cuisine-personal-field">
+                  <label for="cuisinePersonalImage">Foto de la receta <span class="optional">OPCIONAL</span></label>
+                  <input id="cuisinePersonalImage" name="image" type="file" accept="image/png,image/jpeg,image/webp">
+                  <span class="cuisine-personal-help">JPG, PNG o WebP. Máximo 5 MB.</span>
+                </div>
+                <div class="cuisine-personal-field">
+                  <label for="cuisinePersonalDifficulty">Dificultad</label>
+                  <select id="cuisinePersonalDifficulty" name="difficulty" class="filter-select">
+                    <option value="easy">Fácil</option>
+                    <option value="medium" selected>Intermedia</option>
+                    <option value="hard">Avanzada</option>
+                  </select>
+                </div>
               </div>
               <div class="cuisine-personal-divider"><span>La receta</span></div>
               <div class="cuisine-personal-fields">
@@ -6337,7 +6352,7 @@
                 </div>
                 <div class="cuisine-personal-field">
                   <label for="cuisinePersonalSteps">Preparación <span>*</span></label>
-                  <span class="cuisine-personal-help">Escribí cada paso en una línea distinta.</span>
+                  <span class="cuisine-personal-help">Cada paso en una línea distinta.</span>
                   <textarea id="cuisinePersonalSteps" name="steps" rows="7" required placeholder="Mezclá los ingredientes.&#10;Volcá la preparación en un molde.&#10;Horneá durante 20 minutos."></textarea>
                 </div>
               </div>
@@ -6350,6 +6365,18 @@
                   <label for="cuisinePersonalServings">Porciones</label>
                   <input id="cuisinePersonalServings" name="servings" maxlength="80" placeholder="Ej. 4 porciones">
                 </div>
+              </div>
+              <div class="cuisine-personal-preview-wrap">
+                <div class="cuisine-personal-preview-label">VISTA PREVIA</div>
+                <article class="cuisine-personal-preview-card">
+                  <div class="cuisine-personal-preview-media"><img id="cuisinePersonalPreviewImage" alt="" hidden><div id="cuisinePersonalPreviewPlaceholder"><i data-lucide="cooking-pot"></i><span>La foto de tu receta aparece acá</span></div></div>
+                  <div class="cuisine-personal-preview-content">
+                    <div class="cuisine-personal-preview-meta"><span id="cuisinePersonalPreviewDifficulty">Intermedia</span><span id="cuisinePersonalPreviewTime">Tiempo no indicado</span></div>
+                    <h3 id="cuisinePersonalPreviewTitle">Nombre de tu receta</h3>
+                    <p id="cuisinePersonalPreviewDescription">La descripción va a aparecer acá.</p>
+                    <div class="cuisine-personal-preview-counts"><span id="cuisinePersonalPreviewIngredients">0 ingredientes</span><span id="cuisinePersonalPreviewSteps">0 pasos</span><span id="cuisinePersonalPreviewServings">Porciones no indicadas</span></div>
+                  </div>
+                </article>
               </div>
               <div class="cuisine-personal-footer">
                 <p><span>*</span> Campos obligatorios</p>
