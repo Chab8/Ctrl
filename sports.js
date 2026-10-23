@@ -60,8 +60,11 @@
     return s;
   }
   function persist() { try { localStorage.setItem(typeof KEY === 'string' ? KEY : 'ctrl.personal.v1', JSON.stringify(state)) } catch { } }
-  const isTeamF = id => !!id && store().teams.some(t => t.id === id);
-  const isLeagueF = id => !!id && store().leagues.some(l => l.id === id);
+  // API IDs are opaque strings; normalize persisted IDs too, so old state
+  // with numeric IDs cannot silently hide followed teams/leagues.
+  const sameId = (a, b) => a != null && b != null && String(a) === String(b);
+  const isTeamF = id => id != null && store().teams.some(t => sameId(t.id, id));
+  const isLeagueF = id => id != null && store().leagues.some(l => sameId(l.id, id));
   const followedMatch = m => isLeagueF(m.league && m.league.id) || isTeamF(m.home_team && m.home_team.id) || isTeamF(m.away_team && m.away_team.id);
   const ui = { tab: 'matches', day: today(), tableLeague: '', season: '', manageTab: 'leagues', manageLeague: '', manageQuery: '' };
   let dayCache = [], dayToken = 0, tableToken = 0, shown = false, lastDayLoad = 0;
@@ -374,9 +377,11 @@
 
   /* ------------------------------------------------------- seguir (modal) */
   function follow(kind, o) {
-    const s = store(), list = kind === 'team' ? s.teams : s.leagues, i = list.findIndex(x => x.id === o.id);
+    const s = store(), list = kind === 'team' ? s.teams : s.leagues, i = list.findIndex(x => sameId(x.id, o.id));
     if (i >= 0) { list.splice(i, 1); persist(); return false; }
-    list.push(kind === 'team' ? { id: o.id, name: o.name, leagueId: o.leagueId || '' } : { id: o.id, name: o.name, country: o.country || '' });
+    list.push(kind === 'team'
+      ? { id: String(o.id), name: o.name || String(o.id), leagueId: o.leagueId ? String(o.leagueId) : '' }
+      : { id: String(o.id), name: o.name || String(o.id), country: o.country || '' });
     persist(); return true;
   }
   function afterFollowChange() { paintFollowing(); paintDay(); renderUpcoming(); if (ui.tab === 'tables' && ui.tableLeague) { $('spTableFollow').textContent = isLeagueF(ui.tableLeague) ? '★ Siguiendo' : '☆ Seguir competición'; $('spTableLeague').innerHTML = leagueOptions(ui.tableLeague); $('spTableLeague').value = ui.tableLeague; } }
