@@ -6725,7 +6725,12 @@
       if (page === 'finance') renderAll();
       if (page === 'tasks') renderTasks();
       if (page === 'shop') renderShop();
-      if (page === 'projects') renderProjects();
+      if (page === 'projects') {
+        renderProjects();
+        requestAnimationFrame(() => {
+          if (!$('projectsView').hidden) renderProjects();
+        });
+      }
       if (page === 'weather' && window.CtrlWeather) window.CtrlWeather.refresh();
       if (page === 'mail' && gmailAccessToken && !gmailMessages.length) loadGmailMessages();
     }
@@ -6757,13 +6762,13 @@
       const list=state.projects.filter(p=>(st==='all'||p.status===st)&&(p.name+' '+p.description+' '+p.category).toLowerCase().includes(q));
       list.sort((a,b)=>projectSortAZ?a.name.localeCompare(b.name,'es'):String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));
       const p=currentProject();$('projectsOverview').hidden=!!p;$('projectDetail').hidden=!p;
-      $('projectsGrid').innerHTML=list.map(p=>{const done=p.tasks.filter(t=>t.done).length,total=p.tasks.length;return '<article class="project-card" data-open-project="'+esc(p.id)+'" role="button" tabindex="0"><div class="project-card-top"><div class="project-symbol">'+projectIcon('folder')+'</div><span class="project-status">'+esc(projectStatusLabel(p.status))+'</span></div><h3>'+esc(p.name)+'</h3><p>'+esc(p.description||'Sin descripción todavía.')+'</p><div class="project-progress"><span style="width:'+(total?done/total*100:0)+'%"></span></div><div class="project-card-stats"><span>'+done+'/'+total+' tareas</span><span>'+p.resources.length+' recursos</span><span>'+p.workflows.length+' workflows</span></div></article>'}).join('');
+      $('projectsGrid').innerHTML=list.map(p=>{const done=p.tasks.filter(t=>t.done).length,total=p.tasks.length;return '<article class="project-card" data-open-project="'+esc(p.id)+'" role="button" tabindex="0"><div class="project-card-top"><div class="project-symbol">'+projectIcon('folder')+'</div><span class="project-status">'+esc(projectStatusLabel(p.status))+'</span></div><h3>'+esc(p.name)+'</h3>'+(p.description&&p.description.trim()?'<p>'+esc(p.description)+'</p>':'')+'<div class="project-progress"><span style="width:'+(total?done/total*100:0)+'%"></span></div><div class="project-card-stats"><span>'+done+'/'+total+' tareas</span><span>'+p.resources.length+' recursos</span><span>'+p.workflows.length+' workflows</span></div></article>'}).join('');
       $('projectsEmpty').hidden=list.length>0;if(p)renderProjectDetail();if(window.lucide?.createIcons)window.lucide.createIcons({attrs:{'stroke-width':1.8}});
     }
     function openProject(id){currentProjectId=id;currentProjectTab='overview';renderProjects()}
     function renderProjectDetail(){
       const p=currentProject();if(!p)return;
-      $('projectDetailEyebrow').textContent=p.category||'PROYECTO';$('projectDetailTitle').textContent=p.name;$('projectDetailDescription').textContent=p.description||'Sin descripción todavía.';
+      $('projectDetailEyebrow').textContent=p.category||'PROYECTO';$('projectDetailTitle').textContent=p.name;$('projectDetailDescription').textContent=p.description||'';$('projectDetailDescription').hidden=!(p.description&&p.description.trim());
       const url=projectSafeUrl(p.url);$('openProjectLinkBtn').hidden=!url;$('openProjectLinkBtn').onclick=()=>{if(url)window.open(url,'_blank','noopener,noreferrer')};
       document.querySelectorAll('[data-project-tab]').forEach(b=>b.classList.toggle('active',b.dataset.projectTab===currentProjectTab));
       $('projectTabContent').innerHTML=projectTabMarkup(p,currentProjectTab);if(window.lucide?.createIcons)window.lucide.createIcons({attrs:{'stroke-width':1.8}});
