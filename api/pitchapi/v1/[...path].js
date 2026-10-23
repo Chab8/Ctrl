@@ -1,8 +1,8 @@
 /**
  * Ctrl Sports — explicit PitchAPI v1 route for Vercel.
  *
- * Vercel Dev can fail to resolve the parent catch-all for nested /v1/* paths.
- * Keep this route explicit and forward the remaining path under /v1.
+ * Some Vercel Dev versions invoke catch-all handlers without populating
+ * req.query.path. Fall back to reading the route suffix from req.url.
  * Required environment variable: PITCHAPI_API_KEY
  */
 module.exports = async function handler(req, res) {
@@ -18,15 +18,37 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  const parts = req.query.path;
-  const pathParts = Array.isArray(parts) ? parts : (parts ? [parts] : []);
+  const incoming = new URL(req.url, 'https://ctrl.invalid');
+  const parts = req.query && req.query.path;
+  let pathParts = Array.isArray(parts) ? parts : (parts ? [parts] : []);
+
+  // Fallback for local Vercel Dev when the catch-all param is missing.
+  if (!pathParts.length) {
+    const prefix = '/api/pitchapi/v1/';
+    if (!incoming.pathname.startsWith(prefix)) {
+      return res.status(400).json({ error: 'Invalid PitchAPI path' });
+    }
+
+    try {
+      pathParts = incoming.pathname.slice(prefix.length)
+        .split('/')
+        .filter(Boolean)
+        .map(part => decodeURIComponent(part));
+    } catch {
+      return res.status(400).json({ error: 'Invalid PitchAPI path' });
+    }
+  }
+
   if (!pathParts.length || pathParts.some(part =>
-    typeof part !== 'string' || part === '.' || part === '..' || /[\\/]/.test(part)
+    typeof part !== 'string' ||
+    !part ||
+    part === '.' ||
+    part === '..' ||
+    /[\\/]/.test(part)
   )) {
     return res.status(400).json({ error: 'Invalid PitchAPI path' });
   }
 
-  const incoming = new URL(req.url, 'https://ctrl.invalid');
   const target = new URL(
     '/v1/' + pathParts.map(encodeURIComponent).join('/'),
     'https://api.pitchapi.dev'
