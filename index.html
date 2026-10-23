@@ -5818,8 +5818,7 @@
             <path d="M4 13h4l2 3h4l2-3h4" />
           </svg>Inbox <span class="nav-soon">SOON</span></button>
         <button class="nav-item" data-page="projects"><svg viewBox="0 0 24 24">
-            <path d="M3 7h7l2 2h9v10H3z" />
-            <path d="M3 7V5a1 1 0 0 1 1-1h5l2 3" />
+            <path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H10l2 2h7.5A1.5 1.5 0 0 1 21 8.5v10a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z" />
           </svg>Proyectos</button>
       </nav>
       <div class="sidebar-bottom">
@@ -6282,12 +6281,7 @@
       </section>
       <section id="projectsView" class="view" hidden>
         <div class="page-head"><div><div class="eyebrow">CENTRO DE TRABAJO</div><h1>Proyectos<span>.</span></h1><p>Información, tareas, recursos y procesos de todo lo que estás construyendo.</p></div><button class="primary" id="newProjectBtn"><i data-lucide="plus"></i> Nuevo proyecto</button></div>
-        <div id="projectsOverview"><div class="grid stats">
-          <div class="card"><div class="stat-top">Proyectos activos</div><div class="stat-value" id="projectsActiveCount">0</div><div class="stat-bottom">En desarrollo</div></div>
-          <div class="card"><div class="stat-top">Tareas pendientes</div><div class="stat-value" id="projectsPendingCount">0</div><div class="stat-bottom">Entre todos los proyectos</div></div>
-          <div class="card"><div class="stat-top">Recursos guardados</div><div class="stat-value" id="projectsResourcesCount">0</div><div class="stat-bottom">Archivos y enlaces</div></div>
-          <div class="card"><div class="stat-top">Workflows</div><div class="stat-value" id="projectsWorkflowCount">0</div><div class="stat-bottom">Procesos documentados</div></div>
-        </div>
+        <div id="projectsOverview">
         <div class="projects-toolbar"><input id="projectsSearch" class="projects-search" type="search" placeholder="Buscar proyectos..."><select id="projectsStatusFilter" class="filter-select" aria-label="Filtrar por estado"><option value="all">Todos los estados</option><option value="active">En desarrollo</option><option value="paused">En pausa</option><option value="done">Completados</option></select><button class="secondary" id="projectsSortBtn">Nombre A–Z</button></div>
         <div id="projectsGrid" class="projects-grid"></div><div id="projectsEmpty" class="project-empty" hidden><strong>Todavía no hay proyectos.</strong><br>Creá uno para reunir sus tareas, claves, archivos, links y workflows.</div></div>
         <div id="projectDetail" hidden><div class="project-detail-head"><div class="project-detail-title"><button class="icon-btn" id="backToProjects" aria-label="Volver"><i data-lucide="arrow-left"></i></button><div><div class="eyebrow" id="projectDetailEyebrow">PROYECTO</div><h1 id="projectDetailTitle">Proyecto</h1><p id="projectDetailDescription"></p></div></div><div class="project-link-actions"><button class="secondary" id="editProjectBtn">Editar</button><button class="secondary" id="openProjectLinkBtn" hidden>Abrir proyecto ↗</button><button class="secondary project-danger" id="deleteProjectBtn" aria-label="Eliminar proyecto">Eliminar</button></div></div>
@@ -6709,7 +6703,7 @@
     function svgIcon(type) { const names = { expense: 'arrow-down-left', income: 'arrow-up-right', investment: 'chart-no-axes-combined' }; if (window.lucide) return '<i data-lucide="' + (names[type] || 'circle-dollar-sign') + '"></i>'; const paths = { expense: '<path d="M12 5v14m-6-6 6 6 6-6"/>', income: '<path d="M12 19V5m-6 6 6-6 6 6"/>', investment: '<path d="m3 17 6-6 4 4 8-9"/><path d="M15 6h6v6"/>' }; return '<svg viewBox="0 0 24 24">' + (paths[type] || paths.expense) + '</svg>' }
     function refreshLucideIcons() {
       if (!window.lucide || !window.lucide.createIcons) return;
-      const icons = { home: 'layout-dashboard', finance: 'wallet', tasks: 'check-square', calendar: 'calendar-days', weather: 'cloud-sun', inbox: 'inbox', projects: 'folder-kanban', shop: 'shopping-bag' };
+      const icons = { home: 'layout-dashboard', finance: 'wallet', tasks: 'check-square', calendar: 'calendar-days', weather: 'cloud-sun', inbox: 'inbox', projects: 'folder', shop: 'shopping-bag' };
       document.querySelectorAll('.nav-item[data-page],.mobile-nav button[data-page]').forEach(b => { const n = icons[b.dataset.page], s = b.querySelector('svg'); if (n && s) { const i = document.createElement('i'); i.setAttribute('data-lucide', n); s.replaceWith(i) } });
       const buttons = { searchBtn: 'search', notificationBtn: 'bell', menuBtn: 'menu', quickAddBtn: 'plus', newTransactionBtn: 'plus', exportCsvBtn: 'file-spreadsheet', exportBtn: 'download', importBtn: 'upload', addBudgetBtn: 'sliders-horizontal', addInvestmentBtn: 'chart-no-axes-combined', runSearch: 'search' };
       Object.entries(buttons).forEach(([id, n]) => { const b = document.getElementById(id), s = b && b.querySelector('svg'); if (s) { const i = document.createElement('i'); i.setAttribute('data-lucide', n); s.replaceWith(i) } });
@@ -6763,11 +6757,7 @@
       const list=state.projects.filter(p=>(st==='all'||p.status===st)&&(p.name+' '+p.description+' '+p.category).toLowerCase().includes(q));
       list.sort((a,b)=>projectSortAZ?a.name.localeCompare(b.name,'es'):String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));
       const p=currentProject();$('projectsOverview').hidden=!!p;$('projectDetail').hidden=!p;
-      $('projectsActiveCount').textContent=state.projects.filter(p=>(p.status||'active')==='active').length;
-      $('projectsPendingCount').textContent=state.projects.reduce((n,p)=>n+p.tasks.filter(t=>!t.done).length,0);
-      $('projectsResourcesCount').textContent=state.projects.reduce((n,p)=>n+p.resources.length,0);
-      $('projectsWorkflowCount').textContent=state.projects.reduce((n,p)=>n+p.workflows.length,0);
-      $('projectsGrid').innerHTML=list.map(p=>{const done=p.tasks.filter(t=>t.done).length,total=p.tasks.length;return '<article class="project-card" data-open-project="'+esc(p.id)+'" role="button" tabindex="0"><div class="project-card-top"><div class="project-symbol">'+projectIcon('folder-kanban')+'</div><span class="project-status">'+esc(projectStatusLabel(p.status))+'</span></div><h3>'+esc(p.name)+'</h3><p>'+esc(p.description||'Sin descripción todavía.')+'</p><div class="project-progress"><span style="width:'+(total?done/total*100:0)+'%"></span></div><div class="project-card-stats"><span>'+done+'/'+total+' tareas</span><span>'+p.resources.length+' recursos</span><span>'+p.workflows.length+' workflows</span></div></article>'}).join('');
+      $('projectsGrid').innerHTML=list.map(p=>{const done=p.tasks.filter(t=>t.done).length,total=p.tasks.length;return '<article class="project-card" data-open-project="'+esc(p.id)+'" role="button" tabindex="0"><div class="project-card-top"><div class="project-symbol">'+projectIcon('folder')+'</div><span class="project-status">'+esc(projectStatusLabel(p.status))+'</span></div><h3>'+esc(p.name)+'</h3><p>'+esc(p.description||'Sin descripción todavía.')+'</p><div class="project-progress"><span style="width:'+(total?done/total*100:0)+'%"></span></div><div class="project-card-stats"><span>'+done+'/'+total+' tareas</span><span>'+p.resources.length+' recursos</span><span>'+p.workflows.length+' workflows</span></div></article>'}).join('');
       $('projectsEmpty').hidden=list.length>0;if(p)renderProjectDetail();if(window.lucide?.createIcons)window.lucide.createIcons({attrs:{'stroke-width':1.8}});
     }
     function openProject(id){currentProjectId=id;currentProjectTab='overview';renderProjects()}
