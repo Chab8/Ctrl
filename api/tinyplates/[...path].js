@@ -22,7 +22,10 @@ module.exports = async function handler(req, res) {
   const parts = req.query && req.query.path;
   let pathParts = Array.isArray(parts) ? parts : (parts ? [parts] : []);
   if (!pathParts.length) {
-    const pathname = incoming.pathname.replace(/^\\/api\\/tinyplates\\/?/, '');
+    const prefix = '/api/tinyplates/';
+    const pathname = incoming.pathname.startsWith(prefix)
+      ? incoming.pathname.slice(prefix.length)
+      : incoming.pathname.replace('/api/tinyplates', '').replace(/^\\/+/, '');
     try {
       pathParts = pathname ? pathname.split('/').filter(Boolean).map(part => decodeURIComponent(part)) : [];
     } catch (_) {
