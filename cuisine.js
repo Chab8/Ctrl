@@ -71,7 +71,7 @@
         const measure = String(meal['strMeasure' + i] || '').trim();
         ingredients.push({ display: [measure, name].filter(Boolean).join(' ') });
       }
-      const instructions = String(meal.strInstructions || '').split(/\\r?\\n+/).map(step => step.trim()).filter(Boolean);
+      const instructions = String(meal.strInstructions || '').split(/\r?\n+/).map(step => step.trim()).filter(Boolean);
       return {
         id: 'mealdb-' + meal.idMeal,
         title: meal.strMeal || 'Receta',
