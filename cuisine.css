@@ -1,0 +1,78 @@
+/* Cocina */
+.cuisine-page-head{align-items:center}
+.cuisine-source-note{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:11px;max-width:250px;line-height:1.5}
+.cuisine-source-note svg{width:19px;height:19px;flex-shrink:0}
+.cuisine-toolbar{padding:15px;margin-bottom:15px}
+.cuisine-search{display:flex;align-items:center;gap:10px;padding:4px 4px 13px;border-bottom:1px solid var(--line)}
+.cuisine-search>svg{width:17px;height:17px;color:var(--muted);flex-shrink:0}
+.cuisine-search input{flex:1;min-width:0;border:0;outline:0!important;background:transparent;color:var(--ink);font-size:13px;padding:9px 0}
+.cuisine-search input::placeholder{color:var(--muted)}
+.cuisine-search .primary{padding:10px 16px}
+.cuisine-filters{display:flex;align-items:end;gap:10px;flex-wrap:wrap;padding-top:13px}
+.cuisine-filters label{display:grid;gap:6px;min-width:120px;flex:1}
+.cuisine-filters label>span{font-size:10px;color:var(--muted)}
+.cuisine-filters .filter-select{width:100%;min-width:0;padding:10px 11px}
+.cuisine-favorites-toggle{display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap;padding:10px 13px}
+.cuisine-favorites-toggle svg{width:14px;height:14px}
+.cuisine-favorites-toggle[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.cuisine-status{min-height:18px;color:var(--muted);font-size:11px;margin:0 2px 8px}
+.cuisine-status.is-error{color:var(--red)}
+.cuisine-results-meta{font-size:10px;color:var(--muted);margin:0 2px 12px}
+.cuisine-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.cuisine-card{position:relative;min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:17px;background:var(--card);box-shadow:var(--shadow);display:flex;flex-direction:column}
+.cuisine-card-image{width:100%;aspect-ratio:1.55;object-fit:cover;display:block;background:var(--soft)}
+.cuisine-card-image-placeholder{width:100%;aspect-ratio:1.55;display:grid;place-items:center;background:var(--soft);color:var(--muted)}
+.cuisine-card-image-placeholder svg{width:31px;height:31px;stroke-width:1.2}
+.cuisine-card-content{padding:15px;display:flex;flex-direction:column;gap:9px;flex:1}
+.cuisine-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--muted);font-size:9px}
+.cuisine-card h3{font-size:14px;line-height:1.4;letter-spacing:-.2px;margin:0;overflow-wrap:anywhere}
+.cuisine-card-description{font-size:11px;line-height:1.55;color:var(--muted);margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cuisine-card-meta{display:flex;align-items:center;gap:9px;flex-wrap:wrap;color:var(--muted);font-size:10px;margin-top:auto;padding-top:4px}
+.cuisine-card-meta span{display:inline-flex;align-items:center;gap:4px}
+.cuisine-card-meta svg{width:12px;height:12px}
+.cuisine-difficulty{font-size:9px;border:1px solid var(--line);border-radius:20px;padding:4px 7px;white-space:nowrap}
+.cuisine-card-actions{display:flex;align-items:center;gap:8px;padding:0 15px 15px}
+.cuisine-open-btn{flex:1;display:inline-flex;justify-content:center;align-items:center;gap:7px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);font-size:11px}
+.cuisine-open-btn:hover{background:var(--soft)}
+.cuisine-open-btn svg{width:13px;height:13px}
+.cuisine-favorite-btn{width:37px;height:37px;display:grid;place-items:center;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--muted)}
+.cuisine-favorite-btn svg{width:15px;height:15px}
+.cuisine-favorite-btn[aria-pressed="true"]{color:#b95f61;background:#b95f6110;border-color:#b95f6155}
+.cuisine-empty{display:grid;justify-items:center;gap:9px;text-align:center;border:1px dashed var(--line);border-radius:16px;padding:38px 20px;color:var(--muted);font-size:11px}
+.cuisine-empty[hidden],.cuisine-detail[hidden]{display:none!important}
+.cuisine-empty svg{width:27px;height:27px}
+.cuisine-empty strong{color:var(--ink);font-size:13px}
+.cuisine-detail{padding:clamp(16px,3vw,28px);margin-top:2px}
+.cuisine-detail-back{display:inline-flex;align-items:center;gap:7px;border:0;background:transparent;color:var(--muted);padding:3px 0;margin-bottom:18px;font-size:11px}
+.cuisine-detail-back svg{width:15px;height:15px}
+.cuisine-detail-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(230px,.85fr);gap:24px;align-items:start}
+.cuisine-detail-image{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:14px;background:var(--soft)}
+.cuisine-detail-eyebrow{font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+.cuisine-detail h2{font-size:clamp(25px,4vw,38px);line-height:1.15;letter-spacing:-1.2px;margin:0 0 12px;overflow-wrap:anywhere}
+.cuisine-detail-description{color:var(--muted);font-size:12px;line-height:1.7;margin:0 0 15px}
+.cuisine-detail-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.cuisine-detail-meta span{border:1px solid var(--line);border-radius:20px;padding:7px 9px;font-size:10px;color:var(--muted)}
+.cuisine-detail-actions{display:flex;gap:8px;flex-wrap:wrap}
+.cuisine-detail-actions .secondary,.cuisine-detail-actions .primary{display:inline-flex;align-items:center;gap:7px}
+.cuisine-detail-actions svg{width:14px;height:14px}
+.cuisine-detail-source{display:inline-block;margin-top:14px;color:var(--muted);font-size:10px;line-height:1.5;overflow-wrap:anywhere}
+.cuisine-detail-source a{color:var(--ink);text-underline-offset:3px}
+.cuisine-detail-columns{display:grid;grid-template-columns:minmax(220px,.75fr) minmax(0,1.25fr);gap:28px;border-top:1px solid var(--line);margin-top:25px;padding-top:24px}
+.cuisine-detail-section h3{font-size:15px;margin:0 0 15px}
+.cuisine-ingredient-list{list-style:none;padding:0;margin:0;display:grid;gap:0}
+.cuisine-ingredient-list li{display:flex;align-items:flex-start;gap:9px;padding:10px 0;border-bottom:1px solid var(--line);font-size:11px;line-height:1.5}
+.cuisine-ingredient-list li:last-child{border-bottom:0}
+.cuisine-ingredient-list input{margin:2px 0 0;accent-color:var(--green)}
+.cuisine-ingredient-list input:checked+span{text-decoration:line-through;color:var(--muted)}
+.cuisine-step-list{list-style:none;padding:0;margin:0;display:grid;gap:16px}
+.cuisine-step-list li{display:grid;grid-template-columns:27px minmax(0,1fr);gap:11px;align-items:start}
+.cuisine-step-number{width:27px;height:27px;border-radius:50%;display:grid;place-items:center;background:var(--soft);font-size:11px;font-weight:600}
+.cuisine-step-list p{font-size:12px;line-height:1.75;margin:2px 0 0}
+.cuisine-nutrition{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.cuisine-nutrition span{border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:10px;color:var(--muted)}
+.cuisine-nutrition strong{display:block;color:var(--ink);font-size:13px;margin-bottom:3px}
+.cuisine-footer{margin-top:20px}
+html[data-theme="dark"] .cuisine-card-image-placeholder{background:#30312b}
+html[data-theme="dark"] .cuisine-open-btn{background:#292a24}
+@media(max-width:1050px){.cuisine-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cuisine-filters label{min-width:145px}}
+@media(max-width:700px){.cuisine-page-head{align-items:flex-start;gap:12px}.cuisine-source-note{font-size:10px;max-width:none}.cuisine-toolbar{padding:12px}.cuisine-search{gap:8px}.cuisine-search .primary{padding:10px 12px}.cuisine-filters{gap:8px}.cuisine-filters label{min-width:calc(50% - 5px)}.cuisine-favorites-toggle{flex:1}.cuisine-grid{grid-template-columns:1fr}.cuisine-card{display:grid;grid-template-columns:112px minmax(0,1fr);grid-template-rows:auto 1fr}.cuisine-card-image,.cuisine-card-image-placeholder{grid-row:1/3;width:112px;height:100%;min-height:145px;aspect-ratio:auto}.cuisine-card-content{padding:12px 12px 6px;gap:7px}.cuisine-card h3{font-size:12px}.cuisine-card-description{font-size:10px}.cuisine-card-meta{gap:7px;font-size:9px}.cuisine-card-actions{padding:4px 12px 12px;grid-column:2}.cuisine-open-btn{padding:8px}.cuisine-favorite-btn{width:34px;height:34px}.cuisine-detail-hero,.cuisine-detail-columns{grid-template-columns:1fr;gap:20px}.cuisine-detail-image{max-height:270px}.cuisine-detail h2{font-size:27px}.cuisine-detail-columns{margin-top:20px;padding-top:20px}.cuisine-status{line-height:1.5}.mobile-nav{overflow-x:auto;justify-content:flex-start}.mobile-nav button{flex:0 0 auto;min-width:64px}}
