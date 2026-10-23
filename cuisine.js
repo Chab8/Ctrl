@@ -316,13 +316,23 @@
     $('cuisineSearchForm').addEventListener('submit', event => { event.preventDefault(); currentRecipe = null; load(true); });
     ['cuisineType','cuisineMaxTime','cuisineDifficulty'].forEach(id => $(id).addEventListener('change', renderCards));
     $('cuisineFavoritesToggle').addEventListener('click', toggleFavoritesView);
-    if ($('cuisineAddRecipeBtn')) $('cuisineAddRecipeBtn').addEventListener('click', () => {
-      const form = $('cuisinePersonalForm'); form.hidden = !form.hidden;
-      if (!form.hidden) $('cuisinePersonalTitle').focus();
-    });
+    const personalPanel = $('cuisinePersonalPanel');
     const personalForm = $('cuisinePersonalForm');
+    const closePersonalForm = reset => {
+      if (reset && personalForm) personalForm.reset();
+      if (personalPanel) personalPanel.hidden = true;
+    };
+    if ($('cuisineAddRecipeBtn')) $('cuisineAddRecipeBtn').addEventListener('click', () => {
+      if (!personalPanel) return;
+      personalPanel.hidden = !personalPanel.hidden;
+      if (!personalPanel.hidden) {
+        personalPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        $('cuisinePersonalTitle').focus({ preventScroll: true });
+      }
+    });
     if (personalForm) {
-      $('cuisineCancelPersonalBtn').addEventListener('click', () => { personalForm.reset(); personalForm.hidden = true; });
+      $('cuisineCancelPersonalBtn').addEventListener('click', () => closePersonalForm(true));
+      $('cuisineDiscardPersonalBtn').addEventListener('click', () => closePersonalForm(true));
       personalForm.addEventListener('submit', event => {
         event.preventDefault();
         const title = $('cuisinePersonalTitle').value.trim();
@@ -340,7 +350,7 @@
         };
         personalRecipes.unshift(recipe);
         if (writeStorage(PERSONAL_KEY, personalRecipes)) {
-          personalForm.reset(); personalForm.hidden = true; showingFavorites = false;
+          personalForm.reset(); if (personalPanel) personalPanel.hidden = true; showingFavorites = false;
           $('cuisineFavoritesToggle').setAttribute('aria-pressed', 'false');
           currentRecipe = null; renderCards(); status('Tu receta se guardó en este dispositivo.');
         }
