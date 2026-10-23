@@ -39,8 +39,29 @@
   }
 
   function renderDefaultLocationAction() {
+    const isDefault = sameLocation(state.location, state.defaultLocation);
     const button = $('weatherSetDefaultBtn');
-    if (button) button.hidden = sameLocation(state.location, state.defaultLocation);
+    if (button) button.hidden = isDefault;
+    const back = $('weatherBackBtn');
+    if (back) {
+      back.hidden = isDefault;
+      back.innerHTML = '<i data-lucide="arrow-left"></i> Volver a ' + esc(state.defaultLocation.name);
+      if (window.lucide?.createIcons) window.lucide.createIcons({ attrs: { 'stroke-width': 1.8 } });
+    }
+  }
+
+  function returnToDefaultLocation() {
+    state.location = { ...state.defaultLocation };
+    state.forecast = state.defaultForecast;
+    state.lastLoaded = state.forecast ? Date.now() : 0;
+    const input = $('weatherCityInput');
+    if (input) input.value = '';
+    const choices = $('weatherLocationChoices');
+    if (choices) { choices.hidden = true; choices.innerHTML = ''; }
+    renderDefaultLocationAction();
+    showStatus('');
+    if (state.forecast) renderWeather();
+    else fetchForecast(true);
   }
 
   function showStatus(message, isError = false) {
@@ -215,6 +236,7 @@
   $('weatherSearchForm')?.addEventListener('submit', event => { event.preventDefault(); searchLocation($('weatherCityInput')?.value); });
   $('weatherRefreshBtn')?.addEventListener('click', () => fetchForecast(true));
   $('weatherSetDefaultBtn')?.addEventListener('click', setDefaultLocation);
+  $('weatherBackBtn')?.addEventListener('click', returnToDefaultLocation);
   $('weatherRetryBtn')?.addEventListener('click', () => fetchForecast(true));
   $('weatherCityInput')?.addEventListener('keydown', event => { if (event.key === 'Escape') { $('weatherLocationChoices').hidden = true; $('weatherLocationChoices').innerHTML = ''; } });
   window.CtrlWeather = { refresh: () => fetchForecast(true), getLocation: () => ({ ...state.location }) };
