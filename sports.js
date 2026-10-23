@@ -87,7 +87,17 @@
         break;
       }
       let body = null; try { body = await res.json(); } catch { }
-      if (!res.ok) { const err = new Error((body && body.error && body.error.message) || ('Error ' + res.status)); err.status = res.status; err.code = (body && body.error && body.error.code) || ''; throw err; }
+      if (!res.ok) {
+        const apiError = body && body.error;
+        const apiMessage = typeof apiError === 'string' ? apiError
+          : (apiError && apiError.message) || (body && body.message) || '';
+        const err = new Error(apiMessage || ('Error ' + res.status));
+        err.status = res.status;
+        err.code = (apiError && typeof apiError === 'object' && apiError.code) || (body && body.code) || '';
+        err.endpoint = path + qs;
+        err.upstreamMessage = apiMessage;
+        throw err;
+      }
       const data = body && typeof body === 'object' && 'data' in body ? body.data : body;
       memo.set(url, { t: Date.now(), ttl, data });
       return data;
@@ -267,7 +277,12 @@
     let msg;
     if (e && e.status === 401) msg = 'PitchAPI rechazó la clave de acceso (401). Revisá PITCHAPI_API_KEY en las variables de entorno de Vercel.';
     else if (e && e.status === 404 && e.code === 'RESOURCE_NOT_FOUND') msg = 'PitchAPI ya no encuentra este registro. Puede haber cambiado su ID; actualizá los datos o elegí otra competición.';
-    else if (e && e.status === 404) msg = 'PitchAPI devolvió 404: el recurso solicitado no está disponible para estos datos.';
+    else if (e && e.status === 404) {
+      msg = 'PitchAPI devolvió 404: el recurso solicitado no está disponible para estos datos.';
+      if (e.endpoint) msg += '<br><small style="display:inline-block;margin-top:8px;opacity:.8">Consulta: ' + esc(e.endpoint) + '</small>';
+      if (e.upstreamMessage) msg += '<br><small style="display:inline-block;margin-top:4px;opacity:.8">Detalle: ' + esc(e.upstreamMessage) + '</small>';
+      if (e.code) msg += '<br><small style="display:inline-block;margin-top:4px;opacity:.8">Código: ' + esc(e.code) + '</small>';
+    }
     else if (e && e.status === 503) msg = esc(e.message || 'El proxy de Deportes no está configurado. Revisá PITCHAPI_API_KEY en Vercel.');
     else msg = esc(e && e.message || 'Error desconocido');
     return '<div class="empty">' + msg + '<br><button class="secondary" style="margin-top:12px" data-sp-retry="' + retry + '">Reintentar</button></div>';
