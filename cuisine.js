@@ -296,7 +296,7 @@
   }
   async function load(force) {
     if (loading && !force) return;
-    activeLanguage = 'es';
+    activeLanguage = 'all';
     const query = ($('cuisineSearchInput').value || '').trim();
     activeQuery = query;
     const token = ++requestToken;
@@ -305,8 +305,8 @@
     $('cuisineRecipeGrid').innerHTML = '';
     try {
       let payload = query
-        ? await cachedRequest('search', { query: query, language: activeLanguage, limit: '20' })
-        : await cachedRequest('popular', { language: activeLanguage, limit: '24', offset: '0' });
+        ? await cachedRequest('search', { query: query, limit: '20' })
+        : await cachedRequest('popular', { limit: '24', offset: '0' });
       if (token !== requestToken) return;
       activeRecipes = recipeList(payload);
       // Priorizar español e inglés sin excluir otros idiomas.
