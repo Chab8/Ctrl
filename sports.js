@@ -176,16 +176,36 @@
 
   /* ---------------------------------------------------------- datos de días */
   const dayTtl = k => Math.abs((fromKey(k) - fromKey(today())) / 864e5) <= 1.5 ? 60000 : 900000;
+  function matchesFrom(d) {
+    // Accept both the documented { matches: [...] } payload and wrapped variants.
+    if (Array.isArray(d)) return d;
+    if (d && Array.isArray(d.matches)) return d.matches;
+    if (d && d.data && Array.isArray(d.data.matches)) return d.data.matches;
+    return [];
+  }
   async function fetchDate(k, force) {
-    try {
-      const d = await api('/v1/date/' + k, { status: 'all' }, { ttl: dayTtl(k), force });
-      return (d && Array.isArray(d.matches)) ? d.matches : [];
-    } catch (e) {
-      // PitchAPI can return 404 for dates outside its available fixture range.
-      // A date with no available listing should not break the whole date strip.
-      if (e && e.status === 404) return [];
-      throw e;
+    const future = k > today();
+    // PitchAPI's default is historical-only. Ask explicitly for the relevant
+    // status first; if the API returns an empty list, retry with "all" so that
+    // scheduled fixtures aren't hidden by a status/filter inconsistency.
+    const statuses = future ? ['upcoming', 'all'] : ['all', 'upcoming'];
+    let lastError = null;
+    for (let i = 0; i < statuses.length; i++) {
+      try {
+        const d = await api('/v1/date/' + k, { status: statuses[i] }, {
+          ttl: dayTtl(k),
+          force: force || i > 0
+        });
+        const matches = matchesFrom(d);
+        if (matches.length) return matches;
+      } catch (e) {
+        lastError = e;
+        // A 404 for a date with no coverage is treated as an empty day.
+        if (!e || e.status !== 404) throw e;
+      }
     }
+    if (lastError && lastError.status !== 404) throw lastError;
+    return [];
   }
   async function dayMatches(k, force) {
     // La API agrupa por fecha UTC: pedimos el día anterior y el siguiente y filtramos por hora local.
@@ -339,7 +359,7 @@
       const params = { status: 'all' }; if (ui.season) params.season = ui.season;
       const d = await api('/v1/leagues/' + lid + '/matches', params, { ttl: 600000, force });
       if (token !== tableToken) return;
-      const ms = (d && d.matches) || [], season = (d && d.league && d.league.season) || ui.season;
+      const ms = matchesFrom(d), season = (d && d.league && d.league.season) || ui.season;
       if (!ui.season && season) ui.season = season;
       $('spTableSeason').innerHTML = ((lg && lg.seasons) || [season]).filter(Boolean).map(s => '<option' + (s === ui.season ? ' selected' : '') + '>' + esc(s) + '</option>').join('');
       const name = (d && d.league && d.league.name) || (lg && lg.name) || '';
@@ -427,7 +447,7 @@
         try {
           const result = await api('/v1/leagues/' + lid + '/matches', params, { ttl: 600000 });
           d = result;
-          const found = (result && Array.isArray(result.matches)) ? result.matches : [];
+          const found = matchesFrom(result);
           if (found.length) break;
         } catch (err) {
           lastError = err;
@@ -438,7 +458,7 @@
       if (ui.manageLeague !== lid || ui.manageTab !== 'teams') return;
       if (!d && lastError) throw lastError;
       const m = new Map();
-      ((d && d.matches) || []).forEach(x => {
+      matchesFrom(d).forEach(x => {
         [x.home_team, x.away_team].forEach(t => {
           if (t && t.id && t.name) { noteTeam(t); m.set(String(t.id), t); }
         });
