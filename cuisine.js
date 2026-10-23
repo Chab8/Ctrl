@@ -263,16 +263,32 @@
     status(query ? 'Buscando recetas…' : 'Cargando recetas populares…');
     $('cuisineRecipeGrid').innerHTML = '';
     try {
-      const payload = query
+      let payload = query
         ? await cachedRequest('search', { query: query, language: activeLanguage, limit: '20' })
         : await cachedRequest('popular', { language: activeLanguage, limit: '24', offset: '0' });
       if (token !== requestToken) return;
       activeRecipes = recipeList(payload);
+      let usedFallbackLanguage = false;
+
+      // Tiny Plates puede tener pocas recetas publicadas en español.
+      // Si una búsqueda en español no devuelve resultados, probar en inglés
+      // para evitar confundir una limitación del catálogo con un fallo de búsqueda.
+      if (activeRecipes.length === 0 && activeLanguage === 'es') {
+        payload = query
+          ? await cachedRequest('search', { query: query, language: 'en', limit: '20' })
+          : await cachedRequest('popular', { language: 'en', limit: '24', offset: '0' });
+        if (token !== requestToken) return;
+        activeRecipes = recipeList(payload);
+        usedFallbackLanguage = activeRecipes.length > 0;
+      }
+
       loaded = true;
       showingFavorites = false;
       $('cuisineFavoritesToggle').setAttribute('aria-pressed', 'false');
       renderCards();
-      status(activeRecipes.length ? '' : 'No encontramos recetas. Probá otra búsqueda o cambiá el idioma.');
+      status(activeRecipes.length
+        ? (usedFallbackLanguage ? 'No había resultados en español; mostramos recetas disponibles en inglés.' : '')
+        : 'No encontramos recetas. Probá otra búsqueda o cambiá el idioma.');
     } catch (error) {
       if (token !== requestToken) return;
       activeRecipes = [];
