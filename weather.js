@@ -118,6 +118,18 @@
   }
 
   function renderHomeWeather() {
+    const topTemp = $('topWeatherTemp');
+    if (topTemp) {
+      if (state.forecast?.current) {
+        topTemp.textContent = temp(state.forecast.current.temperature_2m);
+        topTemp.title = 'Temperatura actual en ' + state.location.name;
+        topTemp.setAttribute('aria-label', 'Temperatura actual en ' + state.location.name + ': ' + topTemp.textContent);
+      } else {
+        topTemp.textContent = '—°';
+        topTemp.title = 'Consultando temperatura actual';
+        topTemp.setAttribute('aria-label', 'Consultando temperatura actual');
+      }
+    }
     const host = $('homeWeatherSummary');
     if (!host) return;
     if (!state.forecast?.current) {
