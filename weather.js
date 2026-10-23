@@ -5,11 +5,13 @@
   const GEO = 'https://geocoding-api.open-meteo.com/v1/search';
   const STORAGE_KEY = 'ctrl.weather.location.v1';
   const $ = id => document.getElementById(id);
-  const state = { location: { name: 'Buenos Aires', admin1: 'Ciudad Autónoma de Buenos Aires', country: 'Argentina', latitude: -34.6037, longitude: -58.3816 }, forecast: null, loading: false, lastLoaded: 0 };
+  const BUENOS_AIRES = { name: 'Buenos Aires', admin1: 'Ciudad Autónoma de Buenos Aires', country: 'Argentina', latitude: -34.6037, longitude: -58.3816 };
+  const state = { defaultLocation: { ...BUENOS_AIRES }, location: { ...BUENOS_AIRES }, forecast: null, defaultForecast: null, loading: false, lastLoaded: 0 };
 
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-    if (saved && Number.isFinite(saved.latitude) && Number.isFinite(saved.longitude) && saved.name) state.location = saved;
+    if (saved && Number.isFinite(saved.latitude) && Number.isFinite(saved.longitude) && saved.name) state.defaultLocation = { ...saved };
+    state.location = { ...state.defaultLocation };
   } catch (_) {}
 
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -28,8 +30,17 @@
   const fmtHour = value => new Date(value).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
   const temp = value => Math.round(value) + '°';
 
+  function sameLocation(a, b) {
+    return !!a && !!b && Math.abs(a.latitude - b.latitude) < 0.001 && Math.abs(a.longitude - b.longitude) < 0.001;
+  }
+
   function locationLabel() {
     return [state.location.name, state.location.admin1 && state.location.admin1 !== state.location.name ? state.location.admin1 : '', state.location.country].filter(Boolean).join(', ');
+  }
+
+  function renderDefaultLocationAction() {
+    const button = $('weatherSetDefaultBtn');
+    if (button) button.hidden = sameLocation(state.location, state.defaultLocation);
   }
 
   function showStatus(message, isError = false) {
@@ -45,7 +56,7 @@
     }
     state.loading = true;
     const refresh = $('weatherRefreshBtn');
-    if (refresh) { refresh.disabled = true; refresh.innerHTML = '<i data-lucide="loader-circle"></i> Actualizando'; }
+    if (refresh) { refresh.disabled = true; refresh.innerHTML = '<i data-lucide="loader-circle"></i>'; refresh.setAttribute('aria-label', 'Actualizando clima'); }
     showStatus('Consultando el pronóstico…');
     try {
       const params = new URLSearchParams({
@@ -62,6 +73,7 @@
       if (!response.ok) throw new Error('El servicio respondió con error (' + response.status + ').');
       state.forecast = await response.json();
       state.lastLoaded = Date.now();
+      if (sameLocation(state.location, state.defaultLocation)) state.defaultForecast = state.forecast;
       renderWeather();
       renderHomeWeather();
       showStatus('Actualizado ' + new Date(state.lastLoaded).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }));
@@ -73,7 +85,7 @@
       renderHomeWeather();
     } finally {
       state.loading = false;
-      if (refresh) { refresh.disabled = false; refresh.innerHTML = '<i data-lucide="refresh-cw"></i> Actualizar'; }
+      if (refresh) { refresh.disabled = false; refresh.innerHTML = '<i data-lucide="refresh-cw"></i>'; refresh.setAttribute('aria-label', 'Actualizar clima'); }
       if (window.lucide?.createIcons) window.lucide.createIcons({ attrs: { 'stroke-width': 1.8 } });
     }
   }
@@ -114,16 +126,18 @@
     if (sun && data.daily?.sunrise?.[0]) sun.innerHTML = '<div><span>Salida del sol</span><strong>↗ ' + esc(fmtHour(data.daily.sunrise[0])) + '</strong></div><div><span>Puesta del sol</span><strong>↘ ' + esc(fmtHour(data.daily.sunset[0])) + '</strong></div>';
     const place = $('weatherLocationLabel');
     if (place) place.textContent = locationLabel();
+    renderDefaultLocationAction();
     renderHomeWeather();
   }
 
   function renderHomeWeather() {
+    const homeForecast = state.defaultForecast;
     const topTemp = $('topWeatherTemp');
     if (topTemp) {
-      if (state.forecast?.current) {
-        topTemp.textContent = temp(state.forecast.current.temperature_2m);
-        topTemp.title = 'Temperatura actual en ' + state.location.name;
-        topTemp.setAttribute('aria-label', 'Temperatura actual en ' + state.location.name + ': ' + topTemp.textContent);
+      if (homeForecast?.current) {
+        topTemp.textContent = temp(homeForecast.current.temperature_2m);
+        topTemp.title = 'Temperatura actual en ' + state.defaultLocation.name;
+        topTemp.setAttribute('aria-label', 'Temperatura actual en ' + state.defaultLocation.name + ': ' + topTemp.textContent);
       } else {
         topTemp.textContent = '—°';
         topTemp.title = 'Consultando temperatura actual';
@@ -133,11 +147,11 @@
     const host = $('homeWeatherSummary');
     if (!host) return;
     if (!state.forecast?.current) {
-      host.innerHTML = '<div class="home-weather-loading"><span>☁️</span><div><strong>Clima de ' + esc(state.location.name) + '</strong><small>Consultando el pronóstico…</small></div><button type="button" data-open-weather>Ver clima ↗</button></div>';
+      host.innerHTML = '<div class="home-weather-loading"><span>☁️</span><div><strong>Clima de ' + esc(state.defaultLocation.name) + '</strong><small>Consultando el pronóstico…</small></div><button type="button" data-open-weather>Ver clima ↗</button></div>';
       return;
     }
-    const c = state.forecast.current, info = weatherInfo(c.weather_code);
-    host.innerHTML = '<button type="button" class="home-weather-link" data-open-weather><span class="home-weather-icon">' + info[1] + '</span><span class="home-weather-place"><strong>' + esc(state.location.name) + '</strong><small>' + esc(info[0]) + ' · Máx. ' + temp(state.forecast.daily.temperature_2m_max[0]) + ' / Mín. ' + temp(state.forecast.daily.temperature_2m_min[0]) + '</small></span><strong class="home-weather-temp">' + temp(c.temperature_2m) + '</strong><span class="home-weather-arrow">↗</span></button>';
+    const c = homeForecast.current, info = weatherInfo(c.weather_code);
+    host.innerHTML = '<button type="button" class="home-weather-link" data-open-weather><span class="home-weather-icon">' + info[1] + '</span><span class="home-weather-place"><strong>' + esc(state.defaultLocation.name) + '</strong><small>' + esc(info[0]) + ' · Máx. ' + temp(homeForecast.daily.temperature_2m_max[0]) + ' / Mín. ' + temp(homeForecast.daily.temperature_2m_min[0]) + '</small></span><strong class="home-weather-temp">' + temp(c.temperature_2m) + '</strong><span class="home-weather-arrow">↗</span></button>';
   }
 
   async function searchLocation(query) {
@@ -173,15 +187,24 @@
 
   function selectLocation(place) {
     state.location = { name: place.name, admin1: place.admin1 || '', country: place.country || '', latitude: place.latitude, longitude: place.longitude };
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.location)); } catch (_) {}
     const input = $('weatherCityInput');
     if (input) input.value = '';
     const choices = $('weatherLocationChoices');
     if (choices) { choices.hidden = true; choices.innerHTML = ''; }
     state.forecast = null;
     state.lastLoaded = 0;
+    renderDefaultLocationAction();
     showStatus('');
     fetchForecast(true);
+  }
+
+  function setDefaultLocation() {
+    state.defaultLocation = { ...state.location };
+    state.defaultForecast = state.forecast;
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.defaultLocation)); } catch (_) {}
+    renderDefaultLocationAction();
+    renderHomeWeather();
+    showStatus('Ciudad predeterminada actualizada.');
   }
 
   document.addEventListener('click', event => {
@@ -191,9 +214,11 @@
   });
   $('weatherSearchForm')?.addEventListener('submit', event => { event.preventDefault(); searchLocation($('weatherCityInput')?.value); });
   $('weatherRefreshBtn')?.addEventListener('click', () => fetchForecast(true));
+  $('weatherSetDefaultBtn')?.addEventListener('click', setDefaultLocation);
   $('weatherRetryBtn')?.addEventListener('click', () => fetchForecast(true));
   $('weatherCityInput')?.addEventListener('keydown', event => { if (event.key === 'Escape') { $('weatherLocationChoices').hidden = true; $('weatherLocationChoices').innerHTML = ''; } });
   window.CtrlWeather = { refresh: () => fetchForecast(true), getLocation: () => ({ ...state.location }) };
   renderHomeWeather();
+  renderDefaultLocationAction();
   fetchForecast();
 })();
