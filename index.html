@@ -8,6 +8,7 @@
   <meta name="description" content="Ctrl — tu centro de control personal">
   <link rel="manifest" href="./manifest.json">
   <link rel="stylesheet" href="./cuisine.css">
+  <link rel="stylesheet" href="./notes.css">
   <title>Ctrl</title>
   <script>
     try {
@@ -5797,6 +5798,7 @@
             <path d="M7 5V3h10v2" />
           </svg>Finanzas</button>
         <div class="nav-label" style="padding-top:22px">Módulos</div>
+        <button class="nav-item" data-page="notes"><i data-lucide="notebook-pen"></i>Notas</button>
         <button class="nav-item" data-page="tasks"><svg viewBox="0 0 24 24">
             <path d="m4 12 4 4L20 4" />
             <path d="M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h10" />
@@ -6272,6 +6274,35 @@
         <div class="footer-note">Tus productos se guardan en este dispositivo. Las fotos se reducen automáticamente para
           ocupar poco.</div>
       </section>
+      <section id="notesView" class="view notes-view" hidden>
+        <div class="page-head notes-page-head">
+          <div><div class="eyebrow">TU ESPACIO DE IDEAS</div><h1>Notas<span>.</span></h1><p>Capturá ideas, recordatorios y cosas que no querés olvidar.</p></div>
+          <button class="primary" id="newNoteBtn" type="button"><i data-lucide="plus"></i> Nueva nota</button>
+        </div>
+        <div class="notes-toolbar">
+          <label class="notes-search"><i data-lucide="search"></i><input id="notesSearch" type="search" placeholder="Buscar en tus notas..." aria-label="Buscar notas"></label>
+          <div class="notes-toolbar-actions"><button class="notes-filter active" data-notes-filter="all" type="button">Todas</button><button class="notes-filter" data-notes-filter="pinned" type="button"><i data-lucide="pin"></i> Fijadas</button><button class="notes-filter" data-notes-filter="archived" type="button"><i data-lucide="archive"></i> Archivadas</button></div>
+        </div>
+        <form class="notes-composer card" id="noteComposer">
+          <input id="newNoteTitle" type="text" maxlength="160" placeholder="Título" aria-label="Título de la nota">
+          <textarea id="newNoteBody" rows="2" maxlength="12000" placeholder="Escribí una nota..." aria-label="Contenido de la nota"></textarea>
+          <div class="notes-composer-footer"><span>Las notas quedan guardadas en este dispositivo</span><button class="primary" type="submit">Guardar nota</button></div>
+        </form>
+        <div class="notes-section-label" id="notesSectionLabel">TUS NOTAS <span id="notesCount">0</span></div>
+        <div class="notes-grid" id="notesGrid" aria-live="polite"></div>
+        <div class="notes-empty card" id="notesEmpty" hidden><span class="notes-empty-icon"><i data-lucide="notebook-pen"></i></span><strong id="notesEmptyTitle">Todavía no hay notas</strong><p id="notesEmptyText">Anotá una idea, un recordatorio o cualquier cosa que quieras guardar.</p><button class="secondary" id="notesEmptyAction" type="button">Crear primera nota</button></div>
+        <div class="notes-editor-backdrop" id="noteEditorBackdrop" hidden>
+          <form class="notes-editor" id="noteEditorForm" role="dialog" aria-modal="true" aria-labelledby="noteEditorHeading">
+            <div class="notes-editor-head"><strong id="noteEditorHeading">Editar nota</strong><button class="icon-btn" id="noteEditorClose" type="button" aria-label="Cerrar"><i data-lucide="x"></i></button></div>
+            <input class="notes-editor-title" id="noteEditorTitle" maxlength="160" placeholder="Título" aria-label="Título">
+            <textarea class="notes-editor-body" id="noteEditorBody" maxlength="12000" placeholder="Escribí una nota..." aria-label="Contenido"></textarea>
+            <div class="notes-editor-colors" aria-label="Color de la nota">
+              <button class="notes-color" type="button" data-note-color="plain" aria-label="Color original" aria-pressed="true"></button><button class="notes-color" type="button" data-note-color="sage" aria-label="Verde suave" aria-pressed="false"></button><button class="notes-color" type="button" data-note-color="sand" aria-label="Arena" aria-pressed="false"></button><button class="notes-color" type="button" data-note-color="rose" aria-label="Rosa suave" aria-pressed="false"></button><button class="notes-color" type="button" data-note-color="blue" aria-label="Azul suave" aria-pressed="false"></button><button class="notes-color" type="button" data-note-color="lavender" aria-label="Lavanda" aria-pressed="false"></button>
+            </div>
+            <div class="notes-editor-footer"><button class="secondary" id="noteEditorCancel" type="button">Cancelar</button><button class="primary" type="submit"><i data-lucide="check"></i> Guardar cambios</button></div>
+          </form>
+        </div>
+      </section>
       <section id="weatherView" class="view" hidden>
         <div class="page-head"><div><div class="eyebrow">EL TIEMPO, EN CONTEXTO</div><h1>Clima<span>.</span></h1><p>Condiciones actuales y pronóstico para los próximos días.</p><div class="weather-location-tools"><button class="weather-back-btn" id="weatherBackBtn" type="button" hidden><i data-lucide="arrow-left"></i><span id="weatherBackLabel">Volver a Buenos Aires</span></button><div class="weather-location-label" id="weatherLocationLabel">Buenos Aires, Argentina</div><button class="weather-default-action" id="weatherSetDefaultBtn" type="button" hidden>Usar como ciudad predeterminada</button></div></div><div class="weather-head-actions"><form class="weather-search" id="weatherSearchForm" role="search"><label class="sr-only" for="weatherCityInput">Buscar ciudad</label><input id="weatherCityInput" type="search" placeholder="Buscar ciudad…" autocomplete="off" maxlength="100"><button class="primary" id="weatherSearchBtn" type="submit">Buscar</button></form><button class="icon-btn" id="weatherRefreshBtn" type="button" title="Actualizar clima" aria-label="Actualizar clima"><i data-lucide="refresh-cw"></i></button></div></div>
         <div id="weatherStatus" class="weather-status" role="status" aria-live="polite" hidden></div><div id="weatherLocationChoices" class="weather-location-choices" hidden></div>
@@ -6406,7 +6437,7 @@
       </svg>Finanzas</button><button data-page="calendar"><svg viewBox="0 0 24 24">
         <rect x="3" y="5" width="18" height="16" rx="3" />
         <path d="M16 3v4M8 3v4M3 10h18" />
-      </svg>Calendario</button><button data-page="weather"><svg viewBox="0 0 24 24"><path d="M20 15.5A4.5 4.5 0 0 0 18 7h-1A6 6 0 0 0 5 9a4 4 0 0 0 0 8h15z"/><path d="m8 20 1-2m5 2 1-2"/></svg>Clima</button><button data-page="tasks"><svg viewBox="0 0 24 24">
+      </svg>Calendario</button><button data-page="notes"><i data-lucide="notebook-pen"></i>Notas</button><button data-page="weather"><svg viewBox="0 0 24 24"><path d="M20 15.5A4.5 4.5 0 0 0 18 7h-1A6 6 0 0 0 5 9a4 4 0 0 0 0 8h15z"/><path d="m8 20 1-2m5 2 1-2"/></svg>Clima</button><button data-page="tasks"><svg viewBox="0 0 24 24">
         <path d="m4 12 4 4L20 4" />
       </svg>Tareas</button><button data-page="shop"><svg viewBox="0 0 24 24">
         <path d="M6 7h12l1 13H5z" />
@@ -6808,7 +6839,7 @@
     function svgIcon(type) { const names = { expense: 'arrow-down-left', income: 'arrow-up-right', investment: 'chart-no-axes-combined' }; if (window.lucide) return '<i data-lucide="' + (names[type] || 'circle-dollar-sign') + '"></i>'; const paths = { expense: '<path d="M12 5v14m-6-6 6 6 6-6"/>', income: '<path d="M12 19V5m-6 6 6-6 6 6"/>', investment: '<path d="m3 17 6-6 4 4 8-9"/><path d="M15 6h6v6"/>' }; return '<svg viewBox="0 0 24 24">' + (paths[type] || paths.expense) + '</svg>' }
     function refreshLucideIcons() {
       if (!window.lucide || !window.lucide.createIcons) return;
-      const icons = { home: 'layout-dashboard', finance: 'wallet', tasks: 'check-square', calendar: 'calendar-days', weather: 'cloud-sun', inbox: 'inbox', projects: 'folder', shop: 'shopping-bag', cuisine: 'cooking-pot' };
+      const icons = { home: 'layout-dashboard', finance: 'wallet', tasks: 'check-square', calendar: 'calendar-days', weather: 'cloud-sun', inbox: 'inbox', projects: 'folder', shop: 'shopping-bag', cuisine: 'cooking-pot', notes: 'notebook-pen' };
       document.querySelectorAll('.nav-item[data-page],.mobile-nav button[data-page]').forEach(b => { const n = icons[b.dataset.page], s = b.querySelector('svg'); if (n && s) { const i = document.createElement('i'); i.setAttribute('data-lucide', n); s.replaceWith(i) } });
       const buttons = { searchBtn: 'search', notificationBtn: 'bell', menuBtn: 'menu', quickAddBtn: 'plus', newTransactionBtn: 'plus', exportCsvBtn: 'file-spreadsheet', exportBtn: 'download', importBtn: 'upload', addBudgetBtn: 'sliders-horizontal', addInvestmentBtn: 'chart-no-axes-combined', runSearch: 'search' };
       Object.entries(buttons).forEach(([id, n]) => { const b = document.getElementById(id), s = b && b.querySelector('svg'); if (s) { const i = document.createElement('i'); i.setAttribute('data-lucide', n); s.replaceWith(i) } });
@@ -6818,8 +6849,8 @@
     }
     function totals(items) { return { income: sum(items, 'income'), expense: sum(items, 'expense'), investment: sum(items, 'investment') } }
     function moneyTotal(t) { return fmt(t.amount, t.currency || 'ARS') }
-    const PAGE_VIEWS = { home: 'homeView', finance: 'financeView', tasks: 'tasksView', calendar: 'calendarView', weather: 'weatherView', mail: 'mailView', shop: 'shopView', projects: 'projectsView', cuisine: 'cuisineView' };
-    const PAGE_NAMES = { home: 'Home', finance: 'Finanzas', tasks: 'Tareas', calendar: 'Calendario', weather: 'Clima', mail: 'Mail', shop: 'Compras', inbox: 'Inbox', projects: 'Proyectos', cuisine: 'Cocina' };
+    const PAGE_VIEWS = { home: 'homeView', finance: 'financeView', tasks: 'tasksView', calendar: 'calendarView', weather: 'weatherView', mail: 'mailView', shop: 'shopView', projects: 'projectsView', cuisine: 'cuisineView', notes: 'notesView' };
+    const PAGE_NAMES = { home: 'Home', finance: 'Finanzas', tasks: 'Tareas', calendar: 'Calendario', weather: 'Clima', mail: 'Mail', shop: 'Compras', inbox: 'Inbox', projects: 'Proyectos', cuisine: 'Cocina', notes: 'Notas' };
     function setPage(page) {
       Object.entries(PAGE_VIEWS).forEach(([k, id]) => $(id).hidden = k !== page);
       $('placeholderView').hidden = !!PAGE_VIEWS[page];
@@ -6828,6 +6859,7 @@
       document.querySelectorAll('[data-page]').forEach(b => b.classList.toggle('active', b.dataset.page === page));
       window.scrollTo({ top: 0, behavior: 'smooth' });
       if (page === 'finance') renderAll();
+      if (page === 'notes' && window.CtrlNotes) window.CtrlNotes.render();
       if (page === 'tasks') renderTasks();
       if (page === 'shop') renderShop();
       if (page === 'projects') {
@@ -7702,7 +7734,7 @@
         });
       }
 
-      const views = ['homeView', 'financeView', 'tasksView', 'calendarView', 'mailView', 'shopView', 'placeholderView'];
+      const views = ['homeView', 'financeView', 'tasksView', 'calendarView', 'mailView', 'shopView', 'notesView', 'placeholderView'];
       const activeView = () => views.map(id => document.getElementById(id)).find(v => v && !v.hidden);
       const afterPaint = fn => requestAnimationFrame(() => requestAnimationFrame(fn));
 
@@ -8594,6 +8626,7 @@
   <script src="./weather.js"></script>
   <script src="./sports.js"></script>
   <script src="./cuisine.js"></script>
+  <script src="./notes.js"></script>
 </body>
 
 </html>
