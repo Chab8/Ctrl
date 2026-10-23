@@ -6292,7 +6292,7 @@
       <section id="cuisineView" class="view" hidden>
         <div class="page-head cuisine-page-head">
           <div><div class="eyebrow">IDEAS PARA TODOS LOS DÍAS</div><h1>Cocina<span>.</span></h1><p>Descubrí recetas, guardá tus favoritas y encontrá algo rico para preparar.</p></div>
-          <div class="cuisine-source-note"><i data-lucide="chef-hat"></i><span>Recetas de Tiny Plates y sus fuentes originales</span></div>
+          <div class="cuisine-head-actions"><div class="cuisine-source-note"><i data-lucide="chef-hat"></i><span>Recetas de distintas fuentes e idiomas</span></div><button class="primary" id="cuisineAddRecipeBtn" type="button"><i data-lucide="plus"></i> Añadir receta</button></div>
         </div>
         <div class="cuisine-toolbar card">
           <form id="cuisineSearchForm" class="cuisine-search">
@@ -6302,13 +6302,26 @@
             <button class="primary" type="submit">Buscar</button>
           </form>
           <div class="cuisine-filters">
-            <label><span>Idioma</span><select id="cuisineLanguage" class="filter-select"><option value="es">Español</option><option value="en">English</option></select></label>
             <label><span>Tipo de comida</span><select id="cuisineType" class="filter-select"><option value="all">Todos los tipos</option><option value="breakfast">Desayuno</option><option value="main">Plato principal</option><option value="side">Guarnición</option><option value="soup">Sopa</option><option value="salad">Ensalada</option><option value="dessert">Postre</option><option value="snack">Snack</option></select></label>
             <label><span>Tiempo máximo</span><select id="cuisineMaxTime" class="filter-select"><option value="all">Cualquier duración</option><option value="15">15 minutos</option><option value="30">30 minutos</option><option value="45">45 minutos</option><option value="60">60 minutos</option></select></label>
             <label><span>Dificultad estimada</span><select id="cuisineDifficulty" class="filter-select"><option value="all">Cualquiera</option><option value="easy">Fácil</option><option value="medium">Intermedia</option><option value="hard">Avanzada</option></select></label>
             <button id="cuisineFavoritesToggle" class="secondary cuisine-favorites-toggle" type="button" aria-pressed="false"><i data-lucide="heart"></i> Favoritas</button>
           </div>
         </div>
+        <form id="cuisinePersonalForm" class="card cuisine-personal-form" hidden>
+          <div class="card-head"><div><div class="card-title">Tu receta</div><div class="card-sub">Guardala para consultarla cuando quieras.</div></div></div>
+          <label>Nombre de la receta<input id="cuisinePersonalTitle" maxlength="160" required placeholder="Ej. Tarta de verduras"></label>
+          <label>Descripción (opcional)<textarea id="cuisinePersonalDescription" rows="2" maxlength="500" placeholder="Un comentario sobre la receta…"></textarea></label>
+          <div class="cuisine-personal-fields">
+            <label>Ingredientes <span class="cuisine-form-hint">Separá por línea o coma</span><textarea id="cuisinePersonalIngredients" rows="5" required placeholder="2 huevos&#10;200 g de harina&#10;1 taza de leche"></textarea></label>
+            <label>Preparación <span class="cuisine-form-hint">Un paso por línea</span><textarea id="cuisinePersonalSteps" rows="5" required placeholder="Mezclá los ingredientes…&#10;Cociná durante 20 minutos…"></textarea></label>
+          </div>
+          <div class="cuisine-personal-fields">
+            <label>Tiempo en minutos<input id="cuisinePersonalMinutes" type="number" min="0" max="1440" placeholder="30"></label>
+            <label>Raciones (opcional)<input id="cuisinePersonalServings" maxlength="80" placeholder="4 porciones"></label>
+          </div>
+          <div class="cuisine-personal-actions"><button class="primary" type="submit">Guardar receta</button><button class="secondary" id="cuisineCancelPersonalBtn" type="button">Cancelar</button></div>
+        </form>
         <div id="cuisineStatus" class="cuisine-status" role="status" aria-live="polite">Cargando recetas…</div>
         <div id="cuisineResultsMeta" class="cuisine-results-meta"></div>
         <div id="cuisineRecipeGrid" class="cuisine-grid"></div>
