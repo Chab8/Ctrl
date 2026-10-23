@@ -68,6 +68,11 @@
     try { const url = new URL(String(value || '')); return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : ''; }
     catch (_) { return ''; }
   }
+  function imageSource(value) {
+    const text = String(value || '');
+    if (/^data:image\/(jpeg|png|webp);base64,/i.test(text)) return text;
+    return safeHttpUrl(text);
+  }
   function sourceName(recipe) {
     const url = safeHttpUrl(recipe.url);
     if (!url) return 'Fuente original';
@@ -128,7 +133,7 @@
     return {
       id: String(recipe.id), title: recipe.title || 'Receta sin título', url: safeHttpUrl(recipe.url), isPersonal: !!recipe.isPersonal,
       ingredients: recipe.isPersonal ? (recipe.ingredients || []) : undefined, instructions: recipe.isPersonal ? (recipe.instructions || []) : undefined, servings: recipe.isPersonal ? recipe.servings : undefined,
-      image: safeHttpUrl(recipe.image) || recipeImage(recipe), language: recipe.language || activeLanguage,
+      image: imageSource(recipe.image) || imageSource(recipeImage(recipe)), language: recipe.language || activeLanguage,
       description: recipe.description || '', times: recipe.times || {},
       courses: recipe.courses || [], categories: recipe.categories || [], tags: recipe.tags || [],
       ingredientCount: Array.isArray(recipe.ingredients) ? recipe.ingredients.length : Number(recipe.ingredientCount || 0),
@@ -147,7 +152,7 @@
     if (window.lucide && window.lucide.createIcons) window.lucide.createIcons({attrs:{'stroke-width':1.8}});
   }
   function cardMarkup(recipe) {
-    const image = safeHttpUrl(recipe.image || recipeImage(recipe));
+    const image = imageSource(recipe.image || recipeImage(recipe));
     const title = recipe.title || 'Receta sin título';
     const saved = isFavorite(recipe.id);
     const time = timeText(recipe);
