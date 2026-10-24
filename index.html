@@ -6607,6 +6607,600 @@
         width: 125px
       }
     }
+
+    /* ===== Proyecto: vista de detalle ===== */
+    .project-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 12px;
+      padding: 6px 2px;
+      margin-bottom: 14px
+    }
+
+    .project-back:hover {
+      color: var(--ink)
+    }
+
+    .project-back i,
+    .project-back svg {
+      width: 15px;
+      height: 15px
+    }
+
+    .pd-hero {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: var(--shadow)
+    }
+
+    .pd-hero-main {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap
+    }
+
+    .pd-symbol {
+      width: 54px;
+      height: 54px;
+      border-radius: 17px;
+      display: grid;
+      place-items: center;
+      background: var(--ink);
+      color: var(--accent);
+      flex-shrink: 0
+    }
+
+    .pd-symbol i,
+    .pd-symbol svg {
+      width: 24px;
+      height: 24px
+    }
+
+    html[data-theme="dark"] .pd-symbol {
+      background: var(--accent);
+      color: #243019
+    }
+
+    .pd-titles {
+      flex: 1;
+      min-width: 220px
+    }
+
+    .pd-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 8px
+    }
+
+    .pd-meta .eyebrow {
+      margin: 0
+    }
+
+    .pd-titles h1 {
+      font-size: clamp(26px, 4vw, 36px);
+      letter-spacing: -1.4px;
+      margin: 0;
+      line-height: 1.1;
+      overflow-wrap: anywhere
+    }
+
+    .pd-titles p {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.65;
+      margin: 10px 0 0;
+      max-width: 640px;
+      overflow-wrap: anywhere
+    }
+
+    .pd-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap
+    }
+
+    .pd-actions .secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px
+    }
+
+    .pd-actions i,
+    .pd-actions svg {
+      width: 14px;
+      height: 14px
+    }
+
+    .project-status[data-status="active"] {
+      background: #e3ebdc;
+      color: #536d48;
+      border-color: #d1dec6
+    }
+
+    .project-status[data-status="paused"] {
+      background: #f3ead6;
+      color: #947442;
+      border-color: #e7dac1
+    }
+
+    .project-status[data-status="done"] {
+      background: #e1e9ef;
+      color: #4f6f8a;
+      border-color: #cedbe5
+    }
+
+    html[data-theme="dark"] .project-status[data-status="active"] {
+      background: #4d765433;
+      color: #9fd1a6;
+      border-color: #4d765455
+    }
+
+    html[data-theme="dark"] .project-status[data-status="paused"] {
+      background: #f1cb7d26;
+      color: #e9c47c;
+      border-color: #f1cb7d33
+    }
+
+    html[data-theme="dark"] .project-status[data-status="done"] {
+      background: #9bbcf724;
+      color: #9bbcf7;
+      border-color: #9bbcf733
+    }
+
+    .pd-stats {
+      display: grid;
+      grid-template-columns: 1.4fr repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 20px
+    }
+
+    .pd-stat {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 13px 14px;
+      background: var(--paper);
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      min-width: 0
+    }
+
+    .pd-stat span {
+      font-size: 10px;
+      color: var(--muted)
+    }
+
+    .pd-stat strong {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -.8px
+    }
+
+    .pd-stat small {
+      font-size: 10px;
+      color: var(--muted)
+    }
+
+    .pd-bar {
+      height: 5px;
+      border-radius: 8px;
+      background: var(--line);
+      overflow: hidden;
+      margin-top: 3px
+    }
+
+    .pd-bar i {
+      display: block;
+      height: 100%;
+      background: var(--green);
+      border-radius: 8px
+    }
+
+    .project-tabs {
+      margin: 18px 0 16px;
+      background: transparent;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      border-radius: 0;
+      padding: 0;
+      gap: 4px
+    }
+
+    .project-tab {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border-radius: 10px 10px 0 0;
+      padding: 11px 14px
+    }
+
+    .project-tab.active {
+      background: transparent;
+      box-shadow: none;
+      color: var(--ink);
+      font-weight: 600
+    }
+
+    .project-tab.active:after {
+      content: "";
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: -1px;
+      height: 2px;
+      background: var(--ink);
+      border-radius: 2px
+    }
+
+    html[data-theme="dark"] .project-tab.active:after {
+      background: var(--accent)
+    }
+
+    .pt-count {
+      font: 9px 'DM Mono', monospace;
+      background: var(--soft);
+      border-radius: 6px;
+      padding: 2px 5px;
+      color: var(--muted)
+    }
+
+    .pt-count:empty {
+      display: none
+    }
+
+    .pd-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(260px, 1fr);
+      gap: 14px;
+      align-items: start
+    }
+
+    .pd-col {
+      display: grid;
+      gap: 14px;
+      min-width: 0
+    }
+
+    .pd-col .project-panel {
+      margin-bottom: 0
+    }
+
+    .pd-section-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 14px
+    }
+
+    .pd-section-head h2 {
+      font-size: 18px;
+      margin: 0;
+      letter-spacing: -.5px
+    }
+
+    .pd-section-head p {
+      font-size: 11px;
+      color: var(--muted);
+      margin: 5px 0 0
+    }
+
+    .pd-section-head .primary i,
+    .pd-section-head .primary svg {
+      width: 14px;
+      height: 14px
+    }
+
+    .pd-quick {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      border-radius: 14px;
+      padding: 6px 6px 6px 14px;
+      margin-bottom: 14px
+    }
+
+    .pd-quick>i,
+    .pd-quick>svg {
+      width: 16px;
+      height: 16px;
+      color: var(--muted);
+      flex-shrink: 0
+    }
+
+    .pd-quick input {
+      flex: 1;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--ink);
+      font-size: 13px;
+      padding: 9px 0
+    }
+
+    .pd-quick:focus-within {
+      border-color: var(--ink)
+    }
+
+    .pd-subhead {
+      font: 10px 'DM Mono', monospace;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 18px 0 6px
+    }
+
+    .pd-subhead:first-child {
+      margin-top: 0
+    }
+
+    .pd-task {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 12px 4px;
+      border-bottom: 1px solid var(--line);
+      min-width: 0
+    }
+
+    .pd-task:last-child {
+      border-bottom: 0
+    }
+
+    .pd-task .project-check {
+      margin: 0;
+      width: 16px;
+      height: 16px;
+      accent-color: var(--green);
+      flex-shrink: 0
+    }
+
+    .pd-task-main {
+      flex: 1;
+      min-width: 0
+    }
+
+    .pd-task-main strong {
+      font-size: 12px;
+      font-weight: 500;
+      display: block;
+      overflow-wrap: anywhere
+    }
+
+    .pd-task-main small {
+      display: block;
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 4px;
+      overflow-wrap: anywhere
+    }
+
+    .pd-task.done .pd-task-main strong {
+      text-decoration: line-through;
+      color: var(--muted)
+    }
+
+    .pd-due {
+      font-size: 10px;
+      color: var(--muted);
+      white-space: nowrap
+    }
+
+    .pd-due.overdue {
+      color: var(--red)
+    }
+
+    .pd-more {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 11px;
+      padding: 10px 4px 0;
+      text-decoration: underline;
+      text-underline-offset: 3px
+    }
+
+    .pd-more:hover {
+      color: var(--ink)
+    }
+
+    .pd-mini {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      min-width: 0
+    }
+
+    .pd-mini:last-child {
+      border-bottom: 0
+    }
+
+    .pd-mini>div {
+      flex: 1;
+      min-width: 0
+    }
+
+    .pd-mini strong {
+      display: block;
+      font-weight: 500;
+      overflow-wrap: anywhere
+    }
+
+    .pd-mini small {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      margin-top: 3px;
+      overflow-wrap: anywhere
+    }
+
+    .pd-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 12px
+    }
+
+    .pd-item-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--card);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 0
+    }
+
+    .pd-item-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      min-width: 0
+    }
+
+    .pd-item-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: var(--soft);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0
+    }
+
+    .pd-item-icon i,
+    .pd-item-icon svg {
+      width: 16px;
+      height: 16px
+    }
+
+    .pd-item-top>div {
+      min-width: 0;
+      flex: 1
+    }
+
+    .pd-item-top strong {
+      font-size: 12px;
+      display: block;
+      overflow-wrap: anywhere
+    }
+
+    .pd-item-top small {
+      display: block;
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 4px;
+      line-height: 1.5;
+      overflow-wrap: anywhere
+    }
+
+    .pd-secret-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      padding: 8px 10px;
+      background: var(--paper)
+    }
+
+    .pd-secret-box .project-secret-value {
+      flex: 1;
+      min-width: 0
+    }
+
+    .pd-item-foot {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: auto;
+      padding-top: 2px
+    }
+
+    .pd-item-foot .secondary {
+      font-size: 11px;
+      padding: 8px 11px
+    }
+
+    .pd-item-foot .project-inline-actions {
+      margin-left: auto
+    }
+
+    .pd-notes textarea {
+      width: 100%;
+      min-height: 340px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--ink);
+      border-radius: 14px;
+      padding: 16px;
+      font: inherit;
+      font-size: 13px;
+      line-height: 1.7;
+      outline: 0
+    }
+
+    .pd-notes textarea:focus {
+      border-color: var(--ink)
+    }
+
+    @media(max-width:950px) {
+      .pd-grid {
+        grid-template-columns: 1fr
+      }
+
+      .pd-stats {
+        grid-template-columns: 1fr 1fr
+      }
+
+      .pd-stat-progress {
+        grid-column: 1/-1
+      }
+    }
+
+    @media(max-width:700px) {
+      .pd-hero {
+        padding: 16px;
+        border-radius: 18px
+      }
+
+      .pd-symbol {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px
+      }
+
+      .pd-actions {
+        width: 100%
+      }
+
+      .pd-cards {
+        grid-template-columns: 1fr
+      }
+
+      .project-tab {
+        padding: 10px 11px
+      }
+    }
   </style>
 </head>
 
@@ -7237,8 +7831,8 @@
         </div>
         <div id="projectsOverview">
           <div class="projects-toolbar"><input id="projectsSearch" class="projects-search" type="search"
-              placeholder="Buscar proyectos..."><select id="projectsStatusFilter" class="filter-select"
-              aria-label="Filtrar por estado">
+              placeholder="Buscar proyectos..." autocomplete="off"><select id="projectsStatusFilter"
+              class="filter-select" aria-label="Filtrar por estado" autocomplete="off">
               <option value="all">Todos los estados</option>
               <option value="active">En desarrollo</option>
               <option value="paused">En pausa</option>
@@ -7249,27 +7843,38 @@
             para reunir sus tareas, claves, archivos, links y workflows.</div>
         </div>
         <div id="projectDetail" hidden>
-          <div class="project-detail-head">
-            <div class="project-detail-title"><button class="icon-btn" id="backToProjects" aria-label="Volver"><i
-                  data-lucide="arrow-left"></i></button>
-              <div>
-                <div class="eyebrow" id="projectDetailEyebrow">PROYECTO</div>
+          <button class="project-back" id="backToProjects" type="button"><i data-lucide="arrow-left"></i> Todos los
+            proyectos</button>
+          <header class="pd-hero">
+            <div class="pd-hero-main">
+              <div class="pd-symbol"><i data-lucide="folder-kanban"></i></div>
+              <div class="pd-titles">
+                <div class="pd-meta"><span class="eyebrow" id="projectDetailEyebrow">PROYECTO</span><span
+                    class="project-status" id="projectDetailStatus"></span></div>
                 <h1 id="projectDetailTitle">Proyecto</h1>
                 <p id="projectDetailDescription"></p>
               </div>
+              <div class="pd-actions">
+                <button class="secondary" id="openProjectLinkBtn" hidden>Abrir ↗</button>
+                <button class="secondary" id="editProjectBtn"><i data-lucide="pencil"></i> Editar</button>
+                <button class="icon-btn project-danger" id="deleteProjectBtn" aria-label="Eliminar proyecto"
+                  title="Eliminar proyecto"><i data-lucide="trash-2"></i></button>
+              </div>
             </div>
-            <div class="project-link-actions"><button class="secondary" id="editProjectBtn">Editar</button><button
-                class="secondary" id="openProjectLinkBtn" hidden>Abrir proyecto ↗</button><button
-                class="secondary project-danger" id="deleteProjectBtn" aria-label="Eliminar proyecto">Eliminar</button>
-            </div>
+            <div class="pd-stats" id="projectDetailStats"></div>
+          </header>
+          <div class="project-tabs" id="projectTabs">
+            <button class="project-tab active" data-project-tab="overview">Resumen</button>
+            <button class="project-tab" data-project-tab="tasks">Tareas <span class="pt-count"
+                data-count="tasks"></span></button>
+            <button class="project-tab" data-project-tab="secrets">Claves <span class="pt-count"
+                data-count="secrets"></span></button>
+            <button class="project-tab" data-project-tab="workflows">Workflows <span class="pt-count"
+                data-count="workflows"></span></button>
+            <button class="project-tab" data-project-tab="resources">Archivos y links <span class="pt-count"
+                data-count="resources"></span></button>
+            <button class="project-tab" data-project-tab="notes">Notas</button>
           </div>
-          <div class="project-tabs" id="projectTabs"><button class="project-tab active"
-              data-project-tab="overview">Resumen</button><button class="project-tab"
-              data-project-tab="tasks">Tareas</button><button class="project-tab"
-              data-project-tab="secrets">Claves</button><button class="project-tab"
-              data-project-tab="workflows">Workflows</button><button class="project-tab"
-              data-project-tab="resources">Archivos y links</button><button class="project-tab"
-              data-project-tab="notes">Notas</button></div>
           <div id="projectTabContent"></div>
         </div>
       </section>
@@ -7909,19 +8514,100 @@
     function openProject(id) { currentProjectId = id; currentProjectTab = 'overview'; renderProjects() }
     function renderProjectDetail() {
       const p = currentProject(); if (!p) return;
-      $('projectDetailEyebrow').textContent = p.category || 'PROYECTO'; $('projectDetailTitle').textContent = p.name; $('projectDetailDescription').textContent = p.description || ''; $('projectDetailDescription').hidden = !(p.description && p.description.trim());
-      const url = projectSafeUrl(p.url); $('openProjectLinkBtn').hidden = !url; $('openProjectLinkBtn').onclick = () => { if (url) window.open(url, '_blank', 'noopener,noreferrer') };
+      const total = p.tasks.length, done = p.tasks.filter(t => t.done).length, pct = total ? Math.round(done / total * 100) : 0;
+      $('projectDetailEyebrow').textContent = p.category || 'PROYECTO';
+      const st = $('projectDetailStatus'); st.textContent = projectStatusLabel(p.status); st.dataset.status = p.status || 'active';
+      $('projectDetailTitle').textContent = p.name;
+      $('projectDetailDescription').textContent = p.description || '';
+      $('projectDetailDescription').hidden = !(p.description && p.description.trim());
+      const url = projectSafeUrl(p.url); $('openProjectLinkBtn').hidden = !url;
+      $('openProjectLinkBtn').onclick = () => { if (url) window.open(url, '_blank', 'noopener,noreferrer') };
+      const stat = (label, value, sub) => '<div class="pd-stat"><span>' + label + '</span><strong>' + value + '</strong>' + (sub ? '<small>' + sub + '</small>' : '') + '</div>';
+      $('projectDetailStats').innerHTML =
+        '<div class="pd-stat pd-stat-progress"><span>Progreso</span><strong>' + pct + '%</strong><div class="pd-bar"><i style="width:' + pct + '%"></i></div><small>' + done + ' de ' + total + ' tareas</small></div>'
+        + stat('Pendientes', total - done, 'tareas por completar')
+        + stat('Recursos', p.resources.length, 'archivos y links')
+        + stat('Workflows', p.workflows.length, 'procesos');
+      const counts = { tasks: total - done, secrets: p.secrets.length, workflows: p.workflows.length, resources: p.resources.length };
+      document.querySelectorAll('[data-count]').forEach(el => { el.textContent = counts[el.dataset.count] || '' });
       document.querySelectorAll('[data-project-tab]').forEach(b => b.classList.toggle('active', b.dataset.projectTab === currentProjectTab));
-      $('projectTabContent').innerHTML = projectTabMarkup(p, currentProjectTab); if (window.lucide?.createIcons) window.lucide.createIcons({ attrs: { 'stroke-width': 1.8 } });
+      $('projectTabContent').innerHTML = projectTabMarkup(p, currentProjectTab);
+      if (window.lucide?.createIcons) window.lucide.createIcons({ attrs: { 'stroke-width': 1.8 } });
     }
-    function projectTaskMarkup(t) { return '<div class="project-list-item"><input class="project-check" type="checkbox" data-project-task-toggle="' + esc(t.id) + '" ' + (t.done ? 'checked' : '') + '><div class="project-list-item-main"><strong>' + (t.done ? '<s>' : '') + esc(t.title) + (t.done ? '</s>' : '') + '</strong><small>' + esc(t.priority || 'media') + (t.dueDate ? ' · ' + esc(projectDate(t.dueDate)) : '') + (t.notes ? ' · ' + esc(t.notes) : '') + '</small></div>' + projectActions('task', t.id) + '</div>' }
+
+    function projectTaskMarkup(t) {
+      const overdue = !t.done && t.dueDate && t.dueDate < dateNow();
+      const pr = { high: 'Alta', medium: 'Media', low: 'Baja' }[t.priority] || 'Media';
+      return '<div class="pd-task' + (t.done ? ' done' : '') + '"><input class="project-check" type="checkbox" data-project-task-toggle="' + esc(t.id) + '" ' + (t.done ? 'checked' : '') + '>'
+        + '<div class="pd-task-main"><strong>' + esc(t.title) + '</strong>' + (t.notes ? '<small>' + esc(t.notes) + '</small>' : '') + '</div>'
+        + (t.done ? '' : '<span class="priority priority-' + esc(t.priority || 'medium') + '">' + pr + '</span>')
+        + (t.dueDate ? '<span class="pd-due' + (overdue ? ' overdue' : '') + '">' + esc(projectDate(t.dueDate)) + '</span>' : '')
+        + projectActions('task', t.id) + '</div>';
+    }
+
     function projectTabMarkup(p, tab) {
-      if (tab === 'overview') { const pending = p.tasks.filter(t => !t.done).slice(0, 4); return '<div class="project-detail-grid"><div>' + projectPanel('Próximas tareas', pending.length ? '<div class="project-list">' + pending.map(projectTaskMarkup).join('') + '</div>' : projectEmpty('No hay tareas pendientes.'), '<button class="secondary" data-project-action="task">+ Añadir</button>') + projectPanel('Workflows', p.workflows.length ? p.workflows.map(w => '<div class="project-list-item"><div class="project-list-item-main"><strong>' + esc(w.name) + '</strong><small>' + w.steps.length + ' pasos</small></div><button class="secondary" data-workflow-open="' + esc(w.id) + '">Ver</button></div>').join('') : projectEmpty('Documentá procesos paso a paso.'), '<button class="secondary" data-project-action="workflow">+ Crear</button>') + '</div><div>' + projectPanel('Claves y accesos', p.secrets.length ? p.secrets.map(v => '<div class="project-list-item"><div class="project-list-item-main"><strong>' + esc(v.label) + '</strong><small>' + esc(v.username || 'Sin usuario') + '</small></div></div>').join('') : projectEmpty('Guardá referencias de acceso.'), '<button class="secondary" data-project-action="secret">+ Añadir</button>') + projectPanel('Archivos y links', p.resources.length ? p.resources.map(r => '<div class="project-list-item"><div class="project-list-item-main"><strong>' + esc(r.name) + '</strong><small>' + esc(r.kind === 'file' ? r.fileName : r.url) + '</small></div></div>').join('') : projectEmpty('Reuní recursos importantes.'), '<button class="secondary" data-project-action="resource">+ Añadir</button>') + '</div></div>' }
-      if (tab === 'tasks') return '<div class="project-section-head"><div><h2>Tareas del proyecto</h2><p>Organizá pendientes y marcá el avance.</p></div><button class="primary" data-project-action="task">+ Nueva tarea</button></div>' + (p.tasks.length ? '<div class="project-list">' + p.tasks.map(projectTaskMarkup).join('') + '</div>' : projectEmpty('Todavía no hay tareas.'));
-      if (tab === 'secrets') return '<div class="project-section-head"><div><h2>Claves y accesos</h2><p>Referencias de acceso de este dispositivo.</p></div><button class="primary" data-project-action="secret">+ Añadir clave</button></div><div class="helper-note">Se guardan en el almacenamiento local del navegador y no están cifradas. No guardes secretos críticos.</div>' + (p.secrets.length ? '<div class="project-list">' + p.secrets.map(v => '<div class="project-list-item"><div class="project-list-item-main"><strong>' + esc(v.label) + '</strong><small>' + esc(v.username || '') + '</small><div class="project-secret-value" data-secret="' + esc(v.id) + '">••••••••</div></div><button class="secondary" data-secret-toggle="' + esc(v.id) + '">Mostrar</button>' + projectActions('secret', v.id) + '</div>').join('') + '</div>' : projectEmpty('No hay claves guardadas.'));
-      if (tab === 'workflows') return '<div class="project-section-head"><div><h2>Workflows visuales</h2><p>Procesos representados como una secuencia de pasos.</p></div><button class="primary" data-project-action="workflow">+ Nuevo workflow</button></div>' + (p.workflows.length ? p.workflows.map(w => '<section class="project-panel"><div class="card-head"><h3>' + esc(w.name) + '</h3>' + projectActions('workflow', w.id) + '</div><div class="project-workflow-canvas"><div class="workflow-flow">' + w.steps.map((v, i) => (i ? '<span class="workflow-arrow">→</span>' : '') + '<div class="workflow-node"><strong>' + (i + 1) + '. ' + esc(v.title) + '</strong><small>' + esc(v.description || '') + '</small></div>').join('') + '</div></div></section>').join('') : projectEmpty('Creá un workflow para visualizar un proceso.'));
-      if (tab === 'resources') return '<div class="project-section-head"><div><h2>Archivos y enlaces</h2><p>Documentación, referencias y accesos rápidos.</p></div><button class="primary" data-project-action="resource">+ Añadir recurso</button></div><div class="helper-note">Los archivos se guardan en este navegador (máximo 2 MB por archivo). Para sincronizarlos entre dispositivos se necesita almacenamiento en la nube.</div>' + (p.resources.length ? '<div class="project-list">' + p.resources.map(r => '<div class="project-list-item"><div class="project-list-item-main"><strong>' + esc(r.name) + '</strong><small>' + (r.kind === 'file' ? esc(r.fileName || 'Archivo') : '<a class="project-resource-link" href="' + esc(projectSafeUrl(r.url)) + '" target="_blank" rel="noopener noreferrer">' + esc(r.url) + '</a>') + (r.notes ? ' · ' + esc(r.notes) : '') + '</small></div>' + (r.kind === 'file' ? '<button class="secondary" data-file-download="' + esc(r.id) + '">Descargar</button>' : '<button class="secondary" data-link-open="' + esc(r.id) + '">Abrir ↗</button>') + projectActions('resource', r.id) + '</div>').join('') + '</div>' : projectEmpty('No hay archivos ni links guardados.'));
-      if (tab === 'notes') return '<section class="project-panel"><div class="card-head"><h3>Notas del proyecto</h3><button class="primary" id="saveProjectNotes">Guardar notas</button></div><textarea id="projectNotesText" rows="14" maxlength="20000" placeholder="Ideas, decisiones, contexto técnico y próximos pasos...">' + esc(p.notes || '') + '</textarea></section>';
+      const head = (title, sub, kind, label) => '<div class="pd-section-head"><div><h2>' + title + '</h2><p>' + sub + '</p></div>'
+        + '<button class="primary" data-project-action="' + kind + '"><i data-lucide="plus"></i> ' + label + '</button></div>';
+      const quick = '<form class="pd-quick" id="projectQuickTask"><i data-lucide="plus"></i><input id="projectQuickTaskInput" maxlength="160" autocomplete="off" placeholder="Añadir una tarea y presionar Enter…"><button class="primary" type="submit">Añadir</button></form>';
+      const byDue = (a, b) => (a.dueDate || '9999').localeCompare(b.dueDate || '9999');
+
+      if (tab === 'overview') {
+        const pending = p.tasks.filter(t => !t.done).sort(byDue);
+        const left = projectPanel('Próximas tareas',
+          quick + (pending.length ? pending.slice(0, 5).map(projectTaskMarkup).join('') : projectEmpty('No hay tareas pendientes. ¡Todo al día!'))
+          + (pending.length > 5 ? '<button class="pd-more" data-project-goto="tasks">Ver las ' + pending.length + ' tareas pendientes →</button>' : ''));
+        const wf = projectPanel('Workflows',
+          p.workflows.length ? p.workflows.slice(0, 4).map(w => '<div class="pd-mini"><div><strong>' + esc(w.name) + '</strong><small>' + w.steps.length + ' pasos</small></div><button class="secondary" data-workflow-open="' + esc(w.id) + '">Ver</button></div>').join('') : projectEmpty('Documentá procesos paso a paso.'),
+          '<button class="secondary" data-project-action="workflow">+ Crear</button>');
+        const res = projectPanel('Archivos y links',
+          p.resources.length ? p.resources.slice(0, 4).map(r => '<div class="pd-mini"><div><strong>' + esc(r.name) + '</strong><small>' + esc(r.kind === 'file' ? (r.fileName || 'Archivo') : r.url) + '</small></div></div>').join('') + (p.resources.length > 4 ? '<button class="pd-more" data-project-goto="resources">Ver todos →</button>' : '') : projectEmpty('Reuní recursos importantes.'),
+          '<button class="secondary" data-project-action="resource">+ Añadir</button>');
+        const sec = projectPanel('Claves y accesos',
+          p.secrets.length ? p.secrets.slice(0, 4).map(v => '<div class="pd-mini"><div><strong>' + esc(v.label) + '</strong><small>' + esc(v.username || 'Sin usuario') + '</small></div></div>').join('') : projectEmpty('Guardá referencias de acceso.'),
+          '<button class="secondary" data-project-action="secret">+ Añadir</button>');
+        return '<div class="pd-grid"><div class="pd-col">' + left + '</div><div class="pd-col">' + wf + res + sec + '</div></div>';
+      }
+
+      if (tab === 'tasks') {
+        const pending = p.tasks.filter(t => !t.done).sort(byDue), done = p.tasks.filter(t => t.done);
+        return '<div class="pd-section-head"><div><h2>Tareas del proyecto</h2><p>Escribí una y presioná Enter, o usá el detalle completo con fecha y prioridad.</p></div><button class="secondary" data-project-action="task">Tarea con detalle</button></div>'
+          + quick
+          + '<section class="project-panel">'
+          + '<div class="pd-subhead">Pendientes · ' + pending.length + '</div>' + (pending.length ? pending.map(projectTaskMarkup).join('') : projectEmpty('No hay tareas pendientes.'))
+          + (done.length ? '<div class="pd-subhead">Completadas · ' + done.length + '</div>' + done.map(projectTaskMarkup).join('') : '')
+          + '</section>';
+      }
+
+      if (tab === 'secrets') {
+        return head('Claves y accesos', 'Referencias de acceso guardadas en este dispositivo.', 'secret', 'Añadir clave')
+          + '<div class="helper-note" style="margin:0 0 14px">Se guardan en el almacenamiento local del navegador y no están cifradas. No guardes secretos críticos.</div>'
+          + (p.secrets.length ? '<div class="pd-cards">' + p.secrets.map(v =>
+            '<article class="pd-item-card"><div class="pd-item-top"><span class="pd-item-icon"><i data-lucide="key-round"></i></span><div><strong>' + esc(v.label) + '</strong><small>' + esc(v.username || 'Sin usuario') + '</small></div></div>'
+            + '<div class="pd-secret-box"><span class="project-secret-value" data-secret="' + esc(v.id) + '">••••••••</span><button class="secondary" data-secret-toggle="' + esc(v.id) + '">Mostrar</button></div>'
+            + '<div class="pd-item-foot">' + projectActions('secret', v.id) + '</div></article>').join('') + '</div>' : projectEmpty('No hay claves guardadas.'));
+      }
+
+      if (tab === 'workflows') {
+        return head('Workflows visuales', 'Procesos representados como una secuencia de pasos.', 'workflow', 'Nuevo workflow')
+          + (p.workflows.length ? p.workflows.map(w => '<section class="project-panel"><div class="card-head"><h3>' + esc(w.name) + '</h3>' + projectActions('workflow', w.id) + '</div><div class="project-workflow-canvas"><div class="workflow-flow">'
+            + w.steps.map((v, i) => (i ? '<span class="workflow-arrow">→</span>' : '') + '<div class="workflow-node"><strong>' + (i + 1) + '. ' + esc(v.title) + '</strong><small>' + esc(v.description || '') + '</small></div>').join('')
+            + '</div></div></section>').join('') : projectEmpty('Creá un workflow para visualizar un proceso.'));
+      }
+
+      if (tab === 'resources') {
+        return head('Archivos y enlaces', 'Documentación, referencias y accesos rápidos.', 'resource', 'Añadir recurso')
+          + '<div class="helper-note" style="margin:0 0 14px">Los archivos se guardan en este navegador (máximo 2 MB cada uno). Para sincronizarlos entre dispositivos hace falta almacenamiento en la nube.</div>'
+          + (p.resources.length ? '<div class="pd-cards">' + p.resources.map(r =>
+            '<article class="pd-item-card"><div class="pd-item-top"><span class="pd-item-icon"><i data-lucide="' + (r.kind === 'file' ? 'file-text' : 'link') + '"></i></span><div><strong>' + esc(r.name) + '</strong><small>'
+            + (r.kind === 'file' ? esc(r.fileName || 'Archivo') : '<a class="project-resource-link" href="' + esc(projectSafeUrl(r.url)) + '" target="_blank" rel="noopener noreferrer">' + esc(r.url) + '</a>')
+            + (r.notes ? '<br>' + esc(r.notes) : '') + '</small></div></div>'
+            + '<div class="pd-item-foot">' + (r.kind === 'file' ? '<button class="secondary" data-file-download="' + esc(r.id) + '">Descargar</button>' : '<button class="secondary" data-link-open="' + esc(r.id) + '">Abrir ↗</button>') + projectActions('resource', r.id) + '</div></article>').join('') + '</div>' : projectEmpty('No hay archivos ni links guardados.'));
+      }
+
+      if (tab === 'notes') {
+        return '<section class="project-panel pd-notes"><div class="card-head"><h3>Notas del proyecto</h3><button class="primary" id="saveProjectNotes">Guardar notas</button></div>'
+          + '<textarea id="projectNotesText" maxlength="20000" placeholder="Ideas, decisiones, contexto técnico y próximos pasos...">' + esc(p.notes || '') + '</textarea></section>';
+      }
       return '';
     }
     function saveProjectAndRender(msg) { save(); renderProjects(); if (msg) toast(msg) }
@@ -7973,6 +8659,25 @@
     });
     $('projectTabContent').addEventListener('change', e => { const c = e.target.closest('[data-project-task-toggle]'); if (c) { const p = currentProject(), t = p?.tasks.find(x => x.id === c.dataset.projectTaskToggle); if (t) { t.done = c.checked; p.updatedAt = new Date().toISOString(); saveProjectAndRender('Tarea actualizada') } } });
     $('projectTabContent').addEventListener('click', e => { if (e.target.closest('#saveProjectNotes')) { const p = currentProject(); if (p) { p.notes = $('projectNotesText').value; p.updatedAt = new Date().toISOString(); saveProjectAndRender('Notas guardadas') } } });
+    $('projectTabContent').addEventListener('click', e => {
+      const g = e.target.closest('[data-project-goto]');
+      if (g) { currentProjectTab = g.dataset.projectGoto; renderProjectDetail(); }
+    });
+    $('projectTabContent').addEventListener('submit', e => {
+      if (e.target.id !== 'projectQuickTask') return;
+      e.preventDefault();
+      const p = currentProject(), input = $('projectQuickTaskInput'), title = input.value.trim();
+      if (!p || !title) return;
+      p.tasks.push({ id: crypto.randomUUID(), title, notes: '', dueDate: '', priority: 'medium', done: false, updatedAt: new Date().toISOString() });
+      p.updatedAt = new Date().toISOString();
+      saveProjectAndRender('Tarea añadida');
+      setTimeout(() => $('projectQuickTaskInput')?.focus(), 0);
+    });
+
+    // Estado inicial limpio + render al cargar
+    $('projectsStatusFilter').value = 'all';
+    $('projectsSearch').value = '';
+    renderProjects();
 
     const GOOGLE_CLIENT_ID = '255712569055-lh0fvi39j506fd9f6ube4cmo1s1p8im2.apps.googleusercontent.com';
     const GOOGLE_CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events';
