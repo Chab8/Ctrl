@@ -3960,6 +3960,118 @@
       white-space: nowrap
     }
 
+    /* Mail: categorías, selección y acciones masivas */
+    .mail-row.sel-row {
+      grid-template-columns: 20px 28px minmax(110px, 170px) minmax(0, 1fr) 72px
+    }
+
+    .mail-row.selected {
+      background: color-mix(in srgb, var(--surface-2) 85%, var(--ink) 6%)
+    }
+
+    .mail-check-wrap {
+      display: grid;
+      place-items: center;
+      cursor: pointer
+    }
+
+    .mail-check,
+    .mail-bulk-all input {
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      accent-color: var(--ink);
+      cursor: pointer
+    }
+
+    .mail-tabs {
+      display: flex;
+      gap: 4px;
+      padding: 0 14px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+      overflow-x: auto;
+      scrollbar-width: none
+    }
+
+    .mail-tabs::-webkit-scrollbar {
+      display: none
+    }
+
+    .mail-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      white-space: nowrap;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer
+    }
+
+    .mail-tab svg,
+    .mail-tab i {
+      width: 16px;
+      height: 16px
+    }
+
+    .mail-tab:hover {
+      color: var(--ink)
+    }
+
+    .mail-tab.active {
+      color: var(--ink);
+      border-bottom-color: var(--ink)
+    }
+
+    .mail-bulk {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 8px 14px;
+      min-height: 50px;
+      border-bottom: 1px solid var(--line)
+    }
+
+    .mail-bulk[hidden],
+    .mail-bulk [hidden],
+    .mail-tabs[hidden] {
+      display: none !important
+    }
+
+    .mail-bulk-all {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      cursor: pointer
+    }
+
+    .mail-bulk-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap
+    }
+
+    .mail-bulk-actions .secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px
+    }
+
+    .mail-bulk-actions .secondary svg,
+    .mail-bulk-actions .secondary i {
+      width: 14px;
+      height: 14px
+    }
+
     .mail-connect {
       max-width: 600px;
       margin: 35px auto;
@@ -4127,6 +4239,16 @@
         grid-template-columns: 22px minmax(80px, 115px) minmax(0, 1fr) 48px;
         gap: 7px;
         padding: 13px 8px
+      }
+
+      .mail-row.sel-row {
+        grid-template-columns: 18px 20px minmax(80px, 115px) minmax(0, 1fr) 48px
+      }
+
+      .mail-bulk,
+      .mail-tabs {
+        padding-left: 8px;
+        padding-right: 8px
       }
 
       .mail-time {
@@ -5738,6 +5860,8 @@
     }
 
     .mail-main:has(.mail-detail:not([hidden])) .mail-toolbar,
+    .mail-main:has(.mail-detail:not([hidden])) .mail-tabs,
+    .mail-main:has(.mail-detail:not([hidden])) .mail-bulk,
     .mail-main:has(.mail-detail:not([hidden])) .mail-status {
       display: none
     }
@@ -7639,7 +7763,31 @@
                     placeholder="Buscar correos…"></label>
                 <button class="secondary" id="mailSearchBtn">Buscar</button>
               </div>
+              <div class="mail-tabs" id="mailTabs" role="tablist" aria-label="Categorías de Recibidos">
+                <button type="button" class="mail-tab active" role="tab" data-mail-cat="CATEGORY_PERSONAL"><i
+                    data-lucide="inbox"></i> Principal</button>
+                <button type="button" class="mail-tab" role="tab" data-mail-cat="CATEGORY_PROMOTIONS"><i
+                    data-lucide="tag"></i> Promociones</button>
+                <button type="button" class="mail-tab" role="tab" data-mail-cat="CATEGORY_SOCIAL"><i
+                    data-lucide="users"></i> Social</button>
+                <button type="button" class="mail-tab" role="tab" data-mail-cat="CATEGORY_UPDATES"><i
+                    data-lucide="bell"></i> Notificaciones</button>
+              </div>
               <p class="mail-status" id="mailConnectionStatus" style="padding:0 14px">Conectando con Gmail…</p>
+              <div class="mail-bulk" id="mailBulk" hidden>
+                <label class="mail-bulk-all"><input type="checkbox" id="mailSelAll" aria-label="Seleccionar todos"><span
+                    id="mailSelLabel">Seleccionar todos</span></label>
+                <div class="mail-bulk-actions" id="mailBulkActions" hidden>
+                  <button type="button" class="secondary" data-bulk="archive"><i data-lucide="archive"></i>
+                    Archivar</button>
+                  <button type="button" class="secondary" data-bulk="spam"><i data-lucide="octagon-alert"></i>
+                    Denunciar como spam</button>
+                  <button type="button" class="secondary" data-bulk="trash"><i data-lucide="trash-2"></i>
+                    Borrar</button>
+                  <button type="button" class="secondary" data-bulk="read"><i data-lucide="mail-open"></i> Marcar como
+                    leído</button>
+                </div>
+              </div>
               <div id="mailList" class="mail-list">
                 <div class="mail-empty">Tus correos aparecerán acá.</div>
               </div>
@@ -8767,7 +8915,9 @@
       if (!gmailAccessToken) return;
       const reqId = ++gmailReqId;
       const query = queryOverride !== undefined ? queryOverride : $('mailSearchInput').value.trim();
-      const key = gmailFolder + '|' + query;
+      const key = gmailFolder + (gmailFolder === 'INBOX' && !query ? ':' + gmailCategory : '') + '|' + query;
+      if (key !== gmailSelKey) { gmailSel.clear(); gmailSelKey = key }
+      syncMailChrome(query);
       $('mailDetail').hidden = true; $('mailList').hidden = false;
 
       // Mostrar al instante lo que ya conocemos mientras se actualiza
@@ -8779,12 +8929,13 @@
       } else {
         $('mailConnectionStatus').textContent = 'Cargando correos…';
         $('mailList').innerHTML = '<div class="mail-empty">Cargando correos…</div>';
+        updateMailBulk(true);
       }
 
       try {
         const params = new URLSearchParams({ maxResults: '25' });
         if (query) params.set('q', query);
-        else if (['INBOX', 'STARRED', 'SENT', 'DRAFT', 'IMPORTANT', 'TRASH'].includes(gmailFolder)) params.set('labelIds', gmailFolder);
+        else if (['INBOX', 'STARRED', 'SENT', 'DRAFT', 'IMPORTANT', 'TRASH'].includes(gmailFolder)) { params.set('labelIds', gmailFolder); if (gmailFolder === 'INBOX') params.append('labelIds', gmailCategory) }
         const list = await gmailApi('messages?' + params.toString());
         if (reqId !== gmailReqId) return;
         const ids = (list.messages || []).map(x => x.id);
@@ -8818,16 +8969,17 @@
       } catch (error) {
         if (reqId !== gmailReqId) return;
         $('mailConnectionStatus').textContent = 'No se pudo cargar Gmail';
-        if (!cachedIds) $('mailList').innerHTML = '<div class="mail-empty">' + esc(error.message) + '<br><br>Verificá que Gmail API esté habilitada en el proyecto de Google Cloud y que el acceso esté autorizado.</div>';
+        if (!cachedIds) { $('mailList').innerHTML = '<div class="mail-empty">' + esc(error.message) + '<br><br>Verificá que Gmail API esté habilitada en el proyecto de Google Cloud y que el acceso esté autorizado.</div>'; updateMailBulk(true) }
         if (!gmailAccessToken) { $('mailConnectCard').hidden = false; $('mailWorkspace').hidden = true }
       }
     }
 
     function renderGmailMessages() {
-      if (!gmailMessages.length) { $('mailList').innerHTML = '<div class="mail-empty">No hay correos en esta carpeta.</div>'; return }
+      for (const id of [...gmailSel]) if (!gmailMessages.some(m => m.id === id)) gmailSel.delete(id);
+      if (!gmailMessages.length) { $('mailList').innerHTML = '<div class="mail-empty">No hay correos en esta carpeta.</div>'; updateMailBulk(); return }
       $('mailList').innerHTML = gmailMessages.map(m => {
-        const from = gmailHeader(m, 'From'), subject = gmailHeader(m, 'Subject') || '(Sin asunto)', snippet = m.snippet || '', unread = m.labelIds?.includes('UNREAD'), starred = m.labelIds?.includes('STARRED');
-        return '<div class="mail-row ' + (unread ? 'unread' : '') + '"><button class="mail-star ' + (starred ? 'starred' : '') + '" data-gmail-star="' + esc(m.id) + '" aria-label="' + (starred ? 'Quitar destacado' : 'Destacar') + '">' + (starred ? '★' : '☆') + '</button><button class="mail-sender" data-gmail-open="' + esc(m.id) + '" style="border:0;background:none;text-align:left;color:inherit;cursor:pointer;min-width:0">' + esc(gmailFromLabel(from)) + '</button><button data-gmail-open="' + esc(m.id) + '" style="border:0;background:none;text-align:left;color:inherit;cursor:pointer;min-width:0;overflow:hidden"><div class="mail-subject">' + esc(subject) + '</div><div class="mail-snippet">' + esc(snippet) + '</div></button><span class="mail-time">' + esc(gmailDate(m.internalDate)) + '</span></div>';
+        const from = gmailHeader(m, 'From'), subject = gmailHeader(m, 'Subject') || '(Sin asunto)', snippet = m.snippet || '', unread = m.labelIds?.includes('UNREAD'), starred = m.labelIds?.includes('STARRED'), sel = gmailSel.has(m.id);
+        return '<div class="mail-row sel-row ' + (unread ? 'unread' : '') + (sel ? ' selected' : '') + '"><label class="mail-check-wrap"><input type="checkbox" class="mail-check" data-gmail-sel="' + esc(m.id) + '"' + (sel ? ' checked' : '') + ' aria-label="Seleccionar correo"></label><button class="mail-star ' + (starred ? 'starred' : '') + '" data-gmail-star="' + esc(m.id) + '" aria-label="' + (starred ? 'Quitar destacado' : 'Destacar') + '">' + (starred ? '★' : '☆') + '</button><button class="mail-sender" data-gmail-open="' + esc(m.id) + '" style="border:0;background:none;text-align:left;color:inherit;cursor:pointer;min-width:0">' + esc(gmailFromLabel(from)) + '</button><button data-gmail-open="' + esc(m.id) + '" style="border:0;background:none;text-align:left;color:inherit;cursor:pointer;min-width:0;overflow:hidden"><div class="mail-subject">' + esc(subject) + '</div><div class="mail-snippet">' + esc(snippet) + '</div></button><span class="mail-time">' + esc(gmailDate(m.internalDate)) + '</span></div>';
       }).join('');
       $('mailList').querySelectorAll('[data-gmail-open]').forEach(b => b.onclick = () => openGmailMessage(b.dataset.gmailOpen));
       $('mailList').querySelectorAll('[data-gmail-star]').forEach(b => b.onclick = async () => {
@@ -8838,13 +8990,78 @@
         try { await gmailApi('messages/' + encodeURIComponent(m.id) + '/modify', { method: 'POST', body: JSON.stringify(was ? { removeLabelIds: ['STARRED'] } : { addLabelIds: ['STARRED'] }) }) }
         catch (e) { m.labelIds = prev; renderGmailMessages(); toast('No se pudo actualizar el destacado: ' + e.message) }
       });
-      if (gmailFolder === 'INBOX') { const unread = gmailMessages.filter(m => m.labelIds?.includes('UNREAD')).length; $('mailUnreadCount').textContent = unread ? String(unread) : '' }
+      $('mailList').querySelectorAll('[data-gmail-sel]').forEach(c => c.onchange = () => {
+        const id = c.dataset.gmailSel; if (c.checked) gmailSel.add(id); else gmailSel.delete(id);
+        c.closest('.mail-row').classList.toggle('selected', c.checked); updateMailBulk();
+      });
+      updateMailBulk();
+      // el contador de Recibidos refleja solo Principal (como Gmail), salvo en búsquedas
+      if (gmailFolder === 'INBOX' && (gmailLastQuery || gmailCategory === 'CATEGORY_PERSONAL')) { const unread = gmailMessages.filter(m => m.labelIds?.includes('UNREAD')).length; $('mailUnreadCount').textContent = unread ? String(unread) : '' }
       if (window.lucide) lucide.createIcons();
     }
+
+    /* Mail — categorías, selección y acciones masivas */
+    let gmailCategory = 'CATEGORY_PERSONAL', gmailSelKey = '', gmailLastQuery = '', gmailBulkBusy = false;
+    const gmailSel = new Set();
+    function syncMailChrome(query) {
+      gmailLastQuery = query || '';
+      const tabs = $('mailTabs'); if (!tabs) return;
+      tabs.hidden = !(gmailFolder === 'INBOX' && !gmailLastQuery);
+      tabs.querySelectorAll('[data-mail-cat]').forEach(b => { const on = b.dataset.mailCat === gmailCategory; b.classList.toggle('active', on); b.setAttribute('aria-selected', on ? 'true' : 'false') });
+      if (gmailFolder === 'SCHEDULED') updateMailBulk(true);
+    }
+    function updateMailBulk(hide) {
+      const bar = $('mailBulk'); if (!bar) return;
+      const show = !hide && gmailFolder !== 'SCHEDULED' && gmailMessages.length > 0;
+      bar.hidden = !show; if (!show) return;
+      const total = gmailMessages.length, n = gmailMessages.filter(m => gmailSel.has(m.id)).length, all = $('mailSelAll');
+      all.checked = n > 0 && n === total; all.indeterminate = n > 0 && n < total;
+      $('mailSelLabel').textContent = n ? n + (n === 1 ? ' seleccionado' : ' seleccionados') : 'Seleccionar todos';
+      $('mailBulkActions').hidden = !n;
+      const f = gmailFolder, vis = { archive: ['INBOX', 'STARRED', 'IMPORTANT'].includes(f), spam: !['SENT', 'DRAFT', 'TRASH'].includes(f), trash: f !== 'TRASH', read: true };
+      bar.querySelectorAll('[data-bulk]').forEach(b => b.hidden = !vis[b.dataset.bulk]);
+    }
+    const GMAIL_BULK = {
+      archive: { add: [], remove: ['INBOX'], one: 'Correo archivado', many: 'correos archivados', fail: 'archivar' },
+      spam: { add: ['SPAM'], remove: ['INBOX'], one: 'Correo denunciado como spam', many: 'correos denunciados como spam', fail: 'denunciar como spam' },
+      trash: { add: ['TRASH'], remove: ['INBOX'], one: 'Correo movido a la papelera', many: 'correos movidos a la papelera', fail: 'borrar' },
+      read: { add: [], remove: ['UNREAD'], one: 'Correo marcado como leído', many: 'correos marcados como leídos', fail: 'marcar como leído' }
+    };
+    async function gmailBulkAction(kind) {
+      const spec = GMAIL_BULK[kind]; if (!spec || gmailBulkBusy) return;
+      const sel = gmailMessages.filter(m => gmailSel.has(m.id)); if (!sel.length) return;
+      const ids = sel.map(m => m.id), prev = new Map(sel.map(m => [m.id, (m.labelIds || []).slice()]));
+      // actualización optimista
+      sel.forEach(m => { m.labelIds = [...new Set([...(m.labelIds || []).filter(l => !spec.remove.includes(l)), ...spec.add])] });
+      const leaves = kind === 'spam' || kind === 'trash' || (kind === 'archive' && gmailFolder === 'INBOX' && !gmailLastQuery);
+      if (leaves) {
+        const gone = new Set(ids);
+        gmailMessages = gmailMessages.filter(m => !gone.has(m.id));
+        Object.keys(gmailFolderCache).forEach(k => { if (kind !== 'archive' || (k.startsWith('INBOX') && k.endsWith('|'))) gmailFolderCache[k] = gmailFolderCache[k].filter(x => !gone.has(x)) });
+      }
+      gmailSel.clear(); renderGmailMessages();
+      toast(ids.length === 1 ? spec.one : ids.length + ' ' + spec.many);
+      gmailBulkBusy = true;
+      try {
+        const body = { ids }; if (spec.add.length) body.addLabelIds = spec.add; if (spec.remove.length) body.removeLabelIds = spec.remove;
+        await gmailApi('messages/batchModify', { method: 'POST', body: JSON.stringify(body) });
+      } catch (e) {
+        sel.forEach(m => { m.labelIds = prev.get(m.id) });
+        toast('No se pudo ' + spec.fail + ': ' + e.message);
+        loadGmailMessages(undefined, true);
+      } finally { gmailBulkBusy = false }
+    }
+    $('mailSelAll').onchange = e => {
+      if (e.target.checked) gmailMessages.forEach(m => gmailSel.add(m.id)); else gmailSel.clear();
+      $('mailList').querySelectorAll('[data-gmail-sel]').forEach(c => { c.checked = gmailSel.has(c.dataset.gmailSel); c.closest('.mail-row').classList.toggle('selected', c.checked) });
+      updateMailBulk();
+    };
+    $('mailBulk').querySelectorAll('[data-bulk]').forEach(b => b.onclick = () => gmailBulkAction(b.dataset.bulk));
+    $('mailTabs').querySelectorAll('[data-mail-cat]').forEach(b => b.onclick = () => { gmailCategory = b.dataset.mailCat; $('mailSearchInput').value = ''; loadGmailMessages('') });
     async function openGmailMessage(id) { try { const m = await gmailApi('messages/' + encodeURIComponent(id) + '?format=full'); gmailCurrentMessage = m; const headers = m.payload?.headers || [], from = gmailHeader(m, 'From'), to = gmailHeader(m, 'To'), subject = gmailHeader(m, 'Subject') || '(Sin asunto)', date = gmailHeader(m, 'Date'); const body = gmailBody(m.payload); $('mailList').hidden = true; $('mailDetail').hidden = false; $('mailDetail').innerHTML = '<div class="mail-detail-head"><button class="secondary" id="gmailBackBtn"><i data-lucide="arrow-left"></i> Volver</button><span style="flex:1"></span><button class="secondary" id="gmailArchiveBtn"><i data-lucide="archive"></i> Archivar</button><button class="secondary" id="gmailDeleteBtn"><i data-lucide="trash-2"></i></button></div><h2 class="mail-detail-title">' + esc(subject) + '</h2><div class="mail-detail-meta"><i data-lucide="circle-user-round"></i><div><strong>' + esc(gmailFromLabel(from)) + '</strong><div>' + esc(from) + '</div><div>Para: ' + esc(to || 'vos') + ' · ' + esc(date) + '</div></div></div><div class="mail-body">' + esc(body || 'No se encontró una versión de texto de este correo.') + '</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="primary" id="gmailReplyBtn"><i data-lucide="reply"></i> Responder</button><button class="secondary" id="gmailForwardBtn"><i data-lucide="forward"></i> Reenviar</button></div>'; if (window.lucide) lucide.createIcons(); $('gmailBackBtn').onclick = () => { $('mailDetail').hidden = true; $('mailList').hidden = false }; $('gmailReplyBtn').onclick = () => openGmailCompose({ to: from.replace(/^.*<([^>]+)>.*$/, '$1'), subject: /^re:/i.test(subject) ? subject : 'Re: ' + subject, body: '\n\n--- Mensaje original ---\n' + body, threadId: m.threadId, replyTo: gmailHeader(m, 'Message-ID') }); $('gmailForwardBtn').onclick = () => openGmailCompose({ subject: /^fwd?:/i.test(subject) ? subject : 'Fwd: ' + subject, body: '\n\n--- Mensaje reenviado ---\nDe: ' + from + '\nFecha: ' + date + '\nAsunto: ' + subject + '\n\n' + body }); $('gmailArchiveBtn').onclick = async () => { try { await gmailApi('messages/' + encodeURIComponent(id) + '/modify', { method: 'POST', body: JSON.stringify({ removeLabelIds: ['INBOX'] }) }); toast('Correo archivado'); await loadGmailMessages() } catch (e) { toast('No se pudo archivar: ' + e.message) } }; $('gmailDeleteBtn').onclick = async () => { try { await gmailApi('messages/' + encodeURIComponent(id) + '/trash', { method: 'POST' }); toast('Correo movido a la papelera'); await loadGmailMessages() } catch (e) { toast('No se pudo eliminar: ' + e.message) } }; if (m.labelIds?.includes('UNREAD')) await gmailApi('messages/' + encodeURIComponent(id) + '/modify', { method: 'POST', body: JSON.stringify({ removeLabelIds: ['UNREAD'] }) }) } catch (error) { toast('No se pudo abrir el correo: ' + error.message) } }
     function openGmailCompose(prefill = {}) { const backdrop = $('gmailComposeBackdrop'); backdrop.classList.add('open'); $('gmailTo').value = prefill.to || ''; $('gmailCc').value = prefill.cc || ''; $('gmailBcc').value = prefill.bcc || ''; $('gmailSubject').value = prefill.subject || ''; $('gmailBody').value = prefill.body || ''; $('gmailComposeForm').dataset.threadId = prefill.threadId || ''; $('gmailComposeForm').dataset.replyTo = prefill.replyTo || ''; setTimeout(() => $('gmailTo').focus(), 50) }
     async function sendGmailMessage(event) { event.preventDefault(); const to = $('gmailTo').value.trim(), cc = $('gmailCc').value.trim(), bcc = $('gmailBcc').value.trim(), subject = $('gmailSubject').value, body = $('gmailBody').value; if (!to) { toast('Ingresá al menos un destinatario.'); return } const headers = ['To: ' + to]; if (cc) headers.push('Cc: ' + cc); if (bcc) headers.push('Bcc: ' + bcc); headers.push('Subject: =?UTF-8?B?' + btoa(unescape(encodeURIComponent(subject))) + '?='); const replyTo = $('gmailComposeForm').dataset.replyTo; if (replyTo) { headers.push('In-Reply-To: ' + replyTo, 'References: ' + replyTo) } headers.push('MIME-Version: 1.0', 'Content-Type: text/plain; charset=UTF-8', 'Content-Transfer-Encoding: 8bit'); const raw = gmailEncode(headers.join('\r\n') + '\r\n\r\n' + body); const button = $('gmailSendBtn'); button.disabled = true; button.textContent = 'Enviando…'; try { const payload = { raw }; const threadId = $('gmailComposeForm').dataset.threadId; if (threadId) payload.threadId = threadId; await gmailApi('messages/send', { method: 'POST', body: JSON.stringify(payload) }); $('gmailComposeBackdrop').classList.remove('open'); toast('Correo enviado'); gmailFolder = 'SENT'; document.querySelectorAll('[data-mail-folder]').forEach(b => b.classList.toggle('active', b.dataset.mailFolder === gmailFolder)); await loadGmailMessages() } catch (error) { toast('No se pudo enviar el correo: ' + error.message) } finally { button.disabled = false; button.innerHTML = '<i data-lucide="send"></i> Enviar'; if (window.lucide) lucide.createIcons() } }
-    function disconnectGmail() { gmailAccessToken = null; gmailMessages = []; gmailCurrentMessage = null; try { sessionStorage.removeItem('ctrl_gmail_token') } catch { } $('mailConnectCard').hidden = false; $('mailWorkspace').hidden = true; $('mailSearchInput').value = ''; $('mailList').innerHTML = '<div class="mail-empty">Conectá Gmail para ver tus correos.</div>'; toast('Gmail desconectado de Ctrl. Para revocar todos los permisos, hacelo desde tu cuenta de Google.') }
+    function disconnectGmail() { gmailAccessToken = null; gmailMessages = []; gmailCurrentMessage = null; gmailSel.clear(); updateMailBulk(true); try { sessionStorage.removeItem('ctrl_gmail_token') } catch { } $('mailConnectCard').hidden = false; $('mailWorkspace').hidden = true; $('mailSearchInput').value = ''; $('mailList').innerHTML = '<div class="mail-empty">Conectá Gmail para ver tus correos.</div>'; toast('Gmail desconectado de Ctrl. Para revocar todos los permisos, hacelo desde tu cuenta de Google.') }
     function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.timer); toast.timer = setTimeout(() => t.classList.remove('show'), 2600) }
     /* Flujo de dinero — line chart con métricas seleccionables */
     let flowMetric = 'income', flowLastWidth = 0, flowRange = '6m', flowMonthOffset = 0;
@@ -10119,7 +10336,7 @@
       const origLoad = window.loadGmailMessages;
       window.loadGmailMessages = async function () {
         updateSchedCount();
-        if (gmailFolder === 'SCHEDULED') { renderScheduledList(); return; }
+        if (gmailFolder === 'SCHEDULED') { syncMailChrome(''); renderScheduledList(); return; }
         const r = await origLoad.apply(this, arguments);
         runScheduled();
         return r;
@@ -10703,7 +10920,7 @@
         }).filter(b => b.pct >= 80).sort((a, b) => b.pct - a.pct);
       }
       function unreadMail() {
-        return (gmailAccessToken && gmailFolder === 'INBOX') ? gmailMessages.filter(m => m.labelIds?.includes('UNREAD')).length : 0;
+        return (gmailAccessToken && gmailFolder === 'INBOX' && (gmailLastQuery || gmailCategory === 'CATEGORY_PERSONAL')) ? gmailMessages.filter(m => m.labelIds?.includes('UNREAD')).length : 0;
       }
 
       function updateDot() {
