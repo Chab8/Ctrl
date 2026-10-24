@@ -7294,8 +7294,13 @@
               <path d="m16 16 5 5" />
             </svg></button><button class="icon-btn" id="notificationBtn" aria-label="Notificaciones"><svg
               viewBox="0 0 24 24">
-              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" />
-            </svg><i class="notif-dot"></i></button></div>
+              <path d="M10.268 21a2 2 0 0 0 3.464 0" />
+              <path
+                d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" />
+            </svg>
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" />
+            </svg><i class="notif-dot"></i>
+          </button></div>
       </header>
       <section id="homeView" class="view">
         <div class="page-head">
@@ -8427,7 +8432,12 @@
     <div class="modal notif-modal">
       <div class="modal-head">
         <div>
-          <h2 id="notifTitle">Tu día</h2>
+          <h2 id="notifTitle" style="display:flex;align-items:center;gap:9px"><svg viewBox="0 0 24 24"
+              style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round">
+              <path d="M10.268 21a2 2 0 0 0 3.464 0" />
+              <path
+                d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" />
+            </svg>Tu día</h2>
           <p id="notifSubtitle"></p>
         </div><button class="close-btn" id="closeNotif" aria-label="Cerrar">×</button>
       </div>
@@ -8461,7 +8471,7 @@
       if (!window.lucide || !window.lucide.createIcons) return;
       const icons = { home: 'layout-dashboard', finance: 'wallet', tasks: 'check-square', calendar: 'calendar-days', weather: 'cloud-sun', inbox: 'inbox', projects: 'folder', shop: 'shopping-bag', cuisine: 'cooking-pot', notes: 'notebook-pen' };
       document.querySelectorAll('.nav-item[data-page],.mobile-nav button[data-page]').forEach(b => { const n = icons[b.dataset.page], s = b.querySelector('svg'); if (n && s) { const i = document.createElement('i'); i.setAttribute('data-lucide', n); s.replaceWith(i) } });
-      const buttons = { searchBtn: 'search', notificationBtn: 'bell', menuBtn: 'menu', quickAddBtn: 'plus', newTransactionBtn: 'plus', exportCsvBtn: 'file-spreadsheet', exportBtn: 'download', importBtn: 'upload', addBudgetBtn: 'sliders-horizontal', addInvestmentBtn: 'chart-no-axes-combined', runSearch: 'search' };
+      const buttons = { searchBtn: 'search', menuBtn: 'menu', quickAddBtn: 'plus', newTransactionBtn: 'plus', exportCsvBtn: 'file-spreadsheet', exportBtn: 'download', importBtn: 'upload', addBudgetBtn: 'sliders-horizontal', addInvestmentBtn: 'chart-no-axes-combined', runSearch: 'search' };
       Object.entries(buttons).forEach(([id, n]) => { const b = document.getElementById(id), s = b && b.querySelector('svg'); if (s) { const i = document.createElement('i'); i.setAttribute('data-lucide', n); s.replaceWith(i) } });
       document.querySelectorAll('.edit-tx,.edit-budget').forEach(b => { if (b.textContent.trim() === '✎') b.innerHTML = '<i data-lucide="pencil"></i>' });
       document.querySelectorAll('.delete-tx,.delete-investment,.delete-budget').forEach(b => { if (b.textContent.trim() === '×') b.innerHTML = '<i data-lucide="trash-2"></i>' });
@@ -8481,6 +8491,7 @@
       if (page === 'finance') renderAll();
       if (page === 'notes' && window.CtrlNotes) window.CtrlNotes.render();
       if (page === 'tasks') renderTasks();
+      if (page === 'calendar') goToTodayCalendar();
       if (page === 'shop') renderShop();
       if (page === 'projects') {
         renderProjects();
@@ -8725,6 +8736,18 @@
     document.addEventListener('click', e => { if (!e.target.closest('.calendar-toolbar-actions')) $('calendarOverflowMenu').hidden = true });
     $('calendarEventForm').onsubmit = async e => { e.preventDefault(); if (!googleAccessToken) { toast('Volvé a conectar Google Calendar.'); return } const calendarId = $('eventCalendar').value, date = $('eventDate').value, title = $('eventSummary').value.trim(), allDay = $('eventAllDay').checked, startTime = $('eventStart').value, endTime = $('eventEnd').value; if (!calendarId || !date || !title) { toast('Completá el título, calendario y fecha.'); return } if (!allDay && (!startTime || !endTime || endTime <= startTime)) { toast('La hora de finalización debe ser posterior a la de inicio.'); return } const payload = { summary: title }; if (allDay) { const end = new Date(date + 'T12:00:00'); end.setDate(end.getDate() + 1); payload.start = { date }; payload.end = { date: dateKey(end) } } else { payload.start = { dateTime: eventDateTime(date, startTime) }; payload.end = { dateTime: eventDateTime(date, endTime) } } const location = $('eventLocation').value.trim(), description = $('eventDescription').value.trim(), colorId = $('eventColor').value; if (location) payload.location = location; if (description) payload.description = description; if (colorId) payload.colorId = colorId; const button = $('saveCalendarEventBtn'); button.disabled = true; button.textContent = 'Guardando…'; try { const created = await fetch('https://www.googleapis.com/calendar/v3/calendars/' + encodeURIComponent(calendarId) + '/events', { method: 'POST', headers: { Authorization: 'Bearer ' + googleAccessToken, 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); if (!created.ok) { let detail = 'Error ' + created.status; try { const data = await created.json(); detail = data.error?.message || detail } catch { } throw new Error(detail) } await created.json(); closeModal('calendarEventBackdrop'); calendarSelectedDate = date; calendarMonth = new Date(Number(date.slice(0, 4)), Number(date.slice(5, 7)) - 1, 1); saveCalendarPreferences(); await loadGoogleCalendarEvents(); renderCalendar(); toast('Evento guardado en Google Calendar') } catch (error) { console.error(error); toast('No se pudo crear el evento: ' + error.message) } finally { button.disabled = false; button.textContent = 'Crear evento ›' } };
     function disconnectGoogleCalendar() { $('connectGoogleBtn').hidden = false; $('connectGoogleBtn').textContent = 'Conectar Google'; $('connectGoogleBtn').disabled = false; googleAccessToken = null; localStorage.removeItem('ctrl_google_calendar_connected'); localStorage.removeItem(CALENDAR_STORAGE_KEY); calendarSavedState = { months: {} }; try { sessionStorage.removeItem('ctrl_google_calendar_token') } catch { }; googleCalendars = []; calendarEvents = []; $('calendarMainCard').hidden = true; $('calendarConnectCard').hidden = false; $('connectGoogleBtn').textContent = 'Conectar Google'; $('connectGoogleBtn').disabled = false; $('calendarEventsList').innerHTML = '<div class="empty">Conectá Google Calendar para ver tus eventos.</div>'; toast('Se desconectó Google Calendar de Ctrl. Para revocar el permiso por completo, hacelo desde tu cuenta de Google.') }
+    function goToTodayCalendar() {
+      const monthChanged = calendarMonthKey() !== dateNow().slice(0, 7);
+      const now = new Date();
+      calendarMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      calendarSelectedDate = dateNow();
+      saveCalendarPreferences();
+      if (monthChanged) {
+        if (googleAccessToken) loadGoogleCalendarEvents();
+        else loadCachedCalendarMonth();
+      }
+      renderCalendar();
+    }
 
     // Gmail — acceso directo mediante OAuth de Google y Gmail API.
     const GMAIL_SCOPE = 'https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/gmail.send';
@@ -10699,8 +10722,8 @@
         '<button type="button" class="notif-item" data-notif-go="' + go + '"><span class="notif-time">' + esc(time) + '</span><div class="notif-text"><strong>' + esc(title) + '</strong>' + (sub ? '<small' + (warn ? ' class="warn"' : '') + '>' + esc(sub) + '</small>' : '') + '</div></button>';
 
       function matchesHtml(r) {
-        if (!r.follows) return '<div class="notif-none">Todavía no seguís equipos ni competiciones en Deportes.</div>';
-        if (!r.matches.length) return '<div class="notif-none">Hoy no juega ninguno de los equipos o competiciones que seguís.</div>';
+        if (!r.follows) return '<div class="notif-none">Todavía no seguís ningún equipo en Deportes.</div>';
+        if (!r.matches.length) return '<div class="notif-none">Hoy no juega ninguno de los equipos que seguís.</div>';
         return r.matches.map(m => {
           const k = m.status.k;
           const time = k === 'ns' ? m.time : (k === 'live' ? 'En juego' : m.status.label);
@@ -10752,7 +10775,7 @@
           box.querySelector('.notif-count').textContent = r.matches.length;
           box.querySelector('.notif-sec-head').insertAdjacentHTML('afterend', matchesHtml(r));
           box.querySelector('.notif-none')?.remove();
-          if (!r.follows || !r.matches.length) box.insertAdjacentHTML('beforeend', '<div class="notif-none">' + (r.follows ? 'Hoy no juega ninguno de los equipos o competiciones que seguís.' : 'Todavía no seguís equipos ni competiciones en Deportes.') + '</div>');
+          if (!r.follows || !r.matches.length) box.insertAdjacentHTML('beforeend', '<div class="notif-none">' + (r.follows ? 'Hoy no juega ninguno de los equipos que seguís.' : 'Todavía no seguís ningún equipo en Deportes.') + '</div>');
         } catch (e) {
           box.querySelector('.notif-count').textContent = '!';
           box.querySelector('.notif-none').textContent = 'No se pudieron cargar los partidos. Probá de nuevo en un rato.';

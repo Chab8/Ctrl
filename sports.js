@@ -955,8 +955,10 @@ html[data-theme="dark"] .sp-table tr.f td{background:color-mix(in srgb,var(--acc
   window.CtrlSports = {
     todayFollowed: async () => {
       const s = store();
-      if (!s.teams.length && !s.leagues.length) return { follows: false, matches: [] };
-      const ms = (await dayMatches(today())).filter(followedMatch).sort((a, b) => kickoff(a) - kickoff(b));
+      if (!s.teams.length) return { follows: false, matches: [] };
+      const ms = (await dayMatches(today()))
+        .filter(m => isTeamF(m.home_team && m.home_team.id) || isTeamF(m.away_team && m.away_team.id))
+        .sort((a, b) => kickoff(a) - kickoff(b));
       return {
         follows: true,
         matches: ms.map(m => ({
