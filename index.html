@@ -8423,6 +8423,17 @@
       </div>
     </div>
   </div>
+  <div class="modal-backdrop" id="notifBackdrop" role="dialog" aria-modal="true" aria-labelledby="notifTitle">
+    <div class="modal notif-modal">
+      <div class="modal-head">
+        <div>
+          <h2 id="notifTitle">Tu día</h2>
+          <p id="notifSubtitle"></p>
+        </div><button class="close-btn" id="closeNotif" aria-label="Cerrar">×</button>
+      </div>
+      <div id="notifBody"></div>
+    </div>
+  </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -9111,7 +9122,7 @@
     $('mpImportBackdrop').addEventListener('click', e => { if (e.target === $('mpImportBackdrop')) closeModal('mpImportBackdrop') });
     $('confirmMpImport').onclick = confirmMpImport;
     $('transactionSearch').oninput = renderTransactions; $('typeFilter').onchange = renderTransactions; $('periodFilter').onchange = renderTransactions; $('exportCsvBtn').onclick = exportCSV;
-    $('searchBtn').onclick = () => { $('searchBackdrop').classList.add('open'); setTimeout(() => $('globalSearch').focus(), 100) }; $('closeSearch').onclick = () => closeModal('searchBackdrop'); $('searchBackdrop').addEventListener('click', e => { if (e.target === $('searchBackdrop')) closeModal('searchBackdrop') }); $('runSearch').onclick = () => { const q = $('globalSearch').value.trim(); closeModal('searchBackdrop'); setPage('finance'); $('transactionSearch').value = q; renderTransactions() }; $('globalSearch').onkeydown = e => { if (e.key === 'Enter') $('runSearch').click() }; $('notificationBtn').onclick = () => toast(state.transactions.length ? 'Todo al día. Tenés ' + state.transactions.length + ' movimientos registrados.' : 'Todavía no hay movimientos. Empezá por registrar uno en Finanzas.'); $('menuBtn').onclick = () => toast('Usá la navegación inferior para cambiar de sección.');
+    $('searchBtn').onclick = () => { $('searchBackdrop').classList.add('open'); setTimeout(() => $('globalSearch').focus(), 100) }; $('closeSearch').onclick = () => closeModal('searchBackdrop'); $('searchBackdrop').addEventListener('click', e => { if (e.target === $('searchBackdrop')) closeModal('searchBackdrop') }); $('runSearch').onclick = () => { const q = $('globalSearch').value.trim(); closeModal('searchBackdrop'); setPage('finance'); $('transactionSearch').value = q; renderTransactions() }; $('globalSearch').onkeydown = e => { if (e.key === 'Enter') $('runSearch').click() }; $('menuBtn').onclick = () => toast('Usá la navegación inferior para cambiar de sección.');
 
 
     $('connectGmailBtn').onclick = connectGmail;
@@ -10396,7 +10407,7 @@
       white-space: nowrap
     }
 
-    .gs-item span {
+    .gs-item>div>span {
       display: block;
       font-size: 10px;
       color: var(--muted);
@@ -10418,18 +10429,122 @@
       background: var(--soft);
       display: grid;
       place-items: center;
-      flex-shrink: 0
+      flex-shrink: 0;
+      margin: 0
     }
 
     .gs-ico i,
     .gs-ico svg {
       width: 15px;
-      height: 15px
+      height: 15px;
+      display: block
     }
 
     .gs-empty {
       padding: 22px 8px;
       text-align: center;
+      color: var(--muted);
+      font-size: 12px
+    }
+
+    .notif-modal {
+      width: min(100%, 560px);
+      max-height: calc(100dvh - 36px);
+      overflow: auto
+    }
+
+    .notif-sec {
+      margin-top: 18px
+    }
+
+    .notif-sec:first-child {
+      margin-top: 0
+    }
+
+    .notif-sec-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font: 10px 'DM Mono', monospace;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0 2px 6px;
+      border-bottom: 1px solid var(--line)
+    }
+
+    .notif-sec-head i,
+    .notif-sec-head svg {
+      width: 14px;
+      height: 14px
+    }
+
+    .notif-count {
+      margin-left: auto;
+      background: var(--soft);
+      color: var(--ink);
+      border-radius: 7px;
+      padding: 3px 7px;
+      letter-spacing: 0
+    }
+
+    .notif-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      text-align: left;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink);
+      padding: 11px 4px;
+      border-radius: 0
+    }
+
+    .notif-item:hover {
+      background: var(--soft)
+    }
+
+    .notif-time {
+      flex: 0 0 58px;
+      font: 11px 'DM Mono', monospace;
+      color: var(--muted)
+    }
+
+    .notif-text {
+      min-width: 0;
+      flex: 1
+    }
+
+    .notif-text strong {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      overflow-wrap: anywhere
+    }
+
+    .notif-text small {
+      display: block;
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 3px;
+      overflow-wrap: anywhere
+    }
+
+    .notif-text small.warn {
+      color: var(--red)
+    }
+
+    .notif-none {
+      font-size: 11px;
+      color: var(--muted);
+      padding: 12px 2px
+    }
+
+    .notif-clear {
+      text-align: center;
+      padding: 30px 10px;
       color: var(--muted);
       font-size: 12px
     }
@@ -10542,6 +10657,126 @@
       $('runSearch').onclick = () => go(0);
       $('globalResults').addEventListener('click', e => { const b = e.target.closest('[data-gs]'); if (b) go(Number(b.dataset.gs)) });
       $('searchBtn').addEventListener('click', () => { $('globalSearch').value = ''; render() });
+    })();
+  </script>
+  <script>
+    (function () {
+      const hm = d => d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
+      const icon = n => '<i data-lucide="' + n + '"></i>';
+
+      function eventsToday() {
+        const t = dateNow();
+        if (calendarMonthKey() !== t.slice(0, 7)) return { stale: true, list: [] };
+        const list = calendarEvents.filter(e => eventOccursOn(e, t)).sort((a, b) => eventStart(a).localeCompare(eventStart(b)));
+        return { stale: false, list };
+      }
+      function tasksDue() {
+        const t = dateNow();
+        return state.tasks.filter(x => !x.done && x.dueDate && x.dueDate <= t)
+          .sort((a, b) => a.dueDate.localeCompare(b.dueDate) || (a.dueTime || '23:59').localeCompare(b.dueTime || '23:59'));
+      }
+      function budgetAlerts() {
+        const m = monthTx(0);
+        return state.budgets.map(b => {
+          const spent = sum(m.filter(t => t.category === b.category), 'expense');
+          return { ...b, spent, pct: Math.round(spent / Math.max(1, b.limit) * 100) };
+        }).filter(b => b.pct >= 80).sort((a, b) => b.pct - a.pct);
+      }
+      function unreadMail() {
+        return (gmailAccessToken && gmailFolder === 'INBOX') ? gmailMessages.filter(m => m.labelIds?.includes('UNREAD')).length : 0;
+      }
+
+      function updateDot() {
+        const dot = document.querySelector('#notificationBtn .notif-dot');
+        if (!dot) return;
+        const n = eventsToday().list.length + tasksDue().length + budgetAlerts().length;
+        dot.style.display = n ? '' : 'none';
+      }
+
+      const sec = (title, ic, count, body, id) =>
+        '<section class="notif-sec"' + (id ? ' id="' + id + '"' : '') + '><div class="notif-sec-head">' + icon(ic) + '<span>' + title + '</span><span class="notif-count">' + count + '</span></div>' + body + '</section>';
+      const item = (go, time, title, sub, warn) =>
+        '<button type="button" class="notif-item" data-notif-go="' + go + '"><span class="notif-time">' + esc(time) + '</span><div class="notif-text"><strong>' + esc(title) + '</strong>' + (sub ? '<small' + (warn ? ' class="warn"' : '') + '>' + esc(sub) + '</small>' : '') + '</div></button>';
+
+      function matchesHtml(r) {
+        if (!r.follows) return '<div class="notif-none">Todavía no seguís equipos ni competiciones en Deportes.</div>';
+        if (!r.matches.length) return '<div class="notif-none">Hoy no juega ninguno de los equipos o competiciones que seguís.</div>';
+        return r.matches.map(m => {
+          const k = m.status.k;
+          const time = k === 'ns' ? m.time : (k === 'live' ? 'En juego' : m.status.label);
+          const title = m.home + (m.score ? '  ' + m.score + '  ' : ' vs ') + m.away;
+          return item('sports', time, title, m.league, k === 'live');
+        }).join('');
+      }
+
+      function build() {
+        const ev = eventsToday(), tasks = tasksDue(), budgets = budgetAlerts(), unread = unreadMail(), today = dateNow();
+        let h = '';
+
+        // Eventos
+        let evBody;
+        if (ev.stale) evBody = '<div class="notif-none">Abrí Calendario en el mes actual para cargar los eventos de hoy.</div>';
+        else if (!ev.list.length) evBody = '<div class="notif-none">' + (googleAccessToken || calendarEvents.length ? 'No tenés eventos hoy.' : 'Conectá Google Calendar para ver tus eventos de hoy.') + '</div>';
+        else evBody = ev.list.map(e => item('calendar', e.start?.date ? 'Todo el día' : hm(new Date(e.start.dateTime)), e.summary || 'Evento sin título', [e._calendarName, e.location].filter(Boolean).join(' · '))).join('');
+        h += sec('Eventos de hoy', 'calendar-days', ev.list.length, evBody);
+
+        // Partidos (se completan async)
+        h += sec('Partidos de hoy', 'trophy', '…', '<div class="notif-none">Buscando partidos…</div>', 'notifMatches');
+
+        // Tareas
+        const overdue = tasks.filter(t => t.dueDate < today);
+        const tBody = tasks.length ? tasks.map(t => {
+          const late = t.dueDate < today;
+          return item('tasks', late ? 'Vencida' : (t.dueTime || 'Hoy'), t.title, (t.category || 'Personal') + (late ? ' · venció el ' + taskDateLabel(t.dueDate) : ''), late);
+        }).join('') : '<div class="notif-none">No tenés tareas para hoy ni vencidas.</div>';
+        h += sec('Tareas', 'check-square', tasks.length, tBody);
+
+        // Presupuestos
+        if (budgets.length) h += sec('Presupuestos', 'wallet', budgets.length, budgets.map(b =>
+          item('finance', b.pct + '%', b.category, fmt(b.spent) + ' de ' + fmt(b.limit) + (b.pct >= 100 ? ' · límite superado' : ' · cerca del límite'), b.pct >= 100)).join(''));
+
+        // Correo
+        if (unread) h += sec('Correo', 'mail', unread, item('mail', unread + '', unread === 1 ? 'Correo sin leer' : 'Correos sin leer', 'En tu bandeja de entrada'));
+
+        $('notifSubtitle').textContent = new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' });
+        $('notifBody').innerHTML = h;
+        if (window.lucide) lucide.createIcons({ attrs: { 'stroke-width': 1.8 } });
+      }
+
+      async function fillMatches() {
+        const box = $('notifMatches');
+        if (!box || !window.CtrlSports) { if (box) box.remove(); return; }
+        try {
+          const r = await window.CtrlSports.todayFollowed();
+          if (!$('notifMatches')) return;
+          box.querySelector('.notif-count').textContent = r.matches.length;
+          box.querySelector('.notif-sec-head').insertAdjacentHTML('afterend', matchesHtml(r));
+          box.querySelector('.notif-none')?.remove();
+          if (!r.follows || !r.matches.length) box.insertAdjacentHTML('beforeend', '<div class="notif-none">' + (r.follows ? 'Hoy no juega ninguno de los equipos o competiciones que seguís.' : 'Todavía no seguís equipos ni competiciones en Deportes.') + '</div>');
+        } catch (e) {
+          box.querySelector('.notif-count').textContent = '!';
+          box.querySelector('.notif-none').textContent = 'No se pudieron cargar los partidos. Probá de nuevo en un rato.';
+        }
+      }
+
+      $('notificationBtn').onclick = () => {
+        build();
+        $('notifBackdrop').classList.add('open');
+        fillMatches();
+      };
+      $('closeNotif').onclick = () => closeModal('notifBackdrop');
+      $('notifBackdrop').addEventListener('click', e => {
+        if (e.target === $('notifBackdrop')) return closeModal('notifBackdrop');
+        const go = e.target.closest('[data-notif-go]');
+        if (go) { closeModal('notifBackdrop'); setPage(go.dataset.notifGo); }
+      });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal('notifBackdrop'); });
+
+      // El puntito rojo solo aparece si hay algo para hoy
+      const prevRenderAll = window.renderAll;
+      window.renderAll = function () { prevRenderAll.apply(this, arguments); updateDot(); };
+      updateDot();
+      setInterval(updateDot, 5 * 60000);
     })();
   </script>
   <script src="./weather.js"></script>

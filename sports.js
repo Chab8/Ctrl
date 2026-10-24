@@ -952,6 +952,24 @@ html[data-theme="dark"] .sp-table tr.f td{background:color-mix(in srgb,var(--acc
       if (dayCache.some(m => { const st = statusInfo(m); return st.k === 'live' || (st.k === 'ns' && now > kickoff(m) && now - kickoff(m) < 3.5 * 36e5); })) renderDay(true, true);
     }, 60000);
   }
-
+  window.CtrlSports = {
+    todayFollowed: async () => {
+      const s = store();
+      if (!s.teams.length && !s.leagues.length) return { follows: false, matches: [] };
+      const ms = (await dayMatches(today())).filter(followedMatch).sort((a, b) => kickoff(a) - kickoff(b));
+      return {
+        follows: true,
+        matches: ms.map(m => ({
+          id: m.id,
+          home: m.home_team.name,
+          away: m.away_team.name,
+          league: (m.league && m.league.name) || '',
+          time: fmtTime(m.time_utc),
+          score: hasScore(m) ? m.score_home + ' – ' + m.score_away : '',
+          status: statusInfo(m)
+        }))
+      };
+    }
+  };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install); else install();
 })();
