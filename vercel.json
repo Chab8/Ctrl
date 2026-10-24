@@ -1,0 +1,8 @@
+{
+    "rewrites": [
+        {
+            "source": "/api/pitchapi/:path*",
+            "destination": "/api/pitchapi?path=:path*"
+        }
+    ]
+}
