@@ -96,6 +96,7 @@
         err.code = (apiError && typeof apiError === 'object' && apiError.code) || (body && body.code) || '';
         err.endpoint = path + qs;
         err.upstreamMessage = apiMessage;
+        err.target = res.headers.get('X-Pitchapi-Target') || '';
         // Sin JSON de PitchAPI: la respuesta vino del hosting/proxy (ruta inexistente), no de la API.
         err.noEnvelope = !body || typeof body !== 'object';
         throw err;
@@ -269,6 +270,31 @@
     if (d && d.data && Array.isArray(d.data.matches)) return d.data.matches;
     return [];
   }
+  const seasonYear = s => Number((String(s).match(/\d{4}/g) || ['0']).slice(-1)[0]);
+  // Pide los partidos de una liga. Si la temporada por defecto da 404/400, prueba las
+  // temporadas que anuncia el catálogo (de la más nueva a la más vieja).
+  async function leagueMatches(lid, o) {
+    o = o || {};
+    const lg = L.byId.get(String(lid));
+    const known = (Array.isArray(lg && lg.seasons) ? lg.seasons.slice() : [])
+      .sort((a, b) => seasonYear(b) - seasonYear(a)).slice(0, 4);
+    const seasons = o.season ? [o.season] : ['', ...known];
+    const attempts = seasons.map(season => season ? { status: 'all', season } : { status: 'all' });
+    if (!o.season) attempts.push({});   // último recurso: respuesta por defecto de la API
+    let firstOk = null, lastError = null;
+    for (const params of attempts) {
+      try {
+        const data = await api('/v1/leagues/' + encodeURIComponent(lid) + '/matches', params, { ttl: 600000, force: o.force });
+        if (!firstOk) firstOk = { data, params };
+        if (matchesFrom(data).length) return { data, params };
+      } catch (e) {
+        if (!e || e.noEnvelope || (e.status !== 404 && e.status !== 400)) throw e;
+        lastError = e;
+      }
+    }
+    if (firstOk) return firstOk;
+    throw lastError;
+  }
   async function fetchDate(k, force) {
     const future = k > today();
     // PitchAPI's default is historical-only. Ask explicitly for the relevant
@@ -324,6 +350,7 @@
     else if (e && e.status === 404) {
       msg = 'PitchAPI devolvió 404: el recurso solicitado no está disponible para estos datos.';
       if (e.endpoint) msg += '<br><small style="display:inline-block;margin-top:8px;opacity:.8">Consulta: ' + esc(e.endpoint) + '</small>';
+      if (e.target) msg += '<br><small style="display:inline-block;margin-top:4px;opacity:.8">Destino en PitchAPI: ' + esc(e.target) + '</small>';
       if (e.upstreamMessage) msg += '<br><small style="display:inline-block;margin-top:4px;opacity:.8">Detalle: ' + esc(e.upstreamMessage) + '</small>';
       if (e.code) msg += '<br><small style="display:inline-block;margin-top:4px;opacity:.8">Código: ' + esc(e.code) + '</small>';
     }
@@ -455,10 +482,9 @@
     const lg = L.byId.get(lid), token = ++tableToken;
     box.innerHTML = loadingHtml('Cargando competición…');
     try {
-      const params = { status: 'all' }; if (ui.season) params.season = ui.season;
-      const d = await api('/v1/leagues/' + lid + '/matches', params, { ttl: 600000, force });
+      const r = await leagueMatches(lid, { season: ui.season, force });
       if (token !== tableToken) return;
-      const ms = matchesFrom(d), season = (d && d.league && d.league.season) || ui.season;
+      const d = r.data, ms = matchesFrom(d), season = (d && d.league && d.league.season) || r.params.season || ui.season;
       if (!ui.season && season) ui.season = season;
       $('spTableSeason').innerHTML = ((lg && lg.seasons) || [season]).filter(Boolean).map(s => '<option' + (s === ui.season ? ' selected' : '') + '>' + esc(s) + '</option>').join('');
       const name = (d && d.league && d.league.name) || (lg && lg.name) || '';

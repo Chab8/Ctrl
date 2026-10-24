@@ -15,33 +15,42 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  const parts = req.query.path;
-  const pathParts = Array.isArray(parts) ? parts : (parts ? [parts] : []);
-  if (!pathParts.length || pathParts.some(part => typeof part !== 'string' || part.includes('..'))) {
-    return res.status(400).json({ error: 'Invalid PitchAPI path' });
-  }
-
   const incoming = new URL(req.url, 'https://ctrl.invalid');
-  const target = new URL('/' + pathParts.map(encodeURIComponent).join('/'), 'https://api.pitchapi.dev');
-  target.search = incoming.search;
-  target.searchParams.delete('path');
+
+  // La ruta se toma de la URL real; req.query.path queda solo como respaldo.
+  let parts = incoming.pathname.replace(/^\/api\/pitchapi\/?/, '').split('/').filter(Boolean);
+  try {
+    parts = parts.map(p => decodeURIComponent(p));
+  } catch {
+    return res.status(400).json({ error: { message: 'Invalid PitchAPI path' } });
+  }
+  if (!parts.length) {
+    const q = req.query && req.query.path;
+    parts = Array.isArray(q) ? q : (q ? [q] : []);
+  }
+  if (!parts.length || parts.some(p => typeof p !== 'string' || !p || p === '.' || p === '..' || /[\\/]/.test(p))) {
+    return res.status(400).json({ error: { message: 'Invalid PitchAPI path' } });
+  }
+  if (parts[0] !== 'v1') parts.unshift('v1');
+
+  const target = new URL('/' + parts.map(encodeURIComponent).join('/'), 'https://api.pitchapi.dev');
+  incoming.searchParams.forEach((value, name) => {
+    if (name !== 'path') target.searchParams.append(name, value);
+  });
 
   try {
     const upstream = await fetch(target.toString(), {
       method: 'GET',
-      headers: {
-        'X-API-KEY': key,
-        'Accept': 'application/json'
-      }
+      headers: { 'X-API-KEY': key, Accept: 'application/json' }
     });
     const body = await upstream.text();
+    if (!upstream.ok) console.error('[pitchapi]', upstream.status, target.pathname + target.search, body.slice(0, 300));
     res.status(upstream.status);
     res.setHeader('Content-Type', upstream.headers.get('content-type') || 'application/json; charset=utf-8');
+    res.setHeader('X-Pitchapi-Target', target.pathname + target.search);
     res.setHeader('Cache-Control', 'no-store');
     return res.send(body);
   } catch (error) {
-    return res.status(502).json({
-      error: { message: 'No se pudo conectar con PitchAPI.' }
-    });
+    return res.status(502).json({ error: { message: 'No se pudo conectar con PitchAPI.' } });
   }
 };
