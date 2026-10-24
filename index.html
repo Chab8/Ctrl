@@ -8170,12 +8170,13 @@
       <div class="modal-head">
         <div>
           <h2 id="searchTitle">Buscar en Ctrl</h2>
-          <p>Encontrá movimientos financieros por nombre o categoría.</p>
+          <p>Encontrá lo que necesites.</p>
         </div><button class="close-btn" id="closeSearch" aria-label="Cerrar">×</button>
       </div>
       <div class="field"><label for="globalSearch">Búsqueda</label><input id="globalSearch"
-          placeholder="Ej. supermercado, sueldo, tecnología..."></div>
-      <div class="modal-actions"><button class="primary" id="runSearch">Buscar ›</button></div>
+          placeholder="Ej. supermercado, parcial, teclado…" autocomplete="off"></div>
+      <div id="globalResults" class="gs-results"></div>
+      <div class="modal-actions"><button class="primary" id="runSearch">Ir al primer resultado ›</button></div>
     </div>
   </div>
   <div class="modal-backdrop" id="calendarEventBackdrop" role="dialog" aria-modal="true"
@@ -8461,8 +8462,8 @@
     const PAGE_NAMES = { home: 'Home', finance: 'Finanzas', tasks: 'Tareas', calendar: 'Calendario', weather: 'Clima', mail: 'Mail', shop: 'Compras', inbox: 'Inbox', projects: 'Proyectos', cuisine: 'Cocina', notes: 'Notas' };
     function setPage(page) {
       Object.entries(PAGE_VIEWS).forEach(([k, id]) => $(id).hidden = k !== page);
-      $('placeholderView').hidden = !!PAGE_VIEWS[page];
-      $('placeholderTitle').textContent = (PAGE_NAMES[page] || 'Sección') + '.';
+      const ph = $('placeholderView'); if (ph) ph.hidden = !!PAGE_VIEWS[page];
+      const pt = $('placeholderTitle'); if (pt) pt.textContent = (PAGE_NAMES[page] || 'Sección') + '.';
       $('crumbCurrent').textContent = PAGE_NAMES[page] || 'Sección';
       document.querySelectorAll('[data-page]').forEach(b => b.classList.toggle('active', b.dataset.page === page));
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -10349,6 +10350,199 @@
   <script>
     // Bridge the existing page router for separately loaded modules.
     window.setPage = setPage;
+  </script>
+  <style>
+    .gs-results {
+      margin-top: 14px;
+      max-height: 48vh;
+      overflow: auto;
+      display: grid;
+      gap: 2px
+    }
+
+    .gs-group {
+      font: 10px 'DM Mono', monospace;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 12px 4px 6px
+    }
+
+    .gs-item {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      width: 100%;
+      text-align: left;
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      padding: 10px;
+      border-radius: 12px
+    }
+
+    .gs-item:hover,
+    .gs-item:focus-visible {
+      background: var(--soft);
+      outline: none
+    }
+
+    .gs-item strong {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    .gs-item span {
+      display: block;
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 3px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    .gs-item>div {
+      min-width: 0;
+      flex: 1
+    }
+
+    .gs-ico {
+      width: 30px;
+      height: 30px;
+      border-radius: 10px;
+      background: var(--soft);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0
+    }
+
+    .gs-ico i,
+    .gs-ico svg {
+      width: 15px;
+      height: 15px
+    }
+
+    .gs-empty {
+      padding: 22px 8px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px
+    }
+  </style>
+  <script>
+    (function () {
+      const norm = s => String(s ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const readLS = (k, f) => { try { const v = JSON.parse(localStorage.getItem(k) || 'null'); return v == null ? f : v } catch { return f } };
+      const PAGES = [
+        ['home', 'Home', 'inicio principal resumen', 'layout-dashboard'],
+        ['finance', 'Finanzas', 'dinero movimientos gastos ingresos presupuestos inversiones cartera', 'wallet'],
+        ['tasks', 'Tareas', 'pendientes to-do', 'check-square'],
+        ['calendar', 'Calendario', 'agenda eventos google', 'calendar-days'],
+        ['mail', 'Mail', 'correo gmail email', 'mail'],
+        ['shop', 'Compras', 'wishlist productos', 'shopping-bag'],
+        ['weather', 'Clima', 'tiempo pronostico temperatura lluvia', 'cloud-sun'],
+        ['projects', 'Proyectos', 'workflows claves recursos', 'folder'],
+        ['cuisine', 'Cocina', 'recetas comida', 'cooking-pot'],
+        ['notes', 'Notas', 'ideas apuntes', 'notebook-pen'],
+        ['sports', 'Deportes', 'futbol partidos equipos tablas', 'trophy']
+      ];
+      const LIMIT = 6;
+      let results = [];
+
+      function collect(q) {
+        const tokens = norm(q).split(/\s+/).filter(Boolean);
+        const hit = (...f) => { const h = norm(f.join(' ')); return tokens.every(t => h.includes(t)) };
+        const out = [], counts = {};
+        const add = (group, icon, title, sub, go) => { counts[group] = (counts[group] || 0) + 1; if (counts[group] <= LIMIT) out.push({ group, icon, title, sub, go }) };
+
+        PAGES.forEach(([page, name, kw, icon]) => { if (hit(name, kw)) add('Secciones', icon, name, 'Ir a la sección', () => setPage(page)) });
+        if (!tokens.length) return out;
+
+        state.transactions.forEach(t => {
+          if (hit(t.description, t.category, t.account, t.notes, t.amount)) add('Finanzas', 'wallet', t.description, t.category + ' · ' + t.date + ' · ' + fmt(t.amount, t.currency || 'ARS'), () => {
+            setPage('finance'); $('typeFilter').value = 'all'; $('periodFilter').value = 'all'; $('transactionSearch').value = t.description; renderTransactions();
+          })
+        });
+
+        state.tasks.forEach(t => {
+          if (hit(t.title, t.category, t.notes)) add('Tareas', 'check-square', t.title, (t.category || 'Personal') + (t.dueDate ? ' · ' + t.dueDate : '') + (t.done ? ' · completada' : ''), () => {
+            setPage('tasks'); $('taskStatusFilter').value = 'all'; $('taskCategoryFilter').value = 'all'; $('taskPriorityFilter').value = 'all'; $('taskSearch').value = t.title; renderTasks();
+          })
+        });
+
+        readLS('ctrl.notes.v1', []).forEach(n => {
+          if (n && hit(n.title, n.body)) add('Notas', 'notebook-pen', n.title || String(n.body || '').slice(0, 50), String(n.body || '').slice(0, 70) + (n.archived ? ' · archivada' : ''), () => {
+            setPage('notes');
+            const f = document.querySelector('[data-notes-filter="' + (n.archived ? 'archived' : 'all') + '"]'); if (f) f.click();
+            const s = $('notesSearch'); s.value = n.title || String(n.body || '').slice(0, 40); s.dispatchEvent(new Event('input'));
+          })
+        });
+
+        state.projects.forEach(p => {
+          if (hit(p.name, p.description, p.category, p.notes)) add('Proyectos', 'folder', p.name, p.category || projectStatusLabel(p.status), () => { setPage('projects'); openProject(p.id) });
+          p.tasks.forEach(t => { if (hit(t.title, t.notes)) add('Proyectos', 'check-square', t.title, 'Tarea de ' + p.name, () => { setPage('projects'); openProject(p.id); currentProjectTab = 'tasks'; renderProjectDetail() }) });
+          p.resources.forEach(r => { if (hit(r.name, r.url, r.notes)) add('Proyectos', 'link', r.name, 'Recurso de ' + p.name, () => { setPage('projects'); openProject(p.id); currentProjectTab = 'resources'; renderProjectDetail() }) });
+        });
+
+        state.wishlist.forEach(p => {
+          if (hit(p.name, p.description, p.store, p.category)) add('Compras', 'shopping-bag', p.name, p.category + ' · ' + fmt(p.price, p.currency) + (p.bought ? ' · comprado' : ''), () => {
+            setPage('shop');
+            const all = document.querySelector('[data-shop-cat="all"]'); if (all) all.click();
+            $('shopCurrencyFilter').value = 'all'; $('shopStatusFilter').value = 'all'; $('shopMinPrice').value = ''; $('shopMaxPrice').value = '';
+            $('shopSearch').value = p.name; renderShop();
+          })
+        });
+
+        (typeof calendarEvents !== 'undefined' ? calendarEvents : []).forEach(e => {
+          if (hit(e.summary, e.location, e.description)) {
+            const date = e.start?.date || (e.start?.dateTime ? dateKey(new Date(e.start.dateTime)) : '');
+            add('Calendario', 'calendar-days', e.summary || 'Evento sin título', eventDateLabel(e), () => { setPage('calendar'); if (date) { calendarSelectedDate = date; saveCalendarPreferences(); } renderCalendar() });
+          }
+        });
+
+        const personal = readLS('ctrl.cuisine.personal.v1', []), favs = readLS('ctrl.cuisine.favorites.v1', []), seen = new Set();
+        [[personal, false, 'Receta propia'], [favs, true, 'Receta favorita']].forEach(([list, fav, label]) => (Array.isArray(list) ? list : []).forEach(r => {
+          if (!r || seen.has(r.id) || !hit(r.title, r.description)) return; seen.add(r.id);
+          add('Cocina', 'cooking-pot', r.title || 'Receta', label, () => {
+            setPage('cuisine');
+            const t = $('cuisineFavoritesToggle'); if (t && (t.getAttribute('aria-pressed') === 'true') !== fav) t.click();
+            $('cuisineSearchInput').value = r.title || ''; $('cuisineType').dispatchEvent(new Event('change'));
+          });
+        }));
+
+        (typeof gmailMessages !== 'undefined' ? gmailMessages : []).forEach(m => { const subj = gmailHeader(m, 'Subject'), from = gmailHeader(m, 'From'); if (hit(subj, from, m.snippet)) add('Correo', 'mail', subj || '(Sin asunto)', gmailFromLabel(from), () => { setPage('mail'); openGmailMessage(m.id) }) });
+
+        const sp = state.sports || {};
+        [...(sp.teams || []), ...(sp.leagues || [])].forEach(x => { if (hit(x.name)) add('Deportes', 'trophy', x.name, 'Equipo o competición que seguís', () => setPage('sports')) });
+        return out;
+      }
+
+      function render() {
+        const q = $('globalSearch').value.trim();
+        results = collect(q);
+        const box = $('globalResults');
+        if (!results.length) { box.innerHTML = '<div class="gs-empty">No encontramos nada para «' + esc(q) + '».</div>'; return }
+        let last = '', html = '';
+        results.forEach((r, i) => {
+          if (r.group !== last) { html += '<div class="gs-group">' + esc(r.group) + '</div>'; last = r.group }
+          html += '<button type="button" class="gs-item" data-gs="' + i + '"><span class="gs-ico"><i data-lucide="' + esc(r.icon) + '"></i></span><div><strong>' + esc(r.title) + '</strong><span>' + esc(r.sub) + '</span></div></button>';
+        });
+        box.innerHTML = html;
+        if (window.lucide) lucide.createIcons({ attrs: { 'stroke-width': 1.8 } });
+      }
+      function go(i) { const r = results[i]; if (!r) return; closeModal('searchBackdrop'); r.go() }
+
+      $('globalSearch').addEventListener('input', render);
+      $('globalSearch').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); go(0) } };
+      $('runSearch').onclick = () => go(0);
+      $('globalResults').addEventListener('click', e => { const b = e.target.closest('[data-gs]'); if (b) go(Number(b.dataset.gs)) });
+      $('searchBtn').addEventListener('click', () => { $('globalSearch').value = ''; render() });
+    })();
   </script>
   <script src="./weather.js"></script>
   <script src="./sports.js"></script>

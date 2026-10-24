@@ -424,19 +424,14 @@
       + (s.leagues.length ? '<div class="sp-sub">Competiciones</div><div class="sp-chips">' + s.leagues.map(l => chip('league', l)).join('') + '</div>' : '')
       : emptyHtml('Nada por acá todavía. Seguí equipos, selecciones o competiciones para armar tu agenda.');
     hydrate($('spFollowing'));
-    $('spStatTeams').textContent = s.teams.length; $('spStatLeagues').textContent = s.leagues.length + (s.leagues.length === 1 ? ' competición' : ' competiciones');
   }
   async function renderUpcoming(force) {
     const box = $('spUpcoming'), s = store();
-    if (!s.teams.length && !s.leagues.length) { box.innerHTML = emptyHtml('Cuando sigas algo, acá vas a ver los próximos partidos.'); $('spStatToday').textContent = '0'; $('spStatNext').textContent = '—'; return; }
+    if (!s.teams.length && !s.leagues.length) { box.innerHTML = emptyHtml('Cuando sigas algo, acá vas a ver los próximos partidos.'); return; }
     box.innerHTML = loadingHtml('Buscando partidos…');
     try {
-      const week = (await loadWeek(force)).filter(followedMatch), t = today(), now = Date.now();
-      const todayCount = week.filter(m => mKey(m) === t).length;
-      $('spStatToday').textContent = todayCount; $('spStatTodaySub').textContent = todayCount === 1 ? 'partido de lo que seguís' : 'partidos de lo que seguís';
+      const week = (await loadWeek(force)).filter(followedMatch), now = Date.now();
       const next = week.filter(m => statusInfo(m).k !== 'ft' && statusInfo(m).k !== 'pp' && kickoff(m) > now - 3.5 * 36e5).sort((a, b) => kickoff(a) - kickoff(b));
-      if (next.length) { const n = next[0]; $('spStatNext').innerHTML = esc(n.home_team.name) + ' <span style="color:var(--muted)">vs</span> ' + esc(n.away_team.name); $('spStatNextSub').textContent = fmtDay(mKey(n), { weekday: 'long', day: 'numeric', month: 'short' }) + ' · ' + fmtTime(n.time_utc); }
-      else { $('spStatNext').textContent = 'Sin partidos próximos'; $('spStatNextSub').textContent = 'en los próximos 14 días'; }
       box.innerHTML = next.length ? next.slice(0, 8).map(m => matchRow(m, true)).join('') : emptyHtml('No hay partidos de lo que seguís en los próximos 14 días.');
       hydrate(box);
     } catch (e) { box.innerHTML = errorHtml(e, 'upcoming'); }
@@ -834,11 +829,6 @@ html[data-theme="dark"] .sp-table tr.f td{background:color-mix(in srgb,var(--acc
   const SECTION = `
 <div class="page-head"><div><div class="eyebrow">TU FÚTBOL, EN CONTEXTO</div><h1>Deportes<span>.</span></h1><p>Partidos, resultados y tablas de los equipos y competiciones que seguís.</p></div>
 <button class="primary" id="spManageBtn" type="button"><span aria-hidden="true">＋</span> Seguir</button></div>
-<div class="grid task-stats-grid">
-<div class="card task-stat"><div class="stat-top">Partidos hoy</div><div class="stat-value" id="spStatToday">0</div><div class="stat-bottom" id="spStatTodaySub">de lo que seguís</div></div>
-<div class="card task-stat"><div class="stat-top">Equipos y selecciones</div><div class="stat-value" id="spStatTeams">0</div><div class="stat-bottom" id="spStatLeagues">0 competiciones</div></div>
-<div class="card task-stat"><div class="stat-top">Próximo partido</div><div class="sp-stat-next" id="spStatNext">—</div><div class="stat-bottom" id="spStatNextSub">Seguí algo para verlo</div></div>
-</div>
 <div class="sp-tabs"><div class="flow-seg" role="tablist"><button type="button" class="active" data-sp-tab="matches">Partidos</button><button type="button" data-sp-tab="tables">Tablas y competiciones</button></div></div>
 <div id="spTabMatches"><div class="sp-layout">
 <div class="card"><div class="card-head"><div><div class="card-title">Partidos del día</div><div class="card-sub" id="spDaySub"></div></div>
