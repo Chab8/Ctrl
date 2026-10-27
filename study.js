@@ -50,7 +50,7 @@ $('studySubjectGrid').hidden=!activeFolder||!!activeSubject;
 $('studyAllSubjectsLabel').hidden=!activeFolder||!!activeSubject;
 $('studyFolderEmpty').hidden=fs.length>0||!!activeFolder||!!activeSubject;
 $('studySubjectEmpty').hidden=ss.length>0||!activeFolder||!!activeSubject;
-$('studyToolbar').hidden=!!activeSubject;
+$('studyToolbar').hidden=false;const searchLabel=document.querySelector('.study-search');if(searchLabel)searchLabel.hidden=!!activeSubject;
 $('studyFolderBack').hidden=!activeFolder&&!activeSubject;
 $('studyEditFolder').hidden=!activeFolder||!!activeSubject;
 $('studyDeleteFolder').hidden=!activeFolder||!!activeSubject;
