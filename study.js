@@ -10,6 +10,17 @@ const icon=n=>'<i data-lucide="'+n+'"></i>';
 const emptyData=()=>({folders:[],subjects:[],notes:[],files:[],tasks:[],dates:[],topics:[],flashcards:[],grades:[]});
 let data=emptyData(),activeFolder=null,activeSubject=null,activeTab='overview',search='';
 function load(){try{const v=JSON.parse(localStorage.getItem(KEY)||'null');if(v&&typeof v==='object')data=Object.assign(emptyData(),v);}catch(e){console.warn('[Ctrl Estudio] Error leyendo datos',e)}Object.keys(emptyData()).forEach(k=>{if(!Array.isArray(data[k]))data[k]=[];});}
+function ensureDefaultFolders(){
+if(data._defaultFoldersSeeded===true)return;
+const defaults=['Escuela','Trabajo','Personal'];
+defaults.forEach(name=>{
+if(!data.folders.some(f=>String(f.name||'').trim().toLocaleLowerCase('es')===name.toLocaleLowerCase('es'))){
+data.folders.push({id:uid(),name,description:'',icon:'folder',archived:false,createdAt:Date.now()});
+}
+});
+data._defaultFoldersSeeded=true;
+try{localStorage.setItem(KEY,JSON.stringify(data));}catch(e){console.warn('[Ctrl Estudio] No se pudieron guardar las carpetas iniciales',e);toast('No se pudieron guardar las carpetas iniciales. Revisá el espacio disponible.');}
+}
 function toast(t){const e=$('toast');if(e){e.textContent=t;e.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>e.classList.remove('show'),2600);}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(data));render();return true;}catch(e){toast('No se pudo guardar: revisá el espacio disponible.');return false;}}
 function folder(id){return data.folders.find(x=>x.id===id);}
@@ -88,5 +99,5 @@ $('studyDeleteFolder')?.addEventListener('click',()=>{const f=folder(activeFolde
 window.CtrlStudy={render,calendarEvents,refresh:render};
 load();
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{bind();render();},{once:true});else{bind();render();}
-window.addEventListener('ctrl:data-ready',()=>{load();render();});
+window.addEventListener('ctrl:data-ready',()=>{load();ensureDefaultFolders();render();});
 })();
