@@ -5,6 +5,7 @@
 .study-actions>button svg,.study-actions>button i{display:block;flex-shrink:0;width:15px;height:15px}
 #studyFolderBack,#studyEditFolder,#studyDeleteFolder{width:36px;height:36px;min-height:36px;padding:0;display:inline-flex;align-items:center;justify-content:center;flex:0 0 36px}
 #studyFolderBack svg,#studyEditFolder svg,#studyDeleteFolder svg{display:block;width:15px;height:15px}
+#studyFolderBack[hidden],#studyEditFolder[hidden],#studyDeleteFolder[hidden]{display:none}
 .study-search{display:flex;align-items:center;gap:9px;min-width:220px;max-width:420px;flex:1;padding:11px 13px;border:1px solid var(--line);border-radius:12px;background:var(--paper);color:var(--muted)}
 .study-search input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:var(--ink)}
 .study-folder-grid,.study-subject-grid,.study-metric-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-bottom:20px}
