@@ -10,6 +10,7 @@ window.ctrlSupabase = supabase;
 const DATA_KEYS = [
   'ctrl.personal.v1',
   'ctrl.notes.v1',
+  'ctrl.study.v1',
   'ctrl.weather.location.v1',
   'ctrl.cuisine.personal.v1',
   'ctrl.cuisine.favorites.v1'
