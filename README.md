@@ -30,8 +30,12 @@ La app no necesita Node ni un proceso de compilación: es HTML, CSS y JavaScript
 
 ## Importante: datos y sincronización
 
-Ctrl ahora incluye registro e inicio de sesión con Supabase Auth. La sesión queda persistida en el almacenamiento local del navegador/dispositivo y se renueva automáticamente; para cerrar sesión se usa el control de cuenta de la esquina superior derecha. Las credenciales se gestionan en Supabase Auth: la contraseña no se guarda en una tabla propia ni en texto plano.
+Ctrl usa Supabase Auth para el registro y el inicio de sesión. La sesión queda persistida en el navegador/dispositivo y se renueva automáticamente; para cerrar sesión se usa el control de cuenta de la esquina superior derecha. La contraseña la administra Supabase Auth y no se guarda en texto plano en una tabla de la app.
 
-**Los datos funcionales de la app (por ejemplo, movimientos y presupuestos) todavía se guardan localmente y no se sincronizan automáticamente entre dispositivos.** La autenticación está conectada, pero sincronizar esos módulos requiere migrar su almacenamiento a tablas de Supabase con políticas RLS. Mientras tanto, podés mover esos datos usando Exportar mis datos e Importar respaldo. Si la confirmación de email está habilitada en Supabase, configurá la URL publicada de Ctrl en Authentication → URL Configuration → Redirect URLs.
+Los datos personales de Ctrl se guardan en Supabase por usuario y se cargan al iniciar sesión: finanzas (movimientos, presupuestos y cartera), tareas, proyectos, wishlist, notas, región seleccionada del clima, equipos/competiciones seguidos y recetas personales/favoritas. Al abrir Ctrl desde otro dispositivo con la misma cuenta, se carga la misma información; con la app abierta, se comprueba si hay cambios remotos al volver a la pestaña y periódicamente.
+
+La primera cuenta que use este navegador puede importar los datos locales existentes. Para evitar mezclar cuentas, esos datos antiguos no se importan automáticamente a cuentas posteriores. Los datos de calendario y correo continúan gestionándose mediante la conexión de Google.
+
+Si la confirmación de email está habilitada en Supabase, configurá la URL publicada de Ctrl en Authentication → URL Configuration → Redirect URLs.
 
 Los movimientos financieros son manuales. No se consultan cotizaciones de mercado ni cuentas bancarias automáticamente en esta versión.
