@@ -7,6 +7,150 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
 });
 window.ctrlSupabase = supabase;
 
+const DATA_KEYS = [
+  'ctrl.personal.v1',
+  'ctrl.notes.v1',
+  'ctrl.weather.location.v1',
+  'ctrl.cuisine.personal.v1',
+  'ctrl.cuisine.favorites.v1'
+];
+const MIGRATION_OWNER_KEY = 'ctrl.cloud.migration-owner.v1';
+const CLOUD_TABLE = 'ctrl_user_data';
+const originalSetItem = Storage.prototype.setItem;
+const originalRemoveItem = Storage.prototype.removeItem;
+let activeUserId = null;
+let initializingUserId = null;
+let initializePromise = null;
+let cloudReady = false;
+let syncTimer = null;
+let syncQueue = Promise.resolve();
+let suppressSync = false;
+const cloudData = {};
+
+function equalValue(a, b) { return a === b; }
+function localValue(key) {
+  try { return window.localStorage.getItem(key); } catch { return null; }
+}
+function applyCloudData(data) {
+  suppressSync = true;
+  let changed = false;
+  try {
+    DATA_KEYS.forEach(key => {
+      const next = Object.prototype.hasOwnProperty.call(data, key) ? String(data[key]) : null;
+      const previous = localValue(key);
+      if (next === null) {
+        if (previous !== null) { window.localStorage.removeItem(key); changed = true; }
+      } else if (!equalValue(previous, next)) {
+        originalSetItem.call(window.localStorage, key, next);
+        changed = true;
+      }
+    });
+  } finally { suppressSync = false; }
+  return changed;
+}
+function scheduleCloudSync(key, value, remove = false) {
+  if (!cloudReady || suppressSync || !activeUserId || !DATA_KEYS.includes(key)) return;
+  cloudData[key] = remove ? null : String(value);
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => {
+    const userId = activeUserId;
+    const changedKey = key;
+    const changedValue = cloudData[key];
+    const isRemove = changedValue === null;
+    syncQueue = syncQueue.then(async () => {
+      if (!cloudReady || activeUserId !== userId) return;
+      const { data: row, error: readError } = await supabase
+        .from(CLOUD_TABLE).select('data').eq('user_id', userId).maybeSingle();
+      if (readError) throw readError;
+      const merged = row && row.data && typeof row.data === 'object' ? { ...row.data } : {};
+      if (isRemove) delete merged[changedKey];
+      else merged[changedKey] = changedValue;
+      const { error } = await supabase.from(CLOUD_TABLE).upsert({
+        user_id: userId, data: merged, updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' });
+      if (error) throw error;
+      Object.keys(cloudData).forEach(k => {
+        if (cloudData[k] === null) delete cloudData[k];
+      });
+    }).catch(error => {
+      console.error('[Ctrl] No se pudieron sincronizar los datos:', error);
+      window.dispatchEvent(new CustomEvent('ctrl:sync-error', { detail: { message: error.message } }));
+    });
+  }, 450);
+}
+Storage.prototype.setItem = function(key, value) {
+  originalSetItem.call(this, key, value);
+  scheduleCloudSync(String(key), String(value), false);
+};
+Storage.prototype.removeItem = function(key) {
+  originalRemoveItem.call(this, key);
+  scheduleCloudSync(String(key), null, true);
+};
+
+async function initializeUser(user) {
+  if (!user?.id) return;
+  if (activeUserId === user.id && cloudReady) { hideAuth(user); return; }
+  if (initializingUserId === user.id && initializePromise) return initializePromise;
+  initializingUserId = user.id;
+  initializePromise = (async () => {
+    cloudReady = false;
+    const { data: row, error } = await supabase.from(CLOUD_TABLE)
+      .select('data').eq('user_id', user.id).maybeSingle();
+    if (error) throw error;
+    let data = row && row.data && typeof row.data === 'object' && !Array.isArray(row.data)
+      ? { ...row.data } : null;
+    if (!data) {
+      let migrationOwner = null;
+      try { migrationOwner = window.localStorage.getItem(MIGRATION_OWNER_KEY); } catch {}
+      data = {};
+      // Import legacy device data only once, for the first account that adopts this browser.
+      if (!migrationOwner) {
+        DATA_KEYS.forEach(key => {
+          const value = localValue(key);
+          if (value !== null) data[key] = value;
+        });
+        originalSetItem.call(window.localStorage, MIGRATION_OWNER_KEY, user.id);
+      }
+      const { error: insertError } = await supabase.from(CLOUD_TABLE).upsert({
+        user_id: user.id, data, updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' });
+      if (insertError) throw insertError;
+    }
+    Object.keys(cloudData).forEach(key => delete cloudData[key]);
+    Object.assign(cloudData, data);
+    activeUserId = user.id;
+    const changed = applyCloudData(data);
+    cloudReady = true;
+    if (changed) {
+      // The app modules read storage during startup; reload once so every view initializes
+      // from the authenticated user's cloud snapshot rather than the previous account.
+      window.location.reload();
+      return;
+    }
+    hideAuth(user);
+    window.dispatchEvent(new CustomEvent('ctrl:data-ready', { detail: { userId: user.id } }));
+  })().catch(error => {
+    console.error('[Ctrl] No se pudieron cargar los datos de la cuenta:', error);
+    cloudReady = false;
+    activeUserId = null;
+    showAuth();
+    showMessage('No pudimos cargar tus datos guardados. Revisá tu conexión e intentá de nuevo. No se modificaron tus datos en la nube.');
+  }).finally(() => {
+    initializingUserId = null;
+    initializePromise = null;
+  });
+  return initializePromise;
+}
+
+function clearAccountCache() {
+  cloudReady = false;
+  activeUserId = null;
+  Object.keys(cloudData).forEach(key => delete cloudData[key]);
+  suppressSync = true;
+  try { DATA_KEYS.forEach(key => originalRemoveItem.call(window.localStorage, key)); }
+  finally { suppressSync = false; }
+}
+
 const root = document.createElement('div');
 root.id = 'ctrl-auth-root';
 root.hidden = true;
@@ -111,6 +255,7 @@ function showAccountChip(user) {
     if (!confirm('¿Querés cerrar la sesión de Ctrl en este dispositivo?')) return;
     const { error } = await supabase.auth.signOut({ scope: 'local' });
     if (error) alert('No se pudo cerrar la sesión. Probá de nuevo.');
+    else clearAccountCache();
   });
 }
 function escapeHtml(value) {
@@ -150,7 +295,7 @@ $('ctrl-auth-form').addEventListener('submit', async event => {
       if (error) throw error;
       if (data.session) {
         showMessage('Tu cuenta está lista. Bienvenido a Ctrl.', 'success');
-        hideAuth(data.user);
+        await initializeUser(data.user);
       } else {
         setMode('login');
         showMessage('Cuenta creada. Revisá tu email y confirmá la dirección para poder iniciar sesión.', 'success');
@@ -159,7 +304,7 @@ $('ctrl-auth-form').addEventListener('submit', async event => {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       if (!data.session) throw new Error('No se pudo iniciar la sesión. Volvé a intentarlo.');
-      hideAuth(data.user);
+      await initializeUser(data.user);
     }
   } catch (error) {
     showMessage(friendlyError(error));
@@ -198,8 +343,12 @@ supabase.auth.onAuthStateChange((event, session) => {
     return;
   }
   if (session?.user) {
-    hideAuth(session.user);
-  } else if (event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
+    // Defer Supabase calls out of its auth callback to avoid locking the auth client.
+    Promise.resolve().then(() => initializeUser(session.user));
+  } else if (event === 'SIGNED_OUT') {
+    clearAccountCache();
+    showAuth();
+  } else if (event === 'INITIAL_SESSION') {
     showAuth();
   }
 });
@@ -208,7 +357,7 @@ supabase.auth.onAuthStateChange((event, session) => {
   try {
     const { data, error } = await supabase.auth.getSession();
     if (error) throw error;
-    if (data.session?.user) hideAuth(data.session.user);
+    if (data.session?.user) await initializeUser(data.session.user);
     else showAuth();
   } catch (error) {
     showAuth();
