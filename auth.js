@@ -60,20 +60,18 @@ function scheduleCloudSync(key, value, remove = false) {
     Object.keys(pendingChanges).forEach(k => delete pendingChanges[k]);
     syncQueue = syncQueue.then(async () => {
       if (!cloudReady || activeUserId !== userId) return;
-      const { data: row, error: readError } = await supabase
-        .from(CLOUD_TABLE).select('data').eq('user_id', userId).maybeSingle();
-      if (readError) throw readError;
-      const merged = row && row.data && typeof row.data === 'object' ? { ...row.data } : {};
+      const upserts = {};
+      const deletedKeys = [];
       Object.entries(changes).forEach(([changedKey, changedValue]) => {
-        if (changedValue === null) delete merged[changedKey];
-        else merged[changedKey] = changedValue;
+        if (changedValue === null) deletedKeys.push(changedKey);
+        else upserts[changedKey] = changedValue;
       });
-      const { error } = await supabase.from(CLOUD_TABLE).upsert({
-        user_id: userId, data: merged, updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id' });
+      const { error } = await supabase.rpc('ctrl_merge_user_data', {
+        p_changes: upserts, p_deleted_keys: deletedKeys
+      });
       if (error) throw error;
-      Object.keys(merged).forEach(k => { cloudData[k] = merged[k]; });
-      Object.keys(changes).forEach(k => { if (changes[k] === null) delete cloudData[k]; });
+      Object.entries(upserts).forEach(([k, value]) => { cloudData[k] = value; });
+      deletedKeys.forEach(k => delete cloudData[k]);
     }).catch(error => {
       console.error('[Ctrl] No se pudieron sincronizar los datos:', error);
       window.dispatchEvent(new CustomEvent('ctrl:sync-error', { detail: { message: error.message } }));
@@ -108,10 +106,14 @@ async function initializeUser(user) {
         });
         shouldSetMigrationOwner = true;
       }
-      const { error: insertError } = await supabase.from(CLOUD_TABLE).upsert({
-        user_id: user.id, data, updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id' });
+      const { error: insertError } = await supabase.rpc('ctrl_merge_user_data', {
+        p_changes: data, p_deleted_keys: []
+      });
       if (insertError) throw insertError;
+      const { data: mergedRow, error: mergedError } = await supabase.from(CLOUD_TABLE)
+        .select('data').eq('user_id', user.id).maybeSingle();
+      if (mergedError) throw mergedError;
+      data = mergedRow && mergedRow.data && typeof mergedRow.data === 'object' ? { ...mergedRow.data } : data;
       if (shouldSetMigrationOwner) originalSetItem.call(window.localStorage, MIGRATION_OWNER_KEY, user.id);
     }
     Object.keys(cloudData).forEach(key => delete cloudData[key]);
