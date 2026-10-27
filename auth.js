@@ -311,45 +311,53 @@ function hideAuth(user) {
   updateSidebarProfile(user);
 }
 function updateSidebarProfile(user) {
-  const profile = $('sidebarProfile');
-  const title = $('sidebarProfileTitle');
-  const action = $('sidebarProfileAction');
-  const avatar = $('sidebarProfileAvatar');
-  if (!profile || !title || !action || !avatar) return;
   const loggedIn = Boolean(user?.id);
   const email = user?.email || '';
   const initial = (user?.user_metadata?.full_name || email || 'M').trim().charAt(0).toUpperCase();
-  title.textContent = loggedIn ? email : 'Iniciar sesión';
-  title.title = loggedIn ? email : 'Iniciar sesión';
-  action.textContent = loggedIn ? 'Cerrar sesión' : '';
-  action.classList.toggle('is-action', loggedIn);
-  avatar.textContent = initial;
-  profile.setAttribute('aria-label', loggedIn ? 'Cuenta de ' + email : 'Iniciar sesión');
-  profile.dataset.loggedIn = loggedIn ? 'true' : 'false';
+  [
+    { profile: 'sidebarProfile', title: 'sidebarProfileTitle', action: 'sidebarProfileAction', avatar: 'sidebarProfileAvatar' },
+    { profile: 'mobileProfile', title: 'mobileProfileTitle', action: 'mobileProfileAction', avatar: 'mobileProfileAvatar' }
+  ].forEach(ids => {
+    const profile = $(ids.profile);
+    const title = $(ids.title);
+    const action = $(ids.action);
+    const avatar = $(ids.avatar);
+    if (!profile || !title || !action || !avatar) return;
+    title.textContent = loggedIn ? email : 'Iniciar sesión';
+    title.title = loggedIn ? email : 'Iniciar sesión';
+    action.textContent = loggedIn ? 'Cerrar sesión' : '';
+    action.classList.toggle('is-action', loggedIn);
+    avatar.textContent = initial;
+    profile.setAttribute('aria-label', loggedIn ? 'Cuenta de ' + email : 'Iniciar sesión');
+    profile.dataset.loggedIn = loggedIn ? 'true' : 'false';
+  });
 }
-$('sidebarProfile')?.addEventListener('click', async event => {
-  const loggedIn = $('sidebarProfile')?.dataset.loggedIn === 'true';
+async function handleProfileClick(event) {
+  const profile = event.currentTarget;
+  const loggedIn = profile.dataset.loggedIn === 'true';
   if (!loggedIn) {
     setMode('login');
     showAuth();
     return;
   }
-  if (event.target?.closest?.('#sidebarProfileAction')) {
-    event.preventDefault();
-    event.stopPropagation();
-    if (!confirm('¿Querés cerrar la sesión de Ctrl en este dispositivo?')) return;
-    try {
-      await flushCloudChanges();
-      if (Object.keys(pendingChanges).length) throw new Error('Quedan cambios sin sincronizar.');
-    } catch (_) {
-      alert('No cierro la sesión porque todavía hay cambios sin sincronizar. Revisá tu conexión e intentá cerrar sesión de nuevo.');
-      return;
-    }
-    const { error } = await supabase.auth.signOut({ scope: 'local' });
-    if (error) alert('No se pudo cerrar la sesión. Probá de nuevo.');
-    else clearAccountCache();
+  if (!event.target?.closest?.('#sidebarProfileAction, #mobileProfileAction')) return;
+  event.preventDefault();
+  event.stopPropagation();
+  if (!confirm('¿Querés cerrar la sesión de Ctrl en este dispositivo?')) return;
+  try {
+    await flushCloudChanges();
+    if (Object.keys(pendingChanges).length) throw new Error('Quedan cambios sin sincronizar.');
+  } catch (_) {
+    alert('No cierro la sesión porque todavía hay cambios sin sincronizar. Revisá tu conexión e intentá cerrar sesión de nuevo.');
+    return;
   }
-});
+  const { error } = await supabase.auth.signOut({ scope: 'local' });
+  if (error) alert('No se pudo cerrar la sesión. Probá de nuevo.');
+  else clearAccountCache();
+}
+$('sidebarProfile')?.addEventListener('click', handleProfileClick);
+$('mobileProfile')?.addEventListener('click', handleProfileClick);
+
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 }
