@@ -54,29 +54,44 @@ function scheduleCloudSync(key, value, remove = false) {
   if (!cloudReady || suppressSync || !activeUserId || !DATA_KEYS.includes(key)) return;
   pendingChanges[key] = remove ? null : String(value);
   clearTimeout(syncTimer);
-  syncTimer = setTimeout(() => {
-    const userId = activeUserId;
-    const changes = { ...pendingChanges };
-    Object.keys(pendingChanges).forEach(k => delete pendingChanges[k]);
-    syncQueue = syncQueue.then(async () => {
-      if (!cloudReady || activeUserId !== userId) return;
-      const upserts = {};
-      const deletedKeys = [];
-      Object.entries(changes).forEach(([changedKey, changedValue]) => {
-        if (changedValue === null) deletedKeys.push(changedKey);
-        else upserts[changedKey] = changedValue;
-      });
-      const { error } = await supabase.rpc('ctrl_merge_user_data', {
-        p_changes: upserts, p_deleted_keys: deletedKeys
-      });
-      if (error) throw error;
-      Object.entries(upserts).forEach(([k, value]) => { cloudData[k] = value; });
-      deletedKeys.forEach(k => delete cloudData[k]);
-    }).catch(error => {
-      console.error('[Ctrl] No se pudieron sincronizar los datos:', error);
-      window.dispatchEvent(new CustomEvent('ctrl:sync-error', { detail: { message: error.message } }));
+  syncTimer = setTimeout(() => { flushCloudChanges().catch(() => {}); }, 450);
+}
+
+function flushCloudChanges() {
+  clearTimeout(syncTimer);
+  syncTimer = null;
+  if (!cloudReady || !activeUserId) return Promise.resolve();
+  const changes = { ...pendingChanges };
+  Object.keys(pendingChanges).forEach(k => delete pendingChanges[k]);
+  if (!Object.keys(changes).length) return syncQueue;
+  const userId = activeUserId;
+  const operation = syncQueue.then(async () => {
+    if (!cloudReady || activeUserId !== userId) throw new Error('La sesión cambió antes de guardar los datos.');
+    const upserts = {};
+    const deletedKeys = [];
+    Object.entries(changes).forEach(([changedKey, changedValue]) => {
+      if (changedValue === null) deletedKeys.push(changedKey);
+      else upserts[changedKey] = changedValue;
     });
-  }, 450);
+    const { error } = await supabase.rpc('ctrl_merge_user_data', {
+      p_changes: upserts, p_deleted_keys: deletedKeys
+    });
+    if (error) throw error;
+    Object.entries(upserts).forEach(([k, value]) => { cloudData[k] = value; });
+    deletedKeys.forEach(k => delete cloudData[k]);
+    window.dispatchEvent(new CustomEvent('ctrl:sync-ok'));
+  });
+  syncQueue = operation.catch(error => {
+    console.error('[Ctrl] No se pudieron sincronizar los datos:', error);
+    if (activeUserId === userId) {
+      Object.entries(changes).forEach(([key, value]) => {
+        if (!Object.prototype.hasOwnProperty.call(pendingChanges, key)) pendingChanges[key] = value;
+      });
+      if (!syncTimer) syncTimer = setTimeout(() => { flushCloudChanges().catch(() => {}); }, 5000);
+    }
+    window.dispatchEvent(new CustomEvent('ctrl:sync-error', { detail: { message: error.message } }));
+  });
+  return operation;
 }
 
 async function initializeUser(user) {
@@ -181,6 +196,24 @@ async function refreshCloudSnapshot() {
     console.warn('[Ctrl] No se pudo actualizar la copia local desde la nube:', error);
   }
 }
+function showSyncNotice(message, isError) {
+  let notice = document.getElementById('ctrl-cloud-sync-notice');
+  if (!notice) {
+    notice = document.createElement('div');
+    notice.id = 'ctrl-cloud-sync-notice';
+    notice.style.cssText = 'position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:10000;max-width:calc(100vw - 28px);padding:10px 14px;border-radius:12px;font:12px/1.45 "DM Sans",sans-serif;box-shadow:0 8px 28px #0002;text-align:center;';
+    document.body.appendChild(notice);
+  }
+  notice.textContent = message;
+  notice.style.background = isError ? '#f8e5df' : '#e8f0dc';
+  notice.style.color = isError ? '#8f3f2e' : '#354a2a';
+  if (!isError) setTimeout(() => notice.remove(), 1800);
+}
+window.addEventListener('ctrl:sync-error', () => showSyncNotice('No se pudieron sincronizar los cambios. Se volverá a intentar; mantené la sesión abierta.', true));
+window.addEventListener('ctrl:sync-ok', () => {
+  const notice = document.getElementById('ctrl-cloud-sync-notice');
+  if (notice) notice.remove();
+});
 window.addEventListener('focus', refreshCloudSnapshot);
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') refreshCloudSnapshot();
@@ -289,6 +322,13 @@ function showAccountChip(user) {
   chip.innerHTML = `<span class="ctrl-account-avatar">${escapeHtml(initial)}</span><span class="ctrl-account-email" title="${escapeHtml(email)}">${escapeHtml(email)}</span><button type="button" id="ctrl-account-signout">Cerrar sesión</button>`;
   $('ctrl-account-signout').addEventListener('click', async () => {
     if (!confirm('¿Querés cerrar la sesión de Ctrl en este dispositivo?')) return;
+    try {
+      await flushCloudChanges();
+      if (Object.keys(pendingChanges).length) throw new Error('Quedan cambios sin sincronizar.');
+    } catch (_) {
+      alert('No cierro la sesión porque todavía hay cambios sin sincronizar. Revisá tu conexión e intentá cerrar sesión de nuevo.');
+      return;
+    }
     const { error } = await supabase.auth.signOut({ scope: 'local' });
     if (error) alert('No se pudo cerrar la sesión. Probá de nuevo.');
     else clearAccountCache();
