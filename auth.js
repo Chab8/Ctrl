@@ -144,6 +144,9 @@ async function initializeUser(user) {
 function clearAccountCache() {
   cloudReady = false;
   activeUserId = null;
+  clearTimeout(syncTimer);
+  syncTimer = null;
+  Object.keys(pendingChanges).forEach(key => delete pendingChanges[key]);
   try { window.sessionStorage.removeItem(SESSION_USER_KEY); } catch {}
   Object.keys(cloudData).forEach(key => delete cloudData[key]);
   suppressSync = true;
