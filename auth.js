@@ -25,6 +25,7 @@ let cloudReady = false;
 let syncTimer = null;
 let syncQueue = Promise.resolve();
 let suppressSync = false;
+const pendingChanges = {};
 const cloudData = {};
 
 function equalValue(a, b) { return a === b; }
@@ -50,42 +51,34 @@ function applyCloudData(data) {
 }
 function scheduleCloudSync(key, value, remove = false) {
   if (!cloudReady || suppressSync || !activeUserId || !DATA_KEYS.includes(key)) return;
-  cloudData[key] = remove ? null : String(value);
+  pendingChanges[key] = remove ? null : String(value);
   clearTimeout(syncTimer);
   syncTimer = setTimeout(() => {
     const userId = activeUserId;
-    const changedKey = key;
-    const changedValue = cloudData[key];
-    const isRemove = changedValue === null;
+    const changes = { ...pendingChanges };
+    Object.keys(pendingChanges).forEach(k => delete pendingChanges[k]);
     syncQueue = syncQueue.then(async () => {
       if (!cloudReady || activeUserId !== userId) return;
       const { data: row, error: readError } = await supabase
         .from(CLOUD_TABLE).select('data').eq('user_id', userId).maybeSingle();
       if (readError) throw readError;
       const merged = row && row.data && typeof row.data === 'object' ? { ...row.data } : {};
-      if (isRemove) delete merged[changedKey];
-      else merged[changedKey] = changedValue;
+      Object.entries(changes).forEach(([changedKey, changedValue]) => {
+        if (changedValue === null) delete merged[changedKey];
+        else merged[changedKey] = changedValue;
+      });
       const { error } = await supabase.from(CLOUD_TABLE).upsert({
         user_id: userId, data: merged, updated_at: new Date().toISOString()
       }, { onConflict: 'user_id' });
       if (error) throw error;
-      Object.keys(cloudData).forEach(k => {
-        if (cloudData[k] === null) delete cloudData[k];
-      });
+      Object.keys(merged).forEach(k => { cloudData[k] = merged[k]; });
+      Object.keys(changes).forEach(k => { if (changes[k] === null) delete cloudData[k]; });
     }).catch(error => {
       console.error('[Ctrl] No se pudieron sincronizar los datos:', error);
       window.dispatchEvent(new CustomEvent('ctrl:sync-error', { detail: { message: error.message } }));
     });
   }, 450);
 }
-Storage.prototype.setItem = function(key, value) {
-  originalSetItem.call(this, key, value);
-  scheduleCloudSync(String(key), String(value), false);
-};
-Storage.prototype.removeItem = function(key) {
-  originalRemoveItem.call(this, key);
-  scheduleCloudSync(String(key), null, true);
-};
 
 async function initializeUser(user) {
   if (!user?.id) return;
