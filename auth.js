@@ -169,6 +169,7 @@ function clearAccountCache() {
   suppressSync = true;
   try { DATA_KEYS.forEach(key => originalRemoveItem.call(window.localStorage, key)); }
   finally { suppressSync = false; }
+  updateSidebarProfile(null);
 }
 
 async function refreshCloudSnapshot() {
@@ -299,7 +300,6 @@ function setMode(next) {
   $('ctrl-auth-toggle').addEventListener('click', () => setMode(signup ? 'login' : 'signup'));
 }
 function showAuth() {
-  $('ctrl-account-chip')?.remove();
   root.hidden = false;
   document.documentElement.classList.add('ctrl-auth-pending');
   document.body.style.overflow = 'hidden';
@@ -308,19 +308,35 @@ function hideAuth(user) {
   root.hidden = true;
   document.documentElement.classList.remove('ctrl-auth-pending');
   document.body.style.overflow = '';
-  showAccountChip(user);
+  updateSidebarProfile(user);
 }
-function showAccountChip(user) {
-  let chip = $('ctrl-account-chip');
-  if (!chip) {
-    chip = document.createElement('div');
-    chip.id = 'ctrl-account-chip';
-    document.body.appendChild(chip);
+function updateSidebarProfile(user) {
+  const profile = $('sidebarProfile');
+  const title = $('sidebarProfileTitle');
+  const action = $('sidebarProfileAction');
+  const avatar = $('sidebarProfileAvatar');
+  if (!profile || !title || !action || !avatar) return;
+  const loggedIn = Boolean(user?.id);
+  const email = user?.email || '';
+  const initial = (user?.user_metadata?.full_name || email || 'M').trim().charAt(0).toUpperCase();
+  title.textContent = loggedIn ? email : 'Iniciar sesión';
+  title.title = loggedIn ? email : 'Iniciar sesión';
+  action.textContent = loggedIn ? 'Cerrar sesión' : '';
+  action.classList.toggle('is-action', loggedIn);
+  avatar.textContent = initial;
+  profile.setAttribute('aria-label', loggedIn ? 'Cuenta de ' + email : 'Iniciar sesión');
+  profile.dataset.loggedIn = loggedIn ? 'true' : 'false';
+}
+$('sidebarProfile')?.addEventListener('click', async event => {
+  const loggedIn = $('sidebarProfile')?.dataset.loggedIn === 'true';
+  if (!loggedIn) {
+    setMode('login');
+    showAuth();
+    return;
   }
-  const email = user.email || 'Cuenta';
-  const initial = (user.user_metadata?.full_name || email).trim().charAt(0).toUpperCase();
-  chip.innerHTML = `<span class="ctrl-account-avatar">${escapeHtml(initial)}</span><span class="ctrl-account-email" title="${escapeHtml(email)}">${escapeHtml(email)}</span><button type="button" id="ctrl-account-signout">Cerrar sesión</button>`;
-  $('ctrl-account-signout').addEventListener('click', async () => {
+  if (event.target?.closest?.('#sidebarProfileAction')) {
+    event.preventDefault();
+    event.stopPropagation();
     if (!confirm('¿Querés cerrar la sesión de Ctrl en este dispositivo?')) return;
     try {
       await flushCloudChanges();
@@ -332,8 +348,8 @@ function showAccountChip(user) {
     const { error } = await supabase.auth.signOut({ scope: 'local' });
     if (error) alert('No se pudo cerrar la sesión. Probá de nuevo.');
     else clearAccountCache();
-  });
-}
+  }
+});
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 }
