@@ -15,6 +15,7 @@ const DATA_KEYS = [
   'ctrl.cuisine.favorites.v1'
 ];
 const MIGRATION_OWNER_KEY = 'ctrl.cloud.migration-owner.v1';
+const SESSION_USER_KEY = 'ctrl.cloud.active-user.v1';
 const CLOUD_TABLE = 'ctrl_user_data';
 const originalSetItem = Storage.prototype.setItem;
 const originalRemoveItem = Storage.prototype.removeItem;
@@ -86,6 +87,8 @@ async function initializeUser(user) {
   if (initializingUserId === user.id && initializePromise) return initializePromise;
   initializingUserId = user.id;
   initializePromise = (async () => {
+    let userChanged = true;
+    try { userChanged = window.sessionStorage.getItem(SESSION_USER_KEY) !== user.id; } catch {}
     cloudReady = false;
     const { data: row, error } = await supabase.from(CLOUD_TABLE)
       .select('data').eq('user_id', user.id).maybeSingle();
@@ -114,7 +117,8 @@ async function initializeUser(user) {
     activeUserId = user.id;
     const changed = applyCloudData(data);
     cloudReady = true;
-    if (changed) {
+    try { window.sessionStorage.setItem(SESSION_USER_KEY, user.id); } catch {}
+    if (changed || userChanged) {
       // The app modules read storage during startup; reload once so every view initializes
       // from the authenticated user's cloud snapshot rather than the previous account.
       window.location.reload();
@@ -138,11 +142,43 @@ async function initializeUser(user) {
 function clearAccountCache() {
   cloudReady = false;
   activeUserId = null;
+  try { window.sessionStorage.removeItem(SESSION_USER_KEY); } catch {}
   Object.keys(cloudData).forEach(key => delete cloudData[key]);
   suppressSync = true;
   try { DATA_KEYS.forEach(key => originalRemoveItem.call(window.localStorage, key)); }
   finally { suppressSync = false; }
 }
+
+async function refreshCloudSnapshot() {
+  const userId = activeUserId;
+  if (!cloudReady || !userId || syncTimer || Object.keys(pendingChanges).length) return;
+  try {
+    await syncQueue;
+    if (!cloudReady || activeUserId !== userId || syncTimer || Object.keys(pendingChanges).length) return;
+    const { data: row, error } = await supabase.from(CLOUD_TABLE)
+      .select('data').eq('user_id', userId).maybeSingle();
+    if (error || !row || !row.data || typeof row.data !== 'object') return;
+    const next = row.data;
+    const differs = DATA_KEYS.some(key => {
+      const current = localValue(key);
+      const remote = Object.prototype.hasOwnProperty.call(next, key) ? String(next[key]) : null;
+      return current !== remote;
+    });
+    if (differs) {
+      Object.keys(cloudData).forEach(key => delete cloudData[key]);
+      Object.assign(cloudData, next);
+      applyCloudData(next);
+      window.location.reload();
+    }
+  } catch (error) {
+    console.warn('[Ctrl] No se pudo actualizar la copia local desde la nube:', error);
+  }
+}
+window.addEventListener('focus', refreshCloudSnapshot);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') refreshCloudSnapshot();
+});
+setInterval(refreshCloudSnapshot, 30000);
 
 const root = document.createElement('div');
 root.id = 'ctrl-auth-root';
