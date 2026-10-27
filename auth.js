@@ -58,6 +58,16 @@ function scheduleCloudSync(key, value, remove = false) {
   syncTimer = setTimeout(() => { flushCloudChanges().catch(() => {}); }, 450);
 }
 
+// Keep localStorage writes from app modules synchronized with the signed-in user's cloud data.
+Storage.prototype.setItem = function(key, value) {
+  originalSetItem.call(this, key, value);
+  if (this === window.localStorage) scheduleCloudSync(String(key), String(value), false);
+};
+Storage.prototype.removeItem = function(key) {
+  originalRemoveItem.call(this, key);
+  if (this === window.localStorage) scheduleCloudSync(String(key), null, true);
+};
+
 function flushCloudChanges() {
   clearTimeout(syncTimer);
   syncTimer = null;
