@@ -68,6 +68,9 @@ function setMode(next) {
   $('ctrl-auth-name-wrap').hidden = !signup;
   $('ctrl-auth-name').required = signup;
   $('ctrl-auth-password').autocomplete = signup ? 'new-password' : 'current-password';
+  if (signup) $('ctrl-auth-password').setAttribute('minlength', '8');
+  else $('ctrl-auth-password').removeAttribute('minlength');
+  $('ctrl-auth-password').placeholder = signup ? 'Mínimo 8 caracteres' : 'Tu contraseña';
   $('ctrl-auth-eyebrow').textContent = signup ? 'Empezá con Ctrl' : 'Tu espacio personal';
   $('ctrl-auth-title').textContent = signup ? 'Una cuenta. Todo conectado.' : 'Todo en su lugar.';
   $('ctrl-auth-subtitle').textContent = signup ? 'Creá tu cuenta para mantener tu espacio disponible cada vez que vuelvas.' : 'Iniciá sesión para continuar donde lo dejaste.';
@@ -139,8 +142,8 @@ $('ctrl-auth-form').addEventListener('submit', async event => {
         showMessage('Tu cuenta está lista. Bienvenido a Ctrl.', 'success');
         hideAuth(data.user);
       } else {
-        showMessage('Cuenta creada. Revisá tu email y confirmá la dirección para poder iniciar sesión.', 'success');
         setMode('login');
+        showMessage('Cuenta creada. Revisá tu email y confirmá la dirección para poder iniciar sesión.', 'success');
       }
     } else {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
