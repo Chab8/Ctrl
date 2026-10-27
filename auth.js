@@ -23,7 +23,7 @@ root.innerHTML = `
             <label for="ctrl-auth-name">Nombre</label>
             <input id="ctrl-auth-name" name="name" autocomplete="name" placeholder="Cómo te llamás" maxlength="80">
           </div>
-          <div class="ctrl-auth-field">
+          <div class="ctrl-auth-field" id="ctrl-auth-email-wrap">
             <label for="ctrl-auth-email">Email</label>
             <input id="ctrl-auth-email" name="email" type="email" autocomplete="email" placeholder="vos@ejemplo.com" required>
           </div>
@@ -65,17 +65,21 @@ function setMode(next) {
   mode = next;
   clearMessage();
   const signup = mode === 'signup';
+  const recovery = mode === 'recovery';
   $('ctrl-auth-name-wrap').hidden = !signup;
+  $('ctrl-auth-email-wrap').hidden = recovery;
+  $('ctrl-auth-email').required = !recovery;
   $('ctrl-auth-name').required = signup;
   $('ctrl-auth-password').autocomplete = signup ? 'new-password' : 'current-password';
   if (signup) $('ctrl-auth-password').setAttribute('minlength', '8');
   else $('ctrl-auth-password').removeAttribute('minlength');
   $('ctrl-auth-password').placeholder = signup ? 'Mínimo 8 caracteres' : 'Tu contraseña';
-  $('ctrl-auth-eyebrow').textContent = signup ? 'Empezá con Ctrl' : 'Tu espacio personal';
-  $('ctrl-auth-title').textContent = signup ? 'Una cuenta. Todo conectado.' : 'Todo en su lugar.';
-  $('ctrl-auth-subtitle').textContent = signup ? 'Creá tu cuenta para mantener tu espacio disponible cada vez que vuelvas.' : 'Iniciá sesión para continuar donde lo dejaste.';
-  $('ctrl-auth-submit-text').textContent = signup ? 'Crear cuenta' : 'Iniciar sesión';
-  $('ctrl-auth-forgot-wrap').hidden = signup;
+  $('ctrl-auth-eyebrow').textContent = signup ? 'Empezá con Ctrl' : recovery ? 'Seguridad de tu cuenta' : 'Tu espacio personal';
+  $('ctrl-auth-title').textContent = signup ? 'Una cuenta. Todo conectado.' : recovery ? 'Elegí una nueva contraseña.' : 'Todo en su lugar.';
+  $('ctrl-auth-subtitle').textContent = signup ? 'Creá tu cuenta para mantener tu espacio disponible cada vez que vuelvas.' : recovery ? 'Usá una contraseña nueva para proteger tu cuenta.' : 'Iniciá sesión para continuar donde lo dejaste.';
+  $('ctrl-auth-submit-text').textContent = signup ? 'Crear cuenta' : recovery ? 'Guardar contraseña' : 'Iniciar sesión';
+  $('ctrl-auth-forgot-wrap').hidden = signup || recovery;
+  $('ctrl-auth-switch').hidden = recovery;
   $('ctrl-auth-switch').innerHTML = signup
     ? '¿Ya tenés cuenta? <button class="ctrl-auth-link" id="ctrl-auth-toggle" type="button">Iniciar sesión</button>'
     : '¿Todavía no tenés cuenta? <button class="ctrl-auth-link" id="ctrl-auth-toggle" type="button">Crear cuenta</button>';
@@ -130,9 +134,15 @@ $('ctrl-auth-form').addEventListener('submit', async event => {
   clearMessage();
   const email = $('ctrl-auth-email').value.trim();
   const password = $('ctrl-auth-password').value;
-  setBusy(true, mode === 'signup' ? 'Creando cuenta…' : 'Ingresando…');
+  setBusy(true, mode === 'signup' ? 'Creando cuenta…' : mode === 'recovery' ? 'Guardando…' : 'Ingresando…');
   try {
-    if (mode === 'signup') {
+    if (mode === 'recovery') {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw error;
+      await supabase.auth.signOut({ scope: 'local' });
+      setMode('login');
+      showMessage('Contraseña actualizada. Ya podés iniciar sesión con la nueva contraseña.', 'success');
+    } else if (mode === 'signup') {
       const fullName = $('ctrl-auth-name').value.trim();
       const { data, error } = await supabase.auth.signUp({
         email, password, options: { data: { full_name: fullName }, emailRedirectTo: window.location.origin + window.location.pathname }
@@ -180,6 +190,13 @@ $('ctrl-auth-forgot').addEventListener('click', async () => {
 });
 
 supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'PASSWORD_RECOVERY' && session?.user) {
+    $('ctrl-auth-email').value = session.user.email || '';
+    setMode('recovery');
+    showAuth();
+    showMessage('Ahora ingresá tu nueva contraseña.', 'success');
+    return;
+  }
   if (session?.user) {
     hideAuth(session.user);
   } else if (event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
