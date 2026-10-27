@@ -30,6 +30,8 @@ La app no necesita Node ni un proceso de compilación: es HTML, CSS y JavaScript
 
 ## Importante: datos y sincronización
 
-En esta primera versión, los datos se guardan en el almacenamiento local del navegador/dispositivo. **No se sincronizan automáticamente entre la computadora y el celular todavía.** Para compartir la misma información entre dispositivos hay que conectar una base de datos remota y autenticación (por ejemplo, Supabase); no se deben poner claves secretas en el frontend. Hasta entonces, podés mover los datos entre dispositivos usando Exportar mis datos e Importar respaldo.
+Ctrl ahora incluye registro e inicio de sesión con Supabase Auth. La sesión queda persistida en el almacenamiento local del navegador/dispositivo y se renueva automáticamente; para cerrar sesión se usa el control de cuenta de la esquina superior derecha. Las credenciales se gestionan en Supabase Auth: la contraseña no se guarda en una tabla propia ni en texto plano.
+
+**Los datos funcionales de la app (por ejemplo, movimientos y presupuestos) todavía se guardan localmente y no se sincronizan automáticamente entre dispositivos.** La autenticación está conectada, pero sincronizar esos módulos requiere migrar su almacenamiento a tablas de Supabase con políticas RLS. Mientras tanto, podés mover esos datos usando Exportar mis datos e Importar respaldo. Si la confirmación de email está habilitada en Supabase, configurá la URL publicada de Ctrl en Authentication → URL Configuration → Redirect URLs.
 
 Los movimientos financieros son manuales. No se consultan cotizaciones de mercado ni cuentas bancarias automáticamente en esta versión.
