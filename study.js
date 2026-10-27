@@ -98,7 +98,6 @@ $('studyDeleteFolder')?.addEventListener('click',()=>{const f=folder(activeFolde
 }
 window.CtrlStudy={render,calendarEvents,refresh:render};
 load();
-ensureDefaultFolders();
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{bind();render();},{once:true});else{bind();render();}
 window.addEventListener('ctrl:data-ready',()=>{load();ensureDefaultFolders();render();});
 })();
