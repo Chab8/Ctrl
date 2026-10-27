@@ -70,10 +70,10 @@ function setMode(next) {
   $('ctrl-auth-email-wrap').hidden = recovery;
   $('ctrl-auth-email').required = !recovery;
   $('ctrl-auth-name').required = signup;
-  $('ctrl-auth-password').autocomplete = signup ? 'new-password' : 'current-password';
-  if (signup) $('ctrl-auth-password').setAttribute('minlength', '8');
+  $('ctrl-auth-password').autocomplete = (signup || recovery) ? 'new-password' : 'current-password';
+  if (signup || recovery) $('ctrl-auth-password').setAttribute('minlength', '8');
   else $('ctrl-auth-password').removeAttribute('minlength');
-  $('ctrl-auth-password').placeholder = signup ? 'Mínimo 8 caracteres' : 'Tu contraseña';
+  $('ctrl-auth-password').placeholder = (signup || recovery) ? 'Mínimo 8 caracteres' : 'Tu contraseña';
   $('ctrl-auth-eyebrow').textContent = signup ? 'Empezá con Ctrl' : recovery ? 'Seguridad de tu cuenta' : 'Tu espacio personal';
   $('ctrl-auth-title').textContent = signup ? 'Una cuenta. Todo conectado.' : recovery ? 'Elegí una nueva contraseña.' : 'Todo en su lugar.';
   $('ctrl-auth-subtitle').textContent = signup ? 'Creá tu cuenta para mantener tu espacio disponible cada vez que vuelvas.' : recovery ? 'Usá una contraseña nueva para proteger tu cuenta.' : 'Iniciá sesión para continuar donde lo dejaste.';
