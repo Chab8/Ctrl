@@ -27,6 +27,7 @@ let cloudReady = false;
 let syncTimer = null;
 let syncQueue = Promise.resolve();
 let suppressSync = false;
+let lastLocalDataWriteAt = 0;
 const pendingChanges = {};
 const cloudData = {};
 
@@ -61,11 +62,21 @@ function scheduleCloudSync(key, value, remove = false) {
 // Keep localStorage writes from app modules synchronized with the signed-in user's cloud data.
 Storage.prototype.setItem = function(key, value) {
   originalSetItem.call(this, key, value);
-  if (this === window.localStorage) scheduleCloudSync(String(key), String(value), false);
+  if (this === window.localStorage) {
+    const storageKey = String(key);
+    if (DATA_KEYS.includes(storageKey) && !suppressSync) lastLocalDataWriteAt = Date.now();
+    scheduleCloudSync(storageKey, String(value), false);
+  }
 };
 Storage.prototype.removeItem = function(key) {
   originalRemoveItem.call(this, key);
   if (this === window.localStorage) scheduleCloudSync(String(key), null, true);
+};
+
+window.ctrlSyncNow = function() {
+  clearTimeout(syncTimer);
+  syncTimer = null;
+  return flushCloudChanges();
 };
 
 function flushCloudChanges() {
@@ -192,6 +203,11 @@ async function refreshCloudSnapshot() {
     const { data: row, error } = await supabase.from(CLOUD_TABLE)
       .select('data').eq('user_id', userId).maybeSingle();
     if (error || !row || !row.data || typeof row.data !== 'object') return;
+    // A local write may happen while the snapshot request is in flight. Never apply
+    // a response that was fetched before the newest local change had time to sync.
+    if (!cloudReady || activeUserId !== userId || syncTimer ||
+        Object.keys(pendingChanges).length ||
+        Date.now() - lastLocalDataWriteAt < 1800) return;
     const next = row.data;
     const differs = DATA_KEYS.some(key => {
       const current = localValue(key);
