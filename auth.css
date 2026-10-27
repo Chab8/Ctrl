@@ -41,5 +41,5 @@ html[data-theme="dark"] .ctrl-auth-field input{background:var(--paper,#20211d);b
 html[data-theme="dark"] .ctrl-auth-field input:focus{background:var(--card,#262722)}
 html.ctrl-auth-pending body>*:not(#ctrl-auth-root){visibility:hidden!important}
 html.ctrl-auth-pending body{overflow:hidden}
-@media(max-width:520px){.ctrl-auth-backdrop{padding:22px 15px}.ctrl-auth-brand{margin-bottom:23px}.ctrl-auth-card{min-height:660px;padding:27px 22px;border-radius:21px}.ctrl-auth-title{font-size:26px}#ctrl-account-chip{top:10px;right:10px}#ctrl-account-chip .ctrl-account-email{max-width:110px}}
+@media(max-width:520px){.ctrl-auth-backdrop{padding:22px 15px}.ctrl-auth-brand{margin-bottom:23px}.ctrl-auth-card{min-height:660px;padding:27px 22px;border-radius:21px}.ctrl-auth-title{font-size:26px}}
 @media(prefers-reduced-motion:reduce){.ctrl-auth-backdrop:before,.ctrl-auth-backdrop:after,.ctrl-auth-shell{animation:none!important}.ctrl-auth-submit{transition:none}}
