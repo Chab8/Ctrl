@@ -97,6 +97,7 @@ async function initializeUser(user) {
       ? { ...row.data } : null;
     if (!data) {
       let migrationOwner = null;
+      let shouldSetMigrationOwner = false;
       try { migrationOwner = window.localStorage.getItem(MIGRATION_OWNER_KEY); } catch {}
       data = {};
       // Import legacy device data only once, for the first account that adopts this browser.
@@ -105,12 +106,13 @@ async function initializeUser(user) {
           const value = localValue(key);
           if (value !== null) data[key] = value;
         });
-        originalSetItem.call(window.localStorage, MIGRATION_OWNER_KEY, user.id);
+        shouldSetMigrationOwner = true;
       }
       const { error: insertError } = await supabase.from(CLOUD_TABLE).upsert({
         user_id: user.id, data, updated_at: new Date().toISOString()
       }, { onConflict: 'user_id' });
       if (insertError) throw insertError;
+      if (shouldSetMigrationOwner) originalSetItem.call(window.localStorage, MIGRATION_OWNER_KEY, user.id);
     }
     Object.keys(cloudData).forEach(key => delete cloudData[key]);
     Object.assign(cloudData, data);
