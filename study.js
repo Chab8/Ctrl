@@ -157,14 +157,51 @@
     function fillEqPalette(box) {
         if (!box || !window.katex) return;
         const cats = Object.keys(EQ_CATS);
-        box.innerHTML = '<div class="eq-pal-tabs" role="tablist">' + cats.map(c => '<button type="button" role="tab" class="eq-pal-tab' + (c === eqCat ? ' active' : '') + '" data-eq-cat="' + esc(c) + '" aria-selected="' + (c === eqCat) + '">' + c + '</button>').join('') + '</div><div class="eq-pal-grid">' + EQ_CATS[eqCat].map((it, i) => '<button type="button" class="eq-pal-btn" data-eq-ins="' + i + '" title="' + esc(it[2] || it[1]) + '" aria-label="' + esc(it[2] || it[1]) + '">' + eqLabel(it[0]) + '</button>').join('') + '</div>';
+        let tabs = box.querySelector('.eq-pal-tabs');
+        let grid = box.querySelector('.eq-pal-grid');
+        if (!tabs || !grid) {
+            box.innerHTML = '<div class="eq-pal-tabs" role="tablist">' + cats.map(c => '<button type="button" role="tab" class="eq-pal-tab' + (c === eqCat ? ' active' : '') + '" data-eq-cat="' + esc(c) + '" aria-selected="' + (c === eqCat) + '">' + c + '</button>').join('') + '</div><div class="eq-pal-grid"></div>';
+            tabs = box.querySelector('.eq-pal-tabs');
+            grid = box.querySelector('.eq-pal-grid');
+        } else {
+            tabs.querySelectorAll('[data-eq-cat]').forEach(b => {
+                const isAct = b.dataset.eqCat === eqCat;
+                b.classList.toggle('active', isAct);
+                b.setAttribute('aria-selected', String(isAct));
+            });
+        }
+        grid.innerHTML = EQ_CATS[eqCat].map((it, i) => '<button type="button" class="eq-pal-btn" data-eq-ins="' + i + '" title="' + esc(it[2] || it[1]) + '" aria-label="' + esc(it[2] || it[1]) + '">' + eqLabel(it[0]) + '</button>').join('');
     }
     function fillEqPalettes() { const boxes = document.querySelectorAll('[data-eq-pal]'); if (!boxes.length) return; if (window.katex) boxes.forEach(fillEqPalette); else loadKatex().then(() => document.querySelectorAll('[data-eq-pal]').forEach(fillEqPalette)).catch(() => { }); }
     function insertEq(ta, snippet) {
         const a = ta.selectionStart, z = ta.selectionEnd, sel = ta.value.slice(a, z), k = snippet.indexOf('‸'), body = snippet.replace('‸', sel);
         ta.setRangeText(body, a, z, 'end'); const pos = k < 0 ? a + body.length : a + k + sel.length; ta.setSelectionRange(pos, pos); ta.focus(); ta.dispatchEvent(new Event('input', { bubbles: true }));
     }
-    const cleanTex = t => String(t || '').trim().replace(/^\$\$?/, '').replace(/\$\$?$/, '').trim();
+    function cleanTex(t) {
+        if (!t) return '';
+        let s = String(t).trim().replace(/^\$\$?/, '').replace(/\$\$?$/, '').trim();
+        if (!s) return '';
+        const texts = [];
+        s = s.replace(/\\(text|mathrm|mathbf|mathit|textbf)\{([^{}]*)\}/g, m => {
+            texts.push(m);
+            return '___TEX_TEXT_' + (texts.length - 1) + '___';
+        });
+        s = s.replace(/°/g, '^{\\circ}');
+        s = s.replace(/(?<!\\)%/g, '\\%');
+        s = s.replace(/(?<!\\)\$/g, '\\$');
+        s = s.replace(/(\\[a-zA-Z]+)\s+([{\[])/g, '$1$2');
+        s = s.replace(/\}\s+\{/g, '}{');
+        s = s.replace(/\]\s+\{/g, ']{');
+        s = s.replace(/(\\begin\{[^}]+\})\s*/g, '$1');
+        s = s.replace(/\s*(\\end\{[^}]+\})/g, '$1');
+        s = s.replace(/\s*&\s*/g, '___AMP___');
+        s = s.replace(/\s*\\\\\s*/g, '___DBSLASH___');
+        s = s.replace(/(?<!\\) /g, '\\ ');
+        s = s.replace(/___AMP___/g, ' & ');
+        s = s.replace(/___DBSLASH___/g, ' \\\\ ');
+        s = s.replace(/___TEX_TEXT_(\d+)___/g, (_, i) => texts[Number(i)]);
+        return s;
+    }
     function eqInto(el, raw) {
         if (!el) return; const tex = cleanTex(raw); el.dataset.src = tex; if (!tex) { el.innerHTML = ''; return; }
         const draw = () => { if (!el.isConnected || el.dataset.src !== tex) return; el.classList.remove('is-source'); try { window.katex.render(tex, el, { displayMode: true, throwOnError: false }); } catch (e) { el.textContent = tex; } };
