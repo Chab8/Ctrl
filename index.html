@@ -332,13 +332,42 @@
       font: inherit
     }
 
-    .profile-copy { min-width: 0; flex: 1; display: block; }
-    #sidebarProfileTitle, #sidebarProfileAction { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    #sidebarProfileAction { min-height: 12px; }
-    #sidebarProfileAction.is-action { cursor: pointer; }
-    #sidebarProfileAction.is-action:hover { color: var(--ink); text-decoration: underline; }
-    html.sb-collapsed .profile-copy { display: none; }
-    html.sb-collapsed .profile { justify-content: center; padding-left: 0; padding-right: 0; }
+    .profile-copy {
+      min-width: 0;
+      flex: 1;
+      display: block;
+    }
+
+    #sidebarProfileTitle,
+    #sidebarProfileAction {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    #sidebarProfileAction {
+      min-height: 12px;
+    }
+
+    #sidebarProfileAction.is-action {
+      cursor: pointer;
+    }
+
+    #sidebarProfileAction.is-action:hover {
+      color: var(--ink);
+      text-decoration: underline;
+    }
+
+    html.sb-collapsed .profile-copy {
+      display: none;
+    }
+
+    html.sb-collapsed .profile {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+    }
 
     .avatar {
       width: 34px;
@@ -1369,7 +1398,9 @@
       display: none
     }
 
-    .mobile-profile { display: none; }
+    .mobile-profile {
+      display: none;
+    }
 
     .mobile-only {
       display: none
@@ -1628,10 +1659,22 @@
         box-shadow: 0 6px 24px #22231d18;
       }
 
-      .mobile-profile .avatar { flex: 0 0 34px; }
-      .mobile-profile .profile-copy { min-width: 0; max-width: min(210px, calc(100vw - 100px)); }
-      .mobile-profile #mobileProfileTitle { font-size: 11px; }
-      .mobile-profile #mobileProfileAction { font-size: 10px; }
+      .mobile-profile .avatar {
+        flex: 0 0 34px;
+      }
+
+      .mobile-profile .profile-copy {
+        min-width: 0;
+        max-width: min(210px, calc(100vw - 100px));
+      }
+
+      .mobile-profile #mobileProfileTitle {
+        font-size: 11px;
+      }
+
+      .mobile-profile #mobileProfileAction {
+        font-size: 10px;
+      }
 
       .mobile-nav {
         display: flex;
@@ -4416,12 +4459,17 @@
     }
 
     .view.enter .card,
+    .view.enter .mural-note,
     .view.enter .flow-metric,
     .view.enter .mail-folders,
     .view.enter .project-card,
     .view.enter .project-panel,
     .view.enter .cuisine-card,
-    .view.enter .cuisine-personal-form {
+    .view.enter .cuisine-personal-form,
+    .view.enter .study-folder,
+    .view.enter .study-subject,
+    .view.enter .study-metric,
+    .view.enter .study-form {
       animation: enterCard .95s var(--ease-out) both !important;
       animation-delay: calc(var(--d, 0) * 1ms) !important;
       will-change: transform, opacity, filter;
@@ -4436,7 +4484,8 @@
     .view.enter tbody tr,
     .view.enter .weather-hour,
     .view.enter .weather-day,
-    .view.enter .project-list-item {
+    .view.enter .project-list-item,
+    .view.enter .study-item {
       animation: enterRow .7s var(--ease-out) both !important;
       animation-delay: calc(var(--d, 0) * 1ms) !important;
     }
@@ -7432,7 +7481,8 @@
           </svg>Contraer menú</button>
         <button class="profile" id="sidebarProfile" type="button" aria-label="Iniciar sesión">
           <span class="avatar" id="sidebarProfileAvatar">MC</span>
-          <span class="profile-copy"><strong id="sidebarProfileTitle">Iniciar sesión</strong><span id="sidebarProfileAction"></span></span>
+          <span class="profile-copy"><strong id="sidebarProfileTitle">Iniciar sesión</strong><span
+              id="sidebarProfileAction"></span></span>
         </button>
       </div>
     </aside>
@@ -8015,17 +8065,65 @@
       </section>
       <section id="studyView" class="view" hidden>
         <div class="page-head" id="studyPageHead">
-          <div><div class="eyebrow">APRENDIZAJE Y ORGANIZACIÓN</div><h1 id="studyPageTitle">Estudio</h1><p id="studyPageDescription">Materias, apuntes, documentos, tareas y fechas en un solo lugar.</p></div>
-          <div class="study-actions"><button class="secondary" id="studyAddSubject" type="button"><i data-lucide="book-open"></i> Nueva materia</button><button class="primary" id="studyAddFolder" type="button"><i data-lucide="plus"></i> Nueva carpeta</button><button class="icon-btn" id="studyEditSubject" type="button" title="Editar materia" aria-label="Editar materia" hidden><i data-lucide="pencil"></i></button><button class="icon-btn" id="studyArchiveSubject" type="button" title="Archivar materia" aria-label="Archivar materia" hidden><i data-lucide="archive"></i></button><button class="icon-btn" id="studyDeleteSubject" type="button" title="Eliminar materia" aria-label="Eliminar materia" hidden><i data-lucide="trash-2"></i></button></div>
+          <div>
+            <div class="eyebrow">APRENDIZAJE Y ORGANIZACIÓN</div>
+            <h1 id="studyPageTitle">Estudio</h1>
+            <p id="studyPageDescription">Materias, apuntes, documentos, tareas y fechas en un solo lugar.</p>
+          </div>
+          <div class="study-actions"><button class="icon-btn" id="studyFolderBack" type="button" title="Volver"
+              aria-label="Volver" hidden><i data-lucide="arrow-left"></i></button><button class="icon-btn"
+              id="studyEditFolder" type="button" title="Editar carpeta" aria-label="Editar carpeta" hidden><i
+                data-lucide="pencil"></i></button><button class="icon-btn" id="studyDeleteFolder" type="button"
+              title="Eliminar carpeta" aria-label="Eliminar carpeta" hidden><i
+                data-lucide="trash-2"></i></button><button class="icon-btn" id="studyEditSubject" type="button"
+              title="Editar materia" aria-label="Editar materia" hidden><i data-lucide="pencil"></i></button><button
+              class="icon-btn" id="studyArchiveSubject" type="button" title="Archivar materia"
+              aria-label="Archivar materia" hidden><i data-lucide="archive"></i></button><button class="icon-btn"
+              id="studyDeleteSubject" type="button" title="Eliminar materia" aria-label="Eliminar materia" hidden><i
+                data-lucide="trash-2"></i></button><button class="secondary" id="studyAddSubject" type="button"><i
+                data-lucide="book-open"></i> Nueva materia</button><button class="primary" id="studyAddFolder"
+              type="button"><i data-lucide="plus"></i> Nueva carpeta</button></div>
         </div>
-        <div class="study-toolbar" id="studyToolbar"><label class="study-search"><i data-lucide="search"></i><input id="studySearch" type="search" placeholder="Buscar carpetas y materias…" aria-label="Buscar en Estudio"></label><div class="study-actions"><button class="secondary" id="studyFolderBack" type="button" title="Todas las carpetas" aria-label="Todas las carpetas" hidden><i data-lucide="arrow-left"></i></button><button class="icon-btn study-folder-action" id="studyEditFolder" type="button" title="Editar carpeta" aria-label="Editar carpeta" hidden><i data-lucide="pencil"></i></button><button class="icon-btn study-folder-action" id="studyDeleteFolder" type="button" title="Eliminar carpeta" aria-label="Eliminar carpeta" hidden><i data-lucide="trash-2"></i></button></div></div>
-        <div id="studyFoldersWrap"><div class="study-section-label" id="studyFolderLabel">CARPETAS</div><div class="study-folder-grid" id="studyFolderGrid"></div><div class="study-empty card" id="studyFolderEmpty" hidden><strong>Todavía no hay carpetas</strong>Creá una carpeta para organizar tus materias, trabajo o aprendizaje personal.</div></div>
-        <div class="study-section-label" id="studyAllSubjectsLabel">MATERIAS</div><div class="study-subject-grid" id="studySubjectGrid"></div><div class="study-empty card" id="studySubjectEmpty" hidden><strong>No hay materias para mostrar</strong>Creá una materia dentro de una carpeta para empezar.</div>
+        <div class="study-toolbar" id="studyToolbar"><label class="study-search"><i data-lucide="search"></i><input
+              id="studySearch" type="search" placeholder="Buscar carpetas y materias…"
+              aria-label="Buscar en Estudio"></label></div>
+        <div id="studyFoldersWrap">
+          <div class="study-section-label" id="studyFolderLabel">CARPETAS</div>
+          <div class="study-folder-grid" id="studyFolderGrid"></div>
+          <div class="study-empty card" id="studyFolderEmpty" hidden><strong>Todavía no hay carpetas</strong>Creá una
+            carpeta para organizar tus materias, trabajo o aprendizaje personal.</div>
+        </div>
+        <div class="study-section-label" id="studyAllSubjectsLabel">MATERIAS</div>
+        <div class="study-subject-grid" id="studySubjectGrid"></div>
+        <div class="study-empty card" id="studySubjectEmpty" hidden><strong>No hay materias para mostrar</strong>Creá
+          una materia dentro de una carpeta para empezar.</div>
         <section class="study-subject-detail" id="studySubjectDetail" hidden>
-          <div class="study-breadcrumb" hidden><button id="studyBreadcrumbFolders" type="button">Estudio</button><span>›</span><button id="studyBreadcrumbFolder" type="button">Carpeta</button><span>›</span><strong id="studySubjectCrumbName">Materia</strong></div>
-          <div class="study-subject-head" hidden><div><h2 id="studySubjectTitle">Materia</h2><p id="studySubjectDescription"></p></div></div>
-          <div class="study-tabs" id="studyTabs"><button class="study-tab active" data-study-tab="overview" type="button">Resumen</button><button class="study-tab" data-study-tab="notes" type="button">Apuntes</button><button class="study-tab" data-study-tab="files" type="button">Archivos</button><button class="study-tab" data-study-tab="tasks" type="button">Tareas</button><button class="study-tab" data-study-tab="dates" type="button">Fechas</button><button class="study-tab" data-study-tab="topics" type="button">Temario</button><button class="study-tab" data-study-tab="flashcards" type="button">Tarjetas</button><button class="study-tab" data-study-tab="grades" type="button">Calificaciones</button></div>
-          <div class="study-panel" data-study-panel="overview" id="studyOverview"></div><div class="study-panel" data-study-panel="notes" id="studyNotesPanel" hidden></div><div class="study-panel" data-study-panel="files" id="studyFilesPanel" hidden></div><div class="study-panel" data-study-panel="tasks" id="studyTasksPanel" hidden></div><div class="study-panel" data-study-panel="dates" id="studyDatesPanel" hidden></div><div class="study-panel" data-study-panel="topics" id="studyTopicsPanel" hidden></div><div class="study-panel" data-study-panel="flashcards" id="studyFlashcardsPanel" hidden></div><div class="study-panel" data-study-panel="grades" id="studyGradesPanel" hidden></div>
+          <div class="study-breadcrumb" hidden><button id="studyBreadcrumbFolders"
+              type="button">Estudio</button><span>›</span><button id="studyBreadcrumbFolder"
+              type="button">Carpeta</button><span>›</span><strong id="studySubjectCrumbName">Materia</strong></div>
+          <div class="study-subject-head" hidden>
+            <div>
+              <h2 id="studySubjectTitle">Materia</h2>
+              <p id="studySubjectDescription"></p>
+            </div>
+          </div>
+          <div class="study-tabs" id="studyTabs"><button class="study-tab active" data-study-tab="overview"
+              type="button">Resumen</button><button class="study-tab" data-study-tab="notes"
+              type="button">Apuntes</button><button class="study-tab" data-study-tab="files"
+              type="button">Archivos</button><button class="study-tab" data-study-tab="tasks"
+              type="button">Tareas</button><button class="study-tab" data-study-tab="dates"
+              type="button">Fechas</button><button class="study-tab" data-study-tab="topics"
+              type="button">Temario</button><button class="study-tab" data-study-tab="wall"
+              type="button">Mural</button><button class="study-tab" data-study-tab="grades"
+              type="button">Calificaciones</button></div>
+          <div class="study-panel" data-study-panel="wall" id="studyWallPanel" hidden></div>
+          <div class="study-panel" data-study-panel="notes" id="studyNotesPanel" hidden></div>
+          <div class="study-panel" data-study-panel="files" id="studyFilesPanel" hidden></div>
+          <div class="study-panel" data-study-panel="tasks" id="studyTasksPanel" hidden></div>
+          <div class="study-panel" data-study-panel="dates" id="studyDatesPanel" hidden></div>
+          <div class="study-panel" data-study-panel="topics" id="studyTopicsPanel" hidden></div>
+          <div class="study-panel" data-study-panel="flashcards" id="studyFlashcardsPanel" hidden></div>
+          <div class="study-panel" data-study-panel="grades" id="studyGradesPanel" hidden></div>
         </section>
       </section>
       <section id="projectsView" class="view" hidden>
@@ -8235,10 +8333,35 @@
       </section>
     </main>
   </div>
-  <nav class="mobile-nav" aria-label="Navegación móvil"><button class="active" data-page="home"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>Home</button><button data-page="finance"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="3"/><path d="M3 10h18M7 15h4"/></svg>Finanzas</button><button data-page="notes"><i data-lucide="notebook-pen"></i>Notas</button><button data-page="study"><i data-lucide="graduation-cap"></i>Estudio</button><button data-page="tasks"><svg viewBox="0 0 24 24"><path d="m4 12 4 4L20 4"/><path d="M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h10"/></svg>Tareas</button><button data-page="calendar"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>Calendario</button><button data-page="shop"><svg viewBox="0 0 24 24"><path d="M6 7h12l1 13H5z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>Compras</button><button data-page="weather"><svg viewBox="0 0 24 24"><path d="M20 15.5A4.5 4.5 0 0 0 18 7h-1A6 6 0 0 0 5 9a4 4 0 0 0 0 8h15z"/><path d="m8 20 1-2m5 2 1-2"/></svg>Clima</button><button data-page="projects"><i data-lucide="folder"></i>Proyectos</button><button data-page="cuisine"><i data-lucide="cooking-pot"></i>Cocina</button></nav>
+  <nav class="mobile-nav" aria-label="Navegación móvil"><button class="active" data-page="home"><svg
+        viewBox="0 0 24 24">
+        <rect x="3" y="3" width="7" height="7" rx="2" />
+        <rect x="14" y="3" width="7" height="7" rx="2" />
+        <rect x="3" y="14" width="7" height="7" rx="2" />
+        <rect x="14" y="14" width="7" height="7" rx="2" />
+      </svg>Home</button><button data-page="finance"><svg viewBox="0 0 24 24">
+        <rect x="3" y="5" width="18" height="15" rx="3" />
+        <path d="M3 10h18M7 15h4" />
+      </svg>Finanzas</button><button data-page="notes"><i data-lucide="notebook-pen"></i>Notas</button><button
+      data-page="study"><i data-lucide="graduation-cap"></i>Estudio</button><button data-page="tasks"><svg
+        viewBox="0 0 24 24">
+        <path d="m4 12 4 4L20 4" />
+        <path d="M20 12v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h10" />
+      </svg>Tareas</button><button data-page="calendar"><svg viewBox="0 0 24 24">
+        <rect x="3" y="5" width="18" height="16" rx="3" />
+        <path d="M16 3v4M8 3v4M3 10h18" />
+      </svg>Calendario</button><button data-page="shop"><svg viewBox="0 0 24 24">
+        <path d="M6 7h12l1 13H5z" />
+        <path d="M9 7a3 3 0 0 1 6 0" />
+      </svg>Compras</button><button data-page="weather"><svg viewBox="0 0 24 24">
+        <path d="M20 15.5A4.5 4.5 0 0 0 18 7h-1A6 6 0 0 0 5 9a4 4 0 0 0 0 8h15z" />
+        <path d="m8 20 1-2m5 2 1-2" />
+      </svg>Clima</button><button data-page="projects"><i data-lucide="folder"></i>Proyectos</button><button
+      data-page="cuisine"><i data-lucide="cooking-pot"></i>Cocina</button></nav>
   <button class="profile mobile-profile" id="mobileProfile" type="button" aria-label="Iniciar sesión">
     <span class="avatar" id="mobileProfileAvatar">MC</span>
-    <span class="profile-copy"><strong id="mobileProfileTitle">Iniciar sesión</strong><span id="mobileProfileAction"></span></span>
+    <span class="profile-copy"><strong id="mobileProfileTitle">Iniciar sesión</strong><span
+        id="mobileProfileAction"></span></span>
   </button>
   <div class="modal-backdrop" id="taskModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="taskModalTitle">
     <div class="modal task-modal">
@@ -9599,7 +9722,7 @@
         '.activity-amount', 'td.money', '.portfolio-value',
         '.budget-top > span', '.budget > div:last-child',
         '.agenda-count', '.mp-import-stat strong', '.mail-folder-count',
-        '#finIncomeCount', '#finExpenseCount'
+        '#finIncomeCount', '#finExpenseCount', '.study-metric strong'
       ].join(',');
 
       const NUM_RE = /\d{1,3}(?:\.\d{3})+(?:,\d+)?|\d+(?:,\d+)?/g;
@@ -9682,7 +9805,7 @@
 
       function setStagger(view) {
         const vr = view.getBoundingClientRect();
-        view.querySelectorAll('.card,.flow-metric,.mail-folders,.activity,.task,.task-row,.budget,.portfolio-row,.mail-row,tbody tr,.calendar-day,.project-card,.project-panel,.cuisine-card,.weather-hour,.weather-day,.project-list-item').forEach((el, i) => {
+        view.querySelectorAll('.card,.flow-metric,.mail-folders,.activity,.task,.task-row,.budget,.portfolio-row,.mail-row,tbody tr,.calendar-day,.project-card,.project-panel,.cuisine-card,.weather-hour,.weather-day,.project-list-item,.study-folder,.study-subject,.study-metric,.study-form,.study-item,.mural-note').forEach((el, i) => {
           const r = el.getBoundingClientRect();
           const x = Math.max(0, r.left - vr.left), y = Math.max(0, r.top - vr.top);
           el.style.setProperty('--d', Math.round(Math.min(900, 40 + y * 0.45 + x * 0.22 + (i % 6) * 8)));
@@ -9734,7 +9857,7 @@
         });
       }
 
-      const views = ['homeView', 'financeView', 'tasksView', 'calendarView', 'mailView', 'shopView', 'notesView', 'weatherView', 'projectsView', 'cuisineView', 'placeholderView'];
+      const views = ['homeView', 'financeView', 'tasksView', 'calendarView', 'mailView', 'shopView', 'notesView', 'weatherView', 'projectsView', 'cuisineView', 'placeholderView', 'studyView'];
       const activeView = () => views.map(id => document.getElementById(id)).find(v => v && !v.hidden);
       const afterPaint = fn => requestAnimationFrame(() => requestAnimationFrame(fn));
 
