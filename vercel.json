@@ -3,6 +3,10 @@
         {
             "source": "/api/pitchapi/:path*",
             "destination": "/api/pitchapi?path=:path*"
+        },
+        {
+            "source": "/api/tinyplates/:path*",
+            "destination": "/api/tinyplates?path=:path*"
         }
     ]
 }
