@@ -194,12 +194,16 @@
       : '<div class="cuisine-card-image-placeholder"><i data-lucide="cooking-pot"></i></div>';
     return '<article class="cuisine-card">'
       + imageMarkup
-      + '<div class="cuisine-card-content"><div class="cuisine-card-top"><span>' + esc(typeText(recipe)) + '</span><span class="cuisine-difficulty">' + esc(difficultyLabel(diff)) + '</span></div>'
+      + '<div class="cuisine-card-content"><div class="cuisine-card-top"><span>' + esc(typeText(recipe)) + (recipe.isPersonal ? ' · Propia' : '') + '</span><span class="cuisine-difficulty">' + esc(difficultyLabel(diff)) + '</span></div>'
       + '<h3>' + esc(title) + '</h3>'
       + (summary ? '<p class="cuisine-card-description">' + esc(summary) + '</p>' : '')
       + '<div class="cuisine-card-meta"><span><i data-lucide="clock-3"></i>' + esc(time) + '</span><span><i data-lucide="list-checks"></i>' + (recipe.ingredientCount || (recipe.ingredients || []).length || '—') + ' ingredientes</span></div>'
       + '</div><div class="cuisine-card-actions"><button type="button" class="cuisine-open-btn" data-cuisine-open="' + esc(recipe.id) + '">Ver receta <i data-lucide="arrow-up-right"></i></button>'
-      + '<button type="button" class="cuisine-favorite-btn" data-cuisine-favorite="' + esc(recipe.id) + '" aria-label="' + (saved ? 'Quitar de favoritas' : 'Guardar en favoritas') + '" aria-pressed="' + saved + '"><i data-lucide="heart"></i></button></div>'
+      + (recipe.isPersonal
+          ? '<button type="button" class="cuisine-action-btn" data-cuisine-edit="' + esc(recipe.id) + '" title="Editar receta" aria-label="Editar receta"><i data-lucide="pencil"></i></button>'
+            + '<button type="button" class="cuisine-action-btn cuisine-action-danger" data-cuisine-delete="' + esc(recipe.id) + '" title="Eliminar receta" aria-label="Eliminar receta"><i data-lucide="trash-2"></i></button>'
+          : '')
+      + '<button type="button" class="cuisine-action-btn cuisine-fav-btn" data-cuisine-favorite="' + esc(recipe.id) + '" aria-label="' + (saved ? 'Quitar de favoritas' : 'Guardar en favoritas') + '" title="' + (saved ? 'Quitar de favoritas' : 'Guardar en favoritas') + '" aria-pressed="' + saved + '"><i data-lucide="heart"></i></button></div>'
       + (src ? '<span class="sr-only">Fuente: ' + esc(sourceName(recipe)) + '</span>' : '') + '</article>';
   }
   function filteredRecipes() {
@@ -219,7 +223,20 @@
     return list;
   }
   function renderCards() {
-    if (currentRecipe) { $('cuisineRecipeGrid').hidden = true; $('cuisineResultsMeta').hidden = true; $('cuisineEmpty').hidden = true; return; }
+    if (currentRecipe) {
+      $('cuisineRecipeGrid').hidden = true;
+      $('cuisineResultsMeta').hidden = true;
+      $('cuisineEmpty').hidden = true;
+      const pageHead = document.querySelector('.cuisine-page-head');
+      if (pageHead) pageHead.hidden = true;
+      const toolbar = document.querySelector('.cuisine-toolbar');
+      if (toolbar) toolbar.hidden = true;
+      return;
+    }
+    const pageHead = document.querySelector('.cuisine-page-head');
+    if (pageHead) pageHead.hidden = false;
+    const toolbar = document.querySelector('.cuisine-toolbar');
+    if (toolbar) toolbar.hidden = false;
     $('cuisineDetail').hidden = true;
     $('cuisineRecipeGrid').hidden = false;
     const list = filteredRecipes();
@@ -250,30 +267,72 @@
     const ingredientRows = ingredients.map(item => '<li><span>' + esc(item.display || item.original || item.name || 'Ingrediente') + (item.optional ? ' <small>(opcional)</small>' : '') + '</span></li>').join('');
     const stepRows = steps.map((step, index) => '<li><span class="cuisine-step-number">' + esc(step.step || index + 1) + '</span><p>' + esc(typeof step === 'string' ? step : step.text || '') + '</p></li>').join('');
     const description = recipe.description ? '<p class="cuisine-detail-description">' + esc(recipe.description) + '</p>' : '';
+    
+    // Ocultar catálogo para que la receta ocupe toda la pantalla
+    const pageHead = document.querySelector('.cuisine-page-head');
+    if (pageHead) pageHead.hidden = true;
+    const toolbar = document.querySelector('.cuisine-toolbar');
+    if (toolbar) toolbar.hidden = true;
+    const personalPanel = $('cuisinePersonalPanel');
+    if (personalPanel) personalPanel.hidden = true;
     $('cuisineRecipeGrid').hidden = true;
     $('cuisineResultsMeta').hidden = true;
     $('cuisineEmpty').hidden = true;
+    $('cuisineStatus').hidden = true;
     $('cuisineDetail').hidden = false;
+
+    // Badges / metadatos unificados con icono y texto
+    const metaChips = [
+      '<span class="cuisine-detail-chip"><i data-lucide="clock-3"></i> ' + esc(timeText(recipe)) + '</span>',
+      '<span class="cuisine-detail-chip"><i data-lucide="gauge"></i> ' + esc(difficultyLabel(difficulty(recipe))) + (recipe.isPersonal ? '' : ' · estimada') + '</span>',
+      '<span class="cuisine-detail-chip"><i data-lucide="utensils"></i> ' + esc(servings) + '</span>',
+      recipe.isPersonal ? '<span class="cuisine-detail-chip cuisine-personal-chip"><i data-lucide="sparkles"></i> Receta propia</span>' : ''
+    ].filter(Boolean).join('');
+
+    // Acciones: solo icono sin texto para favoritos, editar, eliminar y fuente
+    const saved = isFavorite(recipe.id);
+    const actionsMarkup = '<div class="cuisine-detail-actions">'
+      + '<button type="button" class="cuisine-action-btn cuisine-fav-btn" id="cuisineDetailFavorite" title="' + (saved ? 'Quitar de favoritas' : 'Guardar en favoritas') + '" aria-label="' + (saved ? 'Quitar de favoritas' : 'Guardar en favoritas') + '" aria-pressed="' + saved + '"><i data-lucide="heart"></i></button>'
+      + (recipe.isPersonal
+          ? '<button type="button" class="cuisine-action-btn" id="cuisineDetailEdit" title="Editar receta" aria-label="Editar receta"><i data-lucide="pencil"></i></button>'
+            + '<button type="button" class="cuisine-action-btn cuisine-action-danger" id="cuisineDetailDelete" title="Eliminar receta" aria-label="Eliminar receta"><i data-lucide="trash-2"></i></button>'
+          : '')
+      + (source ? '<a class="cuisine-action-btn" href="' + esc(source) + '" target="_blank" rel="noopener noreferrer" title="Ver fuente original (' + esc(sourceName(recipe)) + ')" aria-label="Ver fuente original"><i data-lucide="external-link"></i></a>' : '')
+      + '</div>';
+
     $('cuisineDetail').innerHTML = '<button type="button" class="cuisine-detail-back" id="cuisineBackBtn"><i data-lucide="arrow-left"></i> Volver a recetas</button>'
-      + '<div class="cuisine-detail-hero"><div><div class="cuisine-detail-eyebrow">' + esc(typeText(recipe)) + ' · ' + esc(recipe.language === 'en' ? 'English' : 'Español') + '</div><h2>' + esc(recipe.title || 'Receta') + '</h2>' + description
-      + '<div class="cuisine-detail-meta"><span><i data-lucide="clock-3"></i> ' + esc(timeText(recipe)) + '</span><span>' + esc(difficultyLabel(difficulty(recipe))) + (recipe.isPersonal ? '' : ' · estimada') + '</span><span>' + esc(servings) + '</span></div>'
-      + '<div class="cuisine-detail-actions"><button class="secondary" type="button" id="cuisineDetailFavorite" aria-pressed="' + isFavorite(recipe.id) + '"><i data-lucide="heart"></i>' + (isFavorite(recipe.id) ? ' Quitar de favoritas' : ' Guardar favorita') + '</button>'
-      + (source ? '<a class="primary" href="' + esc(source) + '" target="_blank" rel="noopener noreferrer"><i data-lucide="external-link"></i> Fuente original</a>' : '') + '</div>'
+      + '<div class="cuisine-detail-hero"><div><div class="cuisine-detail-eyebrow">' + esc(typeText(recipe)) + (!recipe.isPersonal && recipe.language === 'en' ? ' · English' : '') + '</div><h2>' + esc(recipe.title || 'Receta') + '</h2>' + description
+      + '<div class="cuisine-detail-meta">' + metaChips + '</div>'
+      + actionsMarkup
       + (source ? '<div class="cuisine-detail-source">Receta de <a href="' + esc(source) + '" target="_blank" rel="noopener noreferrer">' + esc(sourceName(recipe)) + '</a>. Consultá la publicación original para más contexto.</div>' : '')
       + '</div>' + (image ? '<img class="cuisine-detail-image" src="' + esc(image) + '" alt="' + esc(recipe.title || 'Receta') + '">' : '<div class="cuisine-card-image-placeholder"><i data-lucide="cooking-pot"></i></div>') + '</div>'
       + '<div class="cuisine-detail-columns"><section class="cuisine-detail-section"><h3>Ingredientes <span style="font-weight:400;color:var(--muted);font-size:11px">(' + ingredients.length + ')</span></h3>'
       + (ingredients.length ? '<ul class="cuisine-ingredient-list">' + ingredientRows + '</ul>' : '<p class="cuisine-card-description">Esta receta no tiene ingredientes estructurados disponibles.</p>')
       + (nutritionBits ? '<div class="cuisine-nutrition">' + nutritionBits + '</div>' : '') + '</section>'
       + '<section class="cuisine-detail-section"><h3>Preparación</h3>' + (steps.length ? '<ol class="cuisine-step-list">' + stepRows + '</ol>' : '<p class="cuisine-card-description">Esta receta no tiene instrucciones disponibles.</p>') + '</section></div>';
+    
     $('cuisineBackBtn').onclick = closeDetail;
     $('cuisineDetailFavorite').onclick = () => toggleFavorite(currentRecipe);
+    if (recipe.isPersonal) {
+      const editBtn = $('cuisineDetailEdit');
+      if (editBtn) editBtn.onclick = () => editPersonalRecipe(recipe);
+      const delBtn = $('cuisineDetailDelete');
+      if (delBtn) delBtn.onclick = () => deletePersonalRecipe(recipe.id);
+    }
     if (window.lucide && window.lucide.createIcons) window.lucide.createIcons({attrs:{'stroke-width':1.8}});
+    window.scrollTo({top:0,behavior:'smooth'});
   }
   function closeDetail() {
     currentRecipe = null;
     $('cuisineDetail').hidden = true;
+    const pageHead = document.querySelector('.cuisine-page-head');
+    if (pageHead) pageHead.hidden = false;
+    const toolbar = document.querySelector('.cuisine-toolbar');
+    if (toolbar) toolbar.hidden = false;
+    $('cuisineStatus').hidden = false;
     $('cuisineRecipeGrid').hidden = false;
     renderCards();
+    window.scrollTo({top:0,behavior:'smooth'});
   }
   async function openRecipe(id) {
     const fromList = [...personalRecipes, ...activeRecipes].find(item => String(item.id) === String(id));
@@ -366,49 +425,108 @@
       if (!loaded || !activeRecipes.length) load();
     }
   }
+  let personalImageData = '';
+  function refreshPersonalPreview() {
+    const title = $('cuisinePersonalTitle')?.value.trim();
+    const description = $('cuisinePersonalDescription')?.value.trim();
+    const ingredients = ($('cuisinePersonalIngredients')?.value || '').split(/\n|,/).map(s => s.trim()).filter(Boolean);
+    const steps = ($('cuisinePersonalSteps')?.value || '').split(/\n/).map(s => s.trim()).filter(Boolean);
+    const minutes = Number($('cuisinePersonalMinutes')?.value) || 0;
+    const servings = $('cuisinePersonalServings')?.value.trim();
+    const difficultyValue = $('cuisinePersonalDifficulty')?.value || 'medium';
+    if ($('cuisinePersonalPreviewTitle')) $('cuisinePersonalPreviewTitle').textContent = title || 'Nombre de tu receta';
+    if ($('cuisinePersonalPreviewDescription')) $('cuisinePersonalPreviewDescription').textContent = description || 'La descripción va a aparecer acá.';
+    if ($('cuisinePersonalPreviewDifficulty')) $('cuisinePersonalPreviewDifficulty').textContent = difficultyLabel(difficultyValue);
+    if ($('cuisinePersonalPreviewTime')) $('cuisinePersonalPreviewTime').textContent = minutes > 0 ? minutes + ' min' : 'Tiempo no indicado';
+    if ($('cuisinePersonalPreviewIngredients')) $('cuisinePersonalPreviewIngredients').textContent = ingredients.length + (ingredients.length === 1 ? ' ingrediente' : ' ingredientes');
+    if ($('cuisinePersonalPreviewSteps')) $('cuisinePersonalPreviewSteps').textContent = steps.length + (steps.length === 1 ? ' paso' : ' pasos');
+    if ($('cuisinePersonalPreviewServings')) $('cuisinePersonalPreviewServings').textContent = servings || 'Porciones no indicadas';
+  }
+  function setPersonalPreviewImage(imageData) {
+    const previewImage = $('cuisinePersonalPreviewImage');
+    const previewPlaceholder = $('cuisinePersonalPreviewPlaceholder');
+    if (!previewImage || !previewPlaceholder) return;
+    previewImage.src = imageData || '';
+    previewImage.hidden = !imageData;
+    previewPlaceholder.hidden = !!imageData;
+  }
+  function closePersonalForm(reset) {
+    const personalPanel = $('cuisinePersonalPanel');
+    const personalForm = $('cuisinePersonalForm');
+    if (reset && personalForm) {
+      personalForm.reset();
+      personalForm.dataset.editId = '';
+      personalImageData = '';
+      const heading = $('cuisinePersonalHeading');
+      if (heading) heading.textContent = 'Crear una receta';
+      const sub = heading?.closest('.cuisine-personal-heading-copy')?.querySelector('p');
+      if (sub) sub.textContent = 'Completá los datos y mirá cómo va a quedar antes de guardarla.';
+      const submitBtn = personalForm.querySelector('button[type="submit"]');
+      if (submitBtn) submitBtn.innerHTML = '<i data-lucide="check"></i> Guardar receta';
+      const previewImage = $('cuisinePersonalPreviewImage');
+      const previewPlaceholder = $('cuisinePersonalPreviewPlaceholder');
+      if (previewImage) { previewImage.src = ''; previewImage.hidden = true; }
+      if (previewPlaceholder) previewPlaceholder.hidden = false;
+      refreshPersonalPreview();
+    }
+    if (personalPanel) personalPanel.hidden = true;
+    if (window.lucide && window.lucide.createIcons) window.lucide.createIcons({attrs:{'stroke-width':1.8}});
+  }
+  function editPersonalRecipe(recipe) {
+    if (!recipe) return;
+    if (currentRecipe) closeDetail();
+    const personalPanel = $('cuisinePersonalPanel');
+    const personalForm = $('cuisinePersonalForm');
+    if (!personalPanel || !personalForm) return;
+
+    personalForm.dataset.editId = String(recipe.id);
+    const heading = $('cuisinePersonalHeading');
+    if (heading) heading.textContent = 'Editar receta';
+    const sub = heading?.closest('.cuisine-personal-heading-copy')?.querySelector('p');
+    if (sub) sub.textContent = 'Modificá los datos de tu receta y guardá los cambios.';
+    const submitBtn = personalForm.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.innerHTML = '<i data-lucide="check"></i> Guardar cambios';
+
+    if ($('cuisinePersonalTitle')) $('cuisinePersonalTitle').value = recipe.title || '';
+    if ($('cuisinePersonalDescription')) $('cuisinePersonalDescription').value = recipe.description || '';
+    if ($('cuisinePersonalDifficulty')) $('cuisinePersonalDifficulty').value = recipe.difficulty || 'medium';
+    if ($('cuisinePersonalIngredients')) $('cuisinePersonalIngredients').value = (recipe.ingredients || []).map(i => typeof i === 'string' ? i : i.display || i.name || '').filter(Boolean).join('\n');
+    if ($('cuisinePersonalSteps')) $('cuisinePersonalSteps').value = (recipe.instructions || []).map(s => typeof s === 'string' ? s : s.text || '').filter(Boolean).join('\n');
+    const mins = recipe.times && recipe.times.total && recipe.times.total.seconds ? Math.round(recipe.times.total.seconds / 60) : '';
+    if ($('cuisinePersonalMinutes')) $('cuisinePersonalMinutes').value = mins;
+    if ($('cuisinePersonalServings')) $('cuisinePersonalServings').value = recipe.servings || '';
+
+    personalImageData = recipe.image || '';
+    setPersonalPreviewImage(personalImageData);
+    refreshPersonalPreview();
+
+    personalPanel.hidden = false;
+    personalPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(() => $('cuisinePersonalTitle')?.focus({ preventScroll: true }), 50);
+    if (window.lucide && window.lucide.createIcons) window.lucide.createIcons({attrs:{'stroke-width':1.8}});
+  }
+  function deletePersonalRecipe(id) {
+    const recipe = personalRecipes.find(r => String(r.id) === String(id));
+    if (!recipe) return;
+    if (!confirm('¿Eliminar la receta “' + (recipe.title || 'esta receta') + '”?')) return;
+    personalRecipes = personalRecipes.filter(r => String(r.id) !== String(id));
+    favorites = favorites.filter(r => String(r.id) !== String(id));
+    writeStorage(PERSONAL_KEY, personalRecipes);
+    writeStorage(FAVORITES_KEY, favorites);
+    if (currentRecipe && String(currentRecipe.id) === String(id)) {
+      closeDetail();
+    } else {
+      renderCards();
+    }
+    status('Receta eliminada.');
+    if (typeof window.toast === 'function') window.toast('Receta eliminada');
+  }
   function bind() {
     $('cuisineSearchForm').addEventListener('submit', event => { event.preventDefault(); currentRecipe = null; load(true); });
     ['cuisineType','cuisineMaxTime','cuisineDifficulty'].forEach(id => $(id).addEventListener('change', renderCards));
     $('cuisineFavoritesToggle').addEventListener('click', toggleFavoritesView);
     const personalPanel = $('cuisinePersonalPanel');
     const personalForm = $('cuisinePersonalForm');
-    let personalImageData = '';
-    const closePersonalForm = reset => {
-      if (reset && personalForm) {
-        personalForm.reset();
-        personalImageData = '';
-        const previewImage = $('cuisinePersonalPreviewImage');
-        const previewPlaceholder = $('cuisinePersonalPreviewPlaceholder');
-        if (previewImage) { previewImage.src = ''; previewImage.hidden = true; }
-        if (previewPlaceholder) previewPlaceholder.hidden = false;
-        refreshPersonalPreview();
-      }
-      if (personalPanel) personalPanel.hidden = true;
-    };
-    const refreshPersonalPreview = () => {
-      const title = $('cuisinePersonalTitle')?.value.trim();
-      const description = $('cuisinePersonalDescription')?.value.trim();
-      const ingredients = ($('cuisinePersonalIngredients')?.value || '').split(/\n|,/).map(s => s.trim()).filter(Boolean);
-      const steps = ($('cuisinePersonalSteps')?.value || '').split(/\n/).map(s => s.trim()).filter(Boolean);
-      const minutes = Number($('cuisinePersonalMinutes')?.value) || 0;
-      const servings = $('cuisinePersonalServings')?.value.trim();
-      const difficultyValue = $('cuisinePersonalDifficulty')?.value || 'medium';
-      $('cuisinePersonalPreviewTitle').textContent = title || 'Nombre de tu receta';
-      $('cuisinePersonalPreviewDescription').textContent = description || 'La descripción va a aparecer acá.';
-      $('cuisinePersonalPreviewDifficulty').textContent = difficultyLabel(difficultyValue);
-      $('cuisinePersonalPreviewTime').textContent = minutes > 0 ? minutes + ' min' : 'Tiempo no indicado';
-      $('cuisinePersonalPreviewIngredients').textContent = ingredients.length + (ingredients.length === 1 ? ' ingrediente' : ' ingredientes');
-      $('cuisinePersonalPreviewSteps').textContent = steps.length + (steps.length === 1 ? ' paso' : ' pasos');
-      $('cuisinePersonalPreviewServings').textContent = servings || 'Porciones no indicadas';
-    };
-    const setPersonalPreviewImage = imageData => {
-      const previewImage = $('cuisinePersonalPreviewImage');
-      const previewPlaceholder = $('cuisinePersonalPreviewPlaceholder');
-      if (!previewImage || !previewPlaceholder) return;
-      previewImage.src = imageData || '';
-      previewImage.hidden = !imageData;
-      previewPlaceholder.hidden = !!imageData;
-    };
     const processRecipeImage = file => new Promise((resolve, reject) => {
       if (!file) return resolve('');
       if (!/^image\/(jpeg|png|webp)$/.test(file.type)) return reject(new Error('Elegí una imagen JPG, PNG o WebP.'));
@@ -435,11 +553,14 @@
     });
     if ($('cuisineAddRecipeBtn')) $('cuisineAddRecipeBtn').addEventListener('click', () => {
       if (!personalPanel) return;
-      personalPanel.hidden = !personalPanel.hidden;
-      if (!personalPanel.hidden) {
+      if (personalPanel.hidden) {
+        closePersonalForm(true);
+        personalPanel.hidden = false;
         refreshPersonalPreview();
         personalPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
         $('cuisinePersonalTitle').focus({ preventScroll: true });
+      } else {
+        closePersonalForm(true);
       }
     });
     if (personalForm) {
@@ -471,6 +592,36 @@
         const ingredientText = $('cuisinePersonalIngredients').value.trim();
         const stepText = $('cuisinePersonalSteps').value.trim();
         if (!title || !ingredientText || !stepText) { status('Completá el nombre, los ingredientes y la preparación.', true); return; }
+        
+        const editId = personalForm.dataset.editId;
+        if (editId) {
+          const recipe = personalRecipes.find(item => String(item.id) === String(editId));
+          if (recipe) {
+            recipe.title = title;
+            recipe.description = $('cuisinePersonalDescription').value.trim();
+            if (personalImageData !== undefined) recipe.image = personalImageData;
+            recipe.difficulty = $('cuisinePersonalDifficulty').value || 'medium';
+            recipe.ingredients = ingredientText.split(/\n|,/).map(s => s.trim()).filter(Boolean).map(display => ({display}));
+            recipe.instructions = stepText.split(/\n/).map(s => s.trim()).filter(Boolean);
+            recipe.servings = $('cuisinePersonalServings').value.trim() || 'A gusto';
+            recipe.times = { total: { seconds: Math.max(0, Number($('cuisinePersonalMinutes').value) || 0) * 60 } };
+            
+            const favIdx = favorites.findIndex(item => String(item.id) === String(editId));
+            if (favIdx >= 0) {
+              favorites[favIdx] = favoriteMeta(recipe);
+              writeStorage(FAVORITES_KEY, favorites);
+            }
+
+            if (writeStorage(PERSONAL_KEY, personalRecipes)) {
+              closePersonalForm(true);
+              renderCards();
+              status('Receta actualizada con éxito.');
+              if (typeof window.toast === 'function') window.toast('Receta actualizada');
+            }
+            return;
+          }
+        }
+
         const recipe = {
           id: 'personal-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7),
           title, description: $('cuisinePersonalDescription').value.trim(),
@@ -488,6 +639,7 @@
           showingFavorites = false;
           $('cuisineFavoritesToggle').setAttribute('aria-pressed', 'false');
           currentRecipe = null; renderCards(); status('Tu receta se guardó en este dispositivo.');
+          if (typeof window.toast === 'function') window.toast('Receta guardada');
         } else {
           personalRecipes = personalRecipes.filter(item => item.id !== recipe.id);
         }
@@ -496,8 +648,22 @@
     $('cuisineRecipeGrid').addEventListener('click', event => {
       const fav = event.target.closest('[data-cuisine-favorite]');
       if (fav) {
-        const recipe = activeRecipes.find(item => String(item.id) === fav.dataset.cuisineFavorite) || favorites.find(item => String(item.id) === fav.dataset.cuisineFavorite);
+        event.stopPropagation();
+        const recipe = [...personalRecipes, ...activeRecipes, ...favorites].find(item => String(item.id) === fav.dataset.cuisineFavorite);
         if (recipe) toggleFavorite(recipe);
+        return;
+      }
+      const edit = event.target.closest('[data-cuisine-edit]');
+      if (edit) {
+        event.stopPropagation();
+        const recipe = personalRecipes.find(item => String(item.id) === edit.dataset.cuisineEdit);
+        if (recipe) editPersonalRecipe(recipe);
+        return;
+      }
+      const del = event.target.closest('[data-cuisine-delete]');
+      if (del) {
+        event.stopPropagation();
+        deletePersonalRecipe(del.dataset.cuisineDelete);
         return;
       }
     });
