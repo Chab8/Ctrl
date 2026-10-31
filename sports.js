@@ -387,7 +387,7 @@
       const k = addDays(ui.day, o);
       return '<button type="button" class="sp-dayb' + (k === ui.day ? ' active' : '') + (k === t ? ' today' : '') + '" data-day="' + k + '"><small>' + esc(fmtDay(k, { weekday: 'short' }).replace('.', '')) + '</small><b>' + fromKey(k).getDate() + '</b></button>';
     }).join('');
-    $('spDayTitle').textContent = (ui.day === t ? 'Hoy · ' : '') + fmtDay(ui.day);
+    const dayLabel = fmtDay(ui.day); $('spDayTitle').textContent = (ui.day === t ? 'Hoy · ' : '') + dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1);
     $('spDayInput').value = ui.day;
   }
   async function renderDay(force, silent) {
@@ -418,7 +418,7 @@
   }
   function paintFollowing() {
     const s = store();
-    const chip = (kind, o) => '<span class="sp-chip">' + (kind === 'team' ? crest(o) : (leagueImg(o.id) ? '<img class="sp-crest sm" src="' + esc(leagueImg(o.id)) + '" alt="">' : '')) + '<span>' + esc(o.name) + '</span><button type="button" data-unfollow-' + kind + '="' + esc(o.id) + '" aria-label="Dejar de seguir ' + esc(o.name) + '">×</button></span>';
+    const chip = (kind, o) => '<span class="sp-chip">' + (kind === 'team' ? crest(o) : (leagueImg(o.id) ? '<img class="sp-crest sm" src="' + esc(leagueImg(o.id)) + '" alt="">' : '')) + '<span>' + esc(o.name) + '</span><button type="button" data-unfollow-' + kind + '="' + esc(o.id) + '" aria-label="Dejar de seguir ' + esc(o.name) + '"><i data-lucide="x"></i></button></span>';
     $('spFollowing').innerHTML = (s.teams.length || s.leagues.length)
       ? (s.teams.length ? '<div class="sp-sub">Equipos y selecciones</div><div class="sp-chips">' + s.teams.map(t => chip('team', t)).join('') + '</div>' : '')
       + (s.leagues.length ? '<div class="sp-sub">Competiciones</div><div class="sp-chips">' + s.leagues.map(l => chip('league', l)).join('') + '</div>' : '')
@@ -656,7 +656,8 @@
     if (!side) return '';
     const st = side.starters || [], subs = side.subs || [], coords = st.some(p => p.pitch_x || p.pitch_y);
     const last = n => String(n || '').trim().split(/\s+/).slice(-1)[0];
-    const pitch = coords ? '<div class="sp-pitch">' + st.map(p => '<div class="sp-pl" style="left:' + Math.min(92, Math.max(8, (p.pitch_x || 0) * 100)) + '%;top:' + Math.min(93, Math.max(7, (1 - (p.pitch_y || 0)) * 100)) + '%"><b>' + esc(p.shirt_number || '') + '</b><span>' + esc(last(p.name)) + (p.is_captain ? ' (C)' : '') + '</span></div>').join('') + '</div>'
+    // pitch_x es la profundidad (0 = arco propio) y pitch_y el ancho: arquero abajo, delanteros arriba
+    const pitch = coords ? '<div class="sp-pitch"><span class="sp-box t"></span><span class="sp-box b"></span>' + st.map(p => '<div class="sp-pl" style="left:' + Math.min(90, Math.max(10, (1 - (p.pitch_y || 0)) * 100)) + '%;top:' + Math.min(92, Math.max(8, (1 - (p.pitch_x || 0)) * 100)) + '%"><b>' + esc(p.shirt_number || '') + '</b><span>' + esc(last(p.name)) + (p.is_captain ? ' (C)' : '') + '</span></div>').join('') + '</div>'
       : '<div class="sp-list">' + st.map(p => '<div>' + esc(p.shirt_number || '') + ' · ' + esc(p.name) + '</div>').join('') + '</div>';
     return '<div class="sp-lineup"><div class="sp-sub" style="margin-top:0">' + esc(team.name) + (side.formation ? ' · ' + esc(side.formation) : '') + '</div>'
       + (side.confirmed === false ? '<div class="sp-note">Alineación probable (aún no confirmada)</div>' : '') + pitch
@@ -708,7 +709,7 @@
 .sp-col{display:grid;gap:15px;min-width:0}
 .sp-daybar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .sp-daybar .icon-btn{width:34px;height:34px;font-size:18px;line-height:1}
-.sp-daytitle{font-size:14px;font-weight:600;letter-spacing:-.3px;text-transform:capitalize;flex:1;min-width:140px}
+.sp-daytitle{font-size:14px;font-weight:600;letter-spacing:-.3px;flex:1;min-width:140px}
 .sp-strip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-bottom:14px}
 .sp-dayb{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:12px;padding:8px 2px;display:grid;gap:3px;justify-items:center}
 .sp-dayb small{font:11px 'DM Mono',monospace;text-transform:uppercase;color:var(--muted)}
@@ -802,6 +803,9 @@
 .sp-pitch{position:relative;aspect-ratio:3/4;background:linear-gradient(#5f8c5b,#4d7a4d);border-radius:14px;overflow:hidden}
 .sp-pitch:before{content:'';position:absolute;inset:6px;border:1.5px solid #ffffff59;border-radius:6px}
 .sp-pitch:after{content:'';position:absolute;left:6px;right:6px;top:50%;border-top:1.5px solid #ffffff59}
+.sp-box{position:absolute;left:30%;right:30%;height:12%;border:1.5px solid #ffffff59}
+.sp-box.t{top:6px;border-top:0}
+.sp-box.b{bottom:6px;border-bottom:0}
 .sp-pl{position:absolute;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:2px;width:60px;z-index:1}
 .sp-pl b{width:24px;height:24px;border-radius:50%;background:#fff;color:#243019;display:grid;place-items:center;font:600 10px 'DM Mono',monospace}
 .sp-pl span{font-size:11px;color:#fff;text-shadow:0 1px 2px #0009;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60px}
@@ -827,23 +831,23 @@ html[data-theme="dark"] .sp-table tr.f td{background:color-mix(in srgb,var(--acc
 }`;
 
   const SECTION = `
-<div class="page-head"><div><div class="eyebrow">TU FÚTBOL, EN CONTEXTO</div><h1>Deportes<span>.</span></h1><p>Partidos, resultados y tablas de los equipos y competiciones que seguís.</p></div>
-<button class="primary" id="spManageBtn" type="button"><span aria-hidden="true">＋</span> Seguir</button></div>
+<div class="page-head"><div><h1>Deportes<span>.</span></h1></div>
+<button class="primary" id="spManageBtn" type="button"><i data-lucide="plus"></i> Seguir</button></div>
 <div class="sp-tabs"><div class="flow-seg" role="tablist"><button type="button" class="active" data-sp-tab="matches">Partidos</button><button type="button" data-sp-tab="tables">Tablas y competiciones</button></div></div>
 <div id="spTabMatches"><div class="sp-layout">
 <div class="card"><div class="card-head"><div><div class="card-title">Partidos del día</div><div class="card-sub" id="spDaySub"></div></div>
 <div class="flow-seg" role="group" aria-label="Qué partidos mostrar"><button type="button" data-sp-scope="mine">Mis seguidos</button><button type="button" data-sp-scope="all">Todos</button></div></div>
-<div class="sp-daybar"><button type="button" class="icon-btn" data-sp-shift="-1" aria-label="Día anterior">‹</button><div class="sp-daytitle" id="spDayTitle"></div><button type="button" class="icon-btn" data-sp-shift="1" aria-label="Día siguiente">›</button><input type="date" id="spDayInput" aria-label="Elegir fecha"><button type="button" class="secondary" id="spTodayBtn">Hoy</button><button type="button" class="icon-btn" id="spRefreshBtn" aria-label="Actualizar" title="Actualizar">↻</button></div>
+<div class="sp-daybar"><button type="button" class="icon-btn" data-sp-shift="-1" aria-label="Día anterior"><i data-lucide="chevron-left"></i></button><div class="sp-daytitle" id="spDayTitle"></div><button type="button" class="icon-btn" data-sp-shift="1" aria-label="Día siguiente"><i data-lucide="chevron-right"></i></button><input type="date" id="spDayInput" aria-label="Elegir fecha"><button type="button" class="secondary" id="spTodayBtn">Hoy</button><button type="button" class="icon-btn" id="spRefreshBtn" aria-label="Actualizar" title="Actualizar"><i data-lucide="refresh-cw"></i></button></div>
 <div class="sp-strip" id="spStrip"></div><div id="spDayList"></div></div>
 <div class="sp-col">
 <div class="card"><div class="card-head"><div><div class="card-title">Siguiendo</div><div class="card-sub">Equipos, selecciones y competiciones</div></div><button class="text-action" type="button" data-sp-open="manage">Gestionar</button></div><div id="spFollowing"></div></div>
-<div class="card"><div class="card-head"><div><div class="card-title">Próximos partidos</div><div class="card-sub">Lo que viene de lo que seguís</div></div><button class="text-action" type="button" data-sp-retry="upcoming" title="Actualizar">↻</button></div><div id="spUpcoming"></div></div>
+<div class="card"><div class="card-head"><div><div class="card-title">Próximos partidos</div><div class="card-sub">Lo que viene de lo que seguís</div></div><button class="text-action" type="button" data-sp-retry="upcoming" title="Actualizar" aria-label="Actualizar"><i data-lucide="refresh-cw"></i></button></div><div id="spUpcoming"></div></div>
 </div></div></div>
 <div id="spTabTables" hidden><div class="card"><div class="sp-controls"><select class="filter-select" id="spTableLeague" aria-label="Competición"></select><select class="filter-select" id="spTableSeason" aria-label="Temporada" style="max-width:130px"></select><button type="button" class="secondary" id="spTableFollow">☆ Seguir competición</button></div><div id="spTableBody"></div></div></div>`;
 
   const MODALS = `
-<div class="modal-backdrop" id="spDetailBackdrop" role="dialog" aria-modal="true" aria-label="Detalle del partido"><div class="modal sp-modal"><div class="modal-head"><div><h2>Partido</h2><p>Resumen, estadísticas, alineaciones y cara a cara.</p></div><div style="display:flex;gap:6px"><button class="close-btn" type="button" data-sp-retry="detail" aria-label="Actualizar" title="Actualizar" style="font-size:16px">↻</button><button class="close-btn" type="button" data-sp-close aria-label="Cerrar">×</button></div></div><div id="spDetailBody"></div></div></div>
-<div class="modal-backdrop" id="spManageBackdrop" role="dialog" aria-modal="true" aria-label="Seguir equipos y competiciones"><div class="modal sp-modal"><div class="modal-head"><div><h2>Qué querés seguir</h2><p>Los partidos de lo que sigas aparecen en tu agenda de Deportes.</p></div><button class="close-btn" type="button" data-sp-close aria-label="Cerrar">×</button></div>
+<div class="modal-backdrop" id="spDetailBackdrop" role="dialog" aria-modal="true" aria-label="Detalle del partido"><div class="modal sp-modal"><div class="modal-head"><div><h2>Partido</h2></div><div style="display:flex;gap:6px"><button class="close-btn" type="button" data-sp-retry="detail" aria-label="Actualizar" title="Actualizar"><i data-lucide="refresh-cw"></i></button><button class="close-btn" type="button" data-sp-close aria-label="Cerrar"><i data-lucide="x"></i></button></div></div><div id="spDetailBody"></div></div></div>
+<div class="modal-backdrop" id="spManageBackdrop" role="dialog" aria-modal="true" aria-label="Seguir equipos y competiciones"><div class="modal sp-modal"><div class="modal-head"><div><h2>Qué querés seguir</h2><p>Los partidos de lo que sigas aparecen en tu agenda de Deportes.</p></div><button class="close-btn" type="button" data-sp-close aria-label="Cerrar"><i data-lucide="x"></i></button></div>
 <div class="flow-seg" style="display:flex;margin-bottom:12px"><button type="button" style="flex:1" data-sp-mtab="leagues">Competiciones</button><button type="button" style="flex:1" data-sp-mtab="teams">Equipos y selecciones</button></div>
 <div id="spManageLeagueWrap" class="sp-controls" style="margin-bottom:8px" hidden><select class="filter-select" id="spManageLeague" aria-label="Competición" style="max-width:none"></select></div>
 <div class="filters" style="padding:0;margin-bottom:6px"><input class="search-input" id="spManageSearch" type="search" placeholder="Buscar…" aria-label="Buscar"></div>
