@@ -1,0 +1,446 @@
+/* ===== Ctrl · controles compartidos =====
+   Se carga después de todo (incluido el CSS que inyecta Deportes) para que botones,
+   campos e íconos tengan la misma forma en cada sección y en cada tamaño de pantalla.
+   Solo fija geometría y tipografía; los colores siguen viniendo de cada tema. */
+
+:root {
+  --ctl-h: 40px;
+  --ctl-h-sm: 32px;
+  --ctl-r: 12px;
+  --ctl-r-sm: 9px;
+  --ctl-fs: 13px;
+  --field-fs: 14px;
+  --ctl-icon: 17px
+}
+
+@media(max-width:700px) {
+  :root {
+    --ctl-h: 44px;
+    --ctl-h-sm: 40px;
+    --ctl-fs: 14px;
+    /* 16px evita que iOS haga zoom al enfocar un campo */
+    --field-fs: 16px
+  }
+}
+
+/* ---------- Botones con texto ---------- */
+.primary,
+.secondary,
+.cuisine-open-btn,
+.cuisine-detail-back,
+.project-back,
+.weather-back-btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px !important;
+  min-height: var(--ctl-h) !important;
+  height: auto !important;
+  width: auto;
+  padding: 0 16px !important;
+  border-radius: var(--ctl-r) !important;
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: var(--ctl-fs) !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0 !important;
+  white-space: nowrap
+}
+
+.secondary,
+.cuisine-open-btn,
+.cuisine-detail-back,
+.project-back,
+.weather-back-btn {
+  font-weight: 500 !important
+}
+
+.cuisine-open-btn,
+.cuisine-detail-back,
+.project-back,
+.weather-back-btn {
+  border: 1px solid var(--line) !important;
+  background: var(--card) !important;
+  color: var(--ink) !important
+}
+
+/* El botón de la cabecera de cada sección conserva su texto también en el celular */
+.page-head .primary,
+.page-head .secondary {
+  width: auto !important;
+  height: auto !important;
+  font-size: var(--ctl-fs) !important;
+  padding: 0 16px !important
+}
+
+/* ---------- Botones de solo ícono ---------- */
+.icon-btn,
+.close-btn,
+.secondary.calendar-nav-btn,
+.calendar-quiet-action,
+.flow-nav,
+.study-icon-btn,
+.cuisine-action-btn,
+.cuisine-personal-close,
+.cd-iconbtn,
+.pd-more,
+.mc-sched-btn {
+  display: inline-grid !important;
+  place-items: center;
+  flex: 0 0 auto;
+  width: var(--ctl-h) !important;
+  height: var(--ctl-h) !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  border-radius: var(--ctl-r) !important;
+  font-size: var(--ctl-icon) !important;
+  line-height: 1 !important
+}
+
+.icon-btn:not(.primary),
+.close-btn,
+.calendar-quiet-action,
+.flow-nav,
+.cuisine-personal-close,
+.pd-more {
+  border: 1px solid var(--line) !important;
+  background: var(--card) !important;
+  color: var(--ink) !important
+}
+
+/* Acciones dentro de filas de listas: más chicas, mismo radio */
+.tiny-btn,
+.task-delete,
+.notes-card-pin {
+  display: inline-grid !important;
+  place-items: center;
+  width: var(--ctl-h-sm) !important;
+  height: var(--ctl-h-sm) !important;
+  padding: 0 !important;
+  border-radius: var(--ctl-r-sm) !important
+}
+
+/* Todos los íconos dentro de controles con el mismo tamaño y trazo */
+:is(.primary, .secondary, .icon-btn, .close-btn, .calendar-quiet-action, .flow-nav, .study-icon-btn,
+  .cuisine-action-btn, .cuisine-personal-close, .cuisine-open-btn, .cuisine-detail-back, .project-back,
+  .weather-back-btn, .cd-iconbtn, .pd-more, .mc-sched-btn, .text-action, .notes-filter) svg {
+  width: var(--ctl-icon) !important;
+  height: var(--ctl-icon) !important;
+  stroke-width: 1.8;
+  flex-shrink: 0
+}
+
+:is(.tiny-btn, .task-delete, .notes-card-pin) svg {
+  width: 15px !important;
+  height: 15px !important;
+  stroke-width: 1.8
+}
+
+/* ---------- Enlaces de acción ("Ver todo", "Gestionar") ---------- */
+.text-action {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--ctl-h-sm);
+  padding: 0 4px !important;
+  border: 0;
+  background: transparent;
+  color: var(--ink) !important;
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: var(--ctl-fs) !important;
+  font-weight: 500 !important;
+  text-decoration: none
+}
+
+.text-action:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px
+}
+
+/* ---------- Controles segmentados ---------- */
+.flow-seg,
+.notes-toolbar-actions {
+  display: inline-flex !important;
+  flex-wrap: nowrap !important;
+  gap: 2px !important;
+  padding: 3px !important;
+  border: 1px solid var(--line) !important;
+  border-radius: var(--ctl-r) !important;
+  background: var(--soft) !important;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none
+}
+
+.flow-seg button,
+.notes-filter {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 6px !important;
+  min-height: calc(var(--ctl-h) - 8px) !important;
+  padding: 0 12px !important;
+  border: 0 !important;
+  border-radius: var(--ctl-r-sm) !important;
+  background: transparent !important;
+  color: var(--muted) !important;
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: var(--ctl-fs) !important;
+  font-weight: 500 !important;
+  white-space: nowrap;
+  box-shadow: none !important
+}
+
+.flow-seg button:hover,
+.notes-filter:hover {
+  color: var(--ink) !important
+}
+
+.flow-seg button.active,
+.notes-filter.active {
+  background: var(--ink) !important;
+  color: var(--paper) !important
+}
+
+html[data-theme="dark"] .flow-seg button.active,
+html[data-theme="dark"] .notes-filter.active {
+  background: var(--accent) !important;
+  color: #243019 !important
+}
+
+/* ---------- Campos ---------- */
+.search-input,
+.projects-search,
+#weatherCityInput,
+.field input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=file]):not(.cd-native),
+.field select:not(.cs-native),
+.cuisine-personal-field input:not([type=file]),
+.cuisine-personal-field textarea,
+.field textarea,
+#shopMinPrice,
+#shopMaxPrice,
+html button.cs-trigger.cs-trigger,
+.cd-trigger.cd-trigger,
+.notes-search,
+.study-search,
+.mail-search,
+.cuisine-search {
+  min-height: var(--ctl-h) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: var(--ctl-r) !important;
+  background: var(--card) !important;
+  color: var(--ink) !important;
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: var(--field-fs) !important;
+  box-shadow: none !important
+}
+
+.search-input,
+.projects-search,
+#weatherCityInput,
+.field input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=file]):not(.cd-native),
+.cuisine-personal-field input:not([type=file]),
+#shopMinPrice,
+#shopMaxPrice {
+  height: var(--ctl-h) !important;
+  padding: 0 14px !important
+}
+
+.field textarea,
+.cuisine-personal-field textarea {
+  padding: 11px 14px !important;
+  line-height: 1.45
+}
+
+html button.cs-trigger.cs-trigger,
+.cd-trigger.cd-trigger {
+  padding: 0 12px 0 14px !important
+}
+
+html button.cs-trigger.cs-trigger.cs-compact {
+  min-height: var(--ctl-h-sm) !important;
+  height: var(--ctl-h-sm) !important
+}
+
+/* Buscadores: todos con la lupa a la izquierda */
+.search-input,
+.projects-search,
+#weatherCityInput {
+  padding-left: 40px !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a8c82' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: 13px center !important;
+  background-size: 17px !important
+}
+
+.notes-search,
+.study-search,
+.mail-search,
+.cuisine-search {
+  display: flex !important;
+  align-items: center;
+  gap: 10px !important;
+  padding: 0 4px 0 13px !important;
+  color: var(--muted) !important
+}
+
+:is(.notes-search, .study-search, .mail-search, .cuisine-search)>svg {
+  width: 17px !important;
+  height: 17px !important;
+  flex-shrink: 0
+}
+
+:is(.notes-search, .study-search, .mail-search, .cuisine-search) input {
+  flex: 1;
+  min-width: 0;
+  height: calc(var(--ctl-h) - 2px) !important;
+  padding: 0 !important;
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  color: var(--ink) !important;
+  font-size: var(--field-fs) !important;
+  box-shadow: none !important
+}
+
+/* El botón Buscar de Cocina queda dentro del campo, más bajo */
+.cuisine-search .primary {
+  min-height: calc(var(--ctl-h) - 8px) !important;
+  border-radius: var(--ctl-r-sm) !important;
+  padding: 0 14px !important
+}
+
+.cuisine-search {
+  margin-bottom: 14px
+}
+
+:is(.search-input, .projects-search, #weatherCityInput, .field input, .field textarea, .cuisine-personal-field input, .cuisine-personal-field textarea):focus,
+:is(.notes-search, .study-search, .mail-search, .cuisine-search):focus-within {
+  outline: none !important;
+  border-color: var(--ink) !important;
+  box-shadow: 0 0 0 3px var(--line) !important
+}
+
+/* ---------- Filas de filtros ---------- */
+.filters,
+.task-filters,
+.projects-toolbar,
+.sp-controls {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px !important
+}
+
+:is(.filters, .task-filters, .projects-toolbar)> :is(.search-input, .projects-search) {
+  flex: 1 1 220px;
+  width: auto !important;
+  min-width: 0
+}
+
+@media(max-width:700px) {
+
+  .filters,
+  .task-filters,
+  .projects-toolbar,
+  .sp-controls,
+  .cuisine-filters {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px !important
+  }
+
+  :is(.filters, .task-filters, .projects-toolbar)> :is(.search-input, .projects-search) {
+    grid-column: 1 / -1
+  }
+
+  :is(.filters, .task-filters, .projects-toolbar, .sp-controls, .cuisine-filters)> :is(.cs-trigger, .secondary, select, input, label) {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0
+  }
+
+  .cuisine-filters label .cs-trigger {
+    width: 100% !important
+  }
+
+  /* Cabecera de sección: título y acciones con la misma forma que en escritorio */
+  .page-head {
+    flex-wrap: wrap;
+    align-items: flex-end !important;
+    gap: 12px !important
+  }
+
+  .page-head>div:last-child:not(:first-child) {
+    flex-wrap: wrap
+  }
+}
+
+/* ---------- Íconos de estado ---------- */
+.stat-icon svg {
+  width: 15px !important;
+  height: 15px !important;
+  stroke-width: 1.8
+}
+
+.weather-symbol svg,
+.weather-hour-icon svg,
+.weather-day-icon svg,
+.home-weather-icon svg,
+.home-weather-loading>span svg {
+  width: 1em;
+  height: 1em;
+  stroke-width: 1.5;
+  vertical-align: middle
+}
+
+/* Estudio: en la raíz, el título lleva el mismo punto final que las demás secciones */
+#studyPageHead:has(~ #studyFoldersWrap:not([hidden])) #studyPageTitle::after {
+  content: '.'
+}
+
+#studyPageHead:has(~ #studyFoldersWrap:not([hidden])) #studyPageDescription {
+  display: none
+}
+
+/* Tablas: los encabezados no se parten a mitad de palabra; en el celular la tabla se desplaza */
+th {
+  white-space: nowrap
+}
+
+.movement-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px
+}
+
+@media(max-width:700px) {
+  .finance-movements-card .card-head {
+    flex-wrap: wrap;
+    gap: 12px
+  }
+
+  .finance-movements-card .movement-actions {
+    width: 100%
+  }
+
+  .finance-movements-card .movement-actions .secondary {
+    flex: 1 1 0
+  }
+}
+
+/* Cocina: cada filtro ocupa su columna entera */
+.cuisine-filters label {
+  min-width: 0
+}
+
+.cuisine-filters label .cs-trigger,
+.cuisine-filters label select {
+  width: 100% !important;
+  max-width: none !important
+}
+
+.cuisine-filters .cuisine-favorites-toggle {
+  align-self: end
+}

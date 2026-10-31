@@ -16,15 +16,15 @@
 
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const weatherInfo = code => {
-    if (code === 0) return ['Soleado', '☀️'];
-    if ([1, 2].includes(code)) return ['Parcialmente nublado', '🌤️'];
-    if (code === 3) return ['Nublado', '☁️'];
-    if ([45, 48].includes(code)) return ['Niebla', '🌫️'];
-    if ([51, 53, 55, 56, 57].includes(code)) return ['Llovizna', '🌦️'];
-    if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return ['Lluvia', '🌧️'];
-    if ([71, 73, 75, 77, 85, 86].includes(code)) return ['Nieve', '🌨️'];
-    if ([95, 96, 99].includes(code)) return ['Tormenta', '⛈️'];
-    return ['Condiciones variables', '🌡️'];
+    if (code === 0) return ['Soleado', '<i data-lucide="sun"></i>'];
+    if ([1, 2].includes(code)) return ['Parcialmente nublado', '<i data-lucide="cloud-sun"></i>'];
+    if (code === 3) return ['Nublado', '<i data-lucide="cloud"></i>'];
+    if ([45, 48].includes(code)) return ['Niebla', '<i data-lucide="cloud-fog"></i>'];
+    if ([51, 53, 55, 56, 57].includes(code)) return ['Llovizna', '<i data-lucide="cloud-drizzle"></i>'];
+    if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return ['Lluvia', '<i data-lucide="cloud-rain"></i>'];
+    if ([71, 73, 75, 77, 85, 86].includes(code)) return ['Nieve', '<i data-lucide="cloud-snow"></i>'];
+    if ([95, 96, 99].includes(code)) return ['Tormenta', '<i data-lucide="cloud-lightning"></i>'];
+    return ['Condiciones variables', '<i data-lucide="thermometer"></i>'];
   };
   const fmtDay = (date, options) => new Date(date + 'T12:00:00').toLocaleDateString('es-AR', options);
   const fmtHour = value => new Date(value).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
@@ -168,7 +168,7 @@
     const host = $('homeWeatherSummary');
     if (!host) return;
     if (!homeForecast?.current) {
-      host.innerHTML = '<div class="home-weather-loading"><span>☁️</span><div><strong>Clima de ' + esc(state.defaultLocation.name) + '</strong><small>Consultando el pronóstico…</small></div><button type="button" data-open-weather>Ver clima ↗</button></div>';
+      host.innerHTML = '<div class="home-weather-loading"><span><i data-lucide="cloud"></i></span><div><strong>Clima de ' + esc(state.defaultLocation.name) + '</strong><small>Consultando el pronóstico…</small></div><button type="button" data-open-weather>Ver clima ↗</button></div>';
       return;
     }
     const c = homeForecast.current, info = weatherInfo(c.weather_code);
@@ -191,7 +191,7 @@
       if (!places.length) { showStatus('No encontramos esa ciudad. Probá con otro nombre.', true); return; }
       if (places.length > 1) {
         const choices = $('weatherLocationChoices');
-        choices.innerHTML = places.map((p, i) => '<button type="button" class="weather-location-choice" data-location-index="' + i + '"><strong>' + esc(p.name) + '</strong><span>' + esc([p.admin1, p.country].filter(Boolean).join(', ')) + '</span><span>›</span></button>').join('');
+        choices.innerHTML = places.map((p, i) => '<button type="button" class="weather-location-choice" data-location-index="' + i + '"><strong>' + esc(p.name) + '</strong><span>' + esc([p.admin1, p.country].filter(Boolean).join(', ')) + '</span><span><i data-lucide="chevron-right"></i></span></button>').join('');
         choices.hidden = false;
         choices.querySelectorAll('[data-location-index]').forEach(button => button.addEventListener('click', () => selectLocation(places[Number(button.dataset.locationIndex)])));
         showStatus('Elegí la ciudad correcta.');
