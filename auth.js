@@ -277,7 +277,6 @@ root.innerHTML = `
           <button class="ctrl-auth-submit" id="ctrl-auth-submit" type="submit"><span id="ctrl-auth-submit-text">Iniciar sesión</span><span aria-hidden="true">↗</span></button>
         </form>
         <p class="ctrl-auth-switch" id="ctrl-auth-switch">¿Todavía no tenés cuenta? <button class="ctrl-auth-link" id="ctrl-auth-toggle" type="button">Crear cuenta</button></p>
-        <p class="ctrl-auth-foot">Tu sesión queda guardada en este dispositivo hasta que cierres sesión.</p>
       </section>
     </main>
   </div>`;
